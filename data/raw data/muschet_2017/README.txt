@@ -1,0 +1,2 @@
+metadata manually downloaded from https://www.sciencebase.gov/catalog/item/get/599d9555e4b012c075b964a6?files.metadataFirst=true#attached-files-section
+data is automatically downloaded when running the code from https://www.sciencebase.gov/catalog/file/get/599d9555e4b012c075b964a6?name=CLSAInvertebrateCounts.csv

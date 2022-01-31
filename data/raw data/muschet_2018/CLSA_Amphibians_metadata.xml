@@ -1,0 +1,778 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <idinfo>
+    <citation>
+      <citeinfo>
+        <origin>David M. Mushet</origin>
+        <origin>Matthew J. Solensky</origin>
+        <pubdate>Unpublished material</pubdate>
+        <title>Cottonwood Lake Study Area - Amphibians</title>
+        <edition>1992-2017</edition>
+        <geoform>Tabular Digital Data</geoform>
+        <onlink>https://dx.doi.org/10.5066/F7X9297Q</onlink>
+        <lworkcit>
+          <citeinfo>
+            <origin>David M. Mushet</origin>
+            <pubdate>Unpublished material</pubdate>
+            <title>A Systems Approach to Modeling the Effects of Climate and Land-use Change on Prairie Wetland Ecosystems</title>
+            <geoform>Webpage</geoform>
+            <serinfo>
+              <sername>BASIS+</sername>
+              <issue>GR03E90/9</issue>
+            </serinfo>
+            <onlink>https://www.sciencebase.gov/catalog/item/54d61564e4b0f7b2dc9f2f26</onlink>
+          </citeinfo>
+        </lworkcit>
+      </citeinfo>
+    </citation>
+    <descript>
+      <abstract>This dataset contains the number of captured individuals recorded for each amphibian species surveyed in all wetlands in the Cottonwood Lake Study Area, Stutsman County, North Dakota. While amphibians were the target of the surveys, reptiles (i.e., turtles, snakes) were also sometimes captured over the course of the surveys and are included in the data file.</abstract>
+      <purpose>To record and monitor interannual changes in the species and number of amphibians in the Cottonwood Lake Study Area wetlands as a result of natural and human modified climate variability.</purpose>
+      <supplinf>This dataset is part of the Missouri Coteau Wetland Ecosystem Observatory database that is a collection of data documenting biotic and abiotic responses to long-term climate and land-use change in the Prairie Pothole Region (PPR) of the U.S. The PPR has a naturally dynamic climate that is characterized by extended wet and dry periods, and its wetlands have spatially variable hydrologic and biotic traits. The Cottonwood Lake Study Area in Stutsman County, North Dakota contains wetlands representative of multiple positions along a hydrologic continuum, from groundwater recharge to discharge. The extensive history of data collection in the Cottonwood Lake Study Area provides a unique opportunity to assess the impact of climate variability on ecosystem health and productivity.</supplinf>
+    </descript>
+    <timeperd>
+      <timeinfo>
+        <rngdates>
+          <begdate>1992</begdate>
+          <enddate>2017</enddate>
+        </rngdates>
+      </timeinfo>
+      <current>ground condition</current>
+    </timeperd>
+    <status>
+      <progress>Complete</progress>
+      <update>Annually</update>
+    </status>
+    <spdom>
+      <bounding>
+        <westbc>-99.10625</westbc>
+        <eastbc>-99.09115</eastbc>
+        <northbc>47.10265</northbc>
+        <southbc>47.09547</southbc>
+      </bounding>
+      <descgeog>The Cottonwood Lake Study Area is located in a complex of Waterfowl Production Areas managed by the U.S. Fish and Wildlife Service in Stutsman County, North Dakota.</descgeog>
+    </spdom>
+    <keywords>
+      <theme>
+        <themekt>USGS Thesaurus</themekt>
+        <themekey>Amphibians</themekey>
+        <themekey>Wildlife</themekey>
+        <themekey>Wetland functions</themekey>
+        <themekey>Effects of climate change</themekey>
+        <themekey>Land use change</themekey>
+      </theme>
+      <theme>
+        <themekt>USGS Biocomplexity Thesaurus</themekt>
+        <themekey>Salamanders</themekey>
+        <themekey>Wetlands</themekey>
+        <themekey>Aquatic animals</themekey>
+        <themekey>Indicator species</themekey>
+        <themekey>Animal populations</themekey>
+        <themekey>Biomonitoring</themekey>
+        <themekey>Long-term changes</themekey>
+      </theme>
+      <theme>
+        <themekt>ISO 19115 Topic Categories</themekt>
+        <themekey>Biota</themekey>
+      </theme>
+      <theme>
+        <themekt>USGS Metadata Identifier</themekt>
+        <themekey>USGS:59cab066e4b017cf314094e2</themekey>
+      </theme>
+      <place>
+        <placekt>Geographic Names Information System</placekt>
+        <placekey>United States of America</placekey>
+        <placekey>North Dakota</placekey>
+        <placekey>Stutsman County</placekey>
+      </place>
+      <place>
+        <placekt>None</placekt>
+        <placekey>Northern Great Plains</placekey>
+        <placekey>Prairie Pothole Region</placekey>
+        <placekey>Cottonwood Lake Study Area</placekey>
+      </place>
+      <place>
+        <placekt>FWS Cadastral Database</placekt>
+        <placekey>CHASE LAKE WETLAND MANAGEMENT DISTRICT&gt;STUTSMAN COUNTY WATERFOWL PRODUCTION AREA&gt;Eddy</placekey>
+        <placekey>CHASE LAKE WETLAND MANAGEMENT DISTRICT&gt;STUTSMAN COUNTY WATERFOWL PRODUCTION AREA&gt;Shuler</placekey>
+      </place>
+    </keywords>
+    <accconst>Authorized distribution is strongly recommended to be direct from the distributor described above or from U.S. Geological Survey ScienceBase Catalog Service (https://www.sciencebase.gov). Data integrity can be verified using authentication information herein. The distributor makes no claims as to the suitability of these data for other purposes than those described herein.</accconst>
+    <useconst>Users should not use these data for critical applications without a full awareness of its limitations. Users should be aware that temporal changes may have occurred since this data set was collected and that some parts of these data may no longer represent actual ground conditions. Users should also be aware that comparison with other data sets for the same area that were generated from other time periods may be inaccurate due to inconsistencies resulting from changes in mapping conventions, data collection, and computer processing methods over time. The distributor shall not be liable for improper or incorrect use of these data, based on the description of appropriate/inappropriate uses described in this metadata document. Acknowledgment of the U.S. Geological Survey Northern Prairie Wildlife Research Center as a data source would be appreciated in products developed from these data, and such acknowledgment as is standard for citation and legal practices for data source is expected by users of this data set. Notification of new data products developed directly from these data would also be appreciated; please notify the listed primary contact or U.S. Geological Survey Northern Prairie Wildlife Center staff.</useconst>
+    <ptcontac>
+      <cntinfo>
+        <cntperp>
+          <cntper>David M. Mushet</cntper>
+          <cntorg>U.S. Geological Survey</cntorg>
+        </cntperp>
+        <cntaddr>
+          <addrtype>Physical and mailing</addrtype>
+          <address>Northern Prairie Wildlife Research Center</address>
+          <address>8711 37th Street Southeast</address>
+          <city>Jamestown</city>
+          <state>North Dakota</state>
+          <postal>58401</postal>
+          <country>United States</country>
+        </cntaddr>
+        <cntvoice>1-701-253-5558</cntvoice>
+        <cntemail>dmushet@usgs.gov</cntemail>
+        <hours>8:00 AM - 4:30 PM CST</hours>
+      </cntinfo>
+    </ptcontac>
+    <browse>
+      <browsen>CottonwoodLakeStudyAreaPPR.png</browsen>
+      <browsed>Cottonwood Lake Study Area is located within Stutsman County, North Dakota in the Prairie Pothole Region of the USA.</browsed>
+      <browset>PNG</browset>
+    </browse>
+    <datacred>Funding was provided by U.S. Geological Survey Climate and Land-use Change Mission Area</datacred>
+    <crossref>
+      <citeinfo>
+        <origin>Northern Prairie Wildlife Research Center</origin>
+        <pubdate>Unpublished material</pubdate>
+        <title>Missouri Coteau Wetlands Ecosystem Observatory</title>
+        <geoform>Webpage</geoform>
+        <onlink>https://www.sciencebase.gov/catalog/item/52f0ffd9e4b0f941aa181fc6</onlink>
+      </citeinfo>
+    </crossref>
+    <taxonomy>
+      <keywtax>
+        <taxonkt>USGS Biocomplexity Thesaurus</taxonkt>
+        <taxonkey>Frogs</taxonkey>
+        <taxonkey>Salamanders</taxonkey>
+        <taxonkey>Amphibians</taxonkey>
+        <taxonkey>Reptiles</taxonkey>
+      </keywtax>
+      <taxonsys>
+        <classsys>
+          <classcit>
+            <citeinfo>
+              <origin>Integrated Taxonomic Information System</origin>
+              <pubdate>2017</pubdate>
+              <title>Integrated Taxonomic Information System</title>
+              <geoform>tabular digital data</geoform>
+              <onlink>http://www.itis.gov/</onlink>
+            </citeinfo>
+          </classcit>
+        </classsys>
+        <taxonpro>Amphibian identification was performed by experts. Taxa were identified to the finest resolution possible.</taxonpro>
+        <taxoncom>The taxonomy listed here is validated by ITIS. Codes referenced in "Species" attribute were developed from previous nomenclature and may not reflect the valid ITIS names that they represent.</taxoncom>
+      </taxonsys>
+      <taxoncl>
+        <taxonrn>Kingdom</taxonrn>
+        <taxonrv>Animalia</taxonrv>
+        <common>Animal</common>
+        <common>animaux</common>
+        <common>animals</common>
+        <taxoncl>
+          <taxonrn>Subkingdom</taxonrn>
+          <taxonrv>Bilateria</taxonrv>
+          <taxoncl>
+            <taxonrn>Infrakingdom</taxonrn>
+            <taxonrv>Deuterostomia</taxonrv>
+            <taxoncl>
+              <taxonrn>Phylum</taxonrn>
+              <taxonrv>Chordata</taxonrv>
+              <common>cordés</common>
+              <common>cordado</common>
+              <common>chordates</common>
+              <taxoncl>
+                <taxonrn>Subphylum</taxonrn>
+                <taxonrv>Vertebrata</taxonrv>
+                <common>vertebrado</common>
+                <common>vertébrés</common>
+                <common>vertebrates</common>
+                <taxoncl>
+                  <taxonrn>Infraphylum</taxonrn>
+                  <taxonrv>Gnathostomata</taxonrv>
+                  <taxoncl>
+                    <taxonrn>Superclass</taxonrn>
+                    <taxonrv>Tetrapoda</taxonrv>
+                    <taxoncl>
+                      <taxonrn>Class</taxonrn>
+                      <taxonrv>Amphibia</taxonrv>
+                      <common>amphibiens</common>
+                      <common>anfíbio</common>
+                      <common>Amphibians</common>
+                      <taxoncl>
+                        <taxonrn>Order</taxonrn>
+                        <taxonrv>Anura</taxonrv>
+                        <common>Frogs</common>
+                        <common>perereca</common>
+                        <common>rã</common>
+                        <common>sapo</common>
+                        <common>crapauds</common>
+                        <common>grenouilles</common>
+                        <common>Toads</common>
+                        <taxoncl>
+                          <taxonrn>Family</taxonrn>
+                          <taxonrv>Ranidae</taxonrv>
+                          <common>Ranids</common>
+                          <common>Riparian Frogs</common>
+                          <common>Ranid Frogs</common>
+                          <common>True Frogs</common>
+                          <taxoncl>
+                            <taxonrn>Genus</taxonrn>
+                            <taxonrv>Lithobates</taxonrv>
+                            <common>American Water Frogs</common>
+                            <taxoncl>
+                              <taxonrn>Species</taxonrn>
+                              <taxonrv>Lithobates pipiens</taxonrv>
+                              <common>Northern Leopard Frog</common>
+                            </taxoncl>
+                            <taxoncl>
+                              <taxonrn>Species</taxonrn>
+                              <taxonrv>Lithobates sylvaticus</taxonrv>
+                              <common>Wood Frog</common>
+                            </taxoncl>
+                          </taxoncl>
+                        </taxoncl>
+                        <taxoncl>
+                          <taxonrn>Family</taxonrn>
+                          <taxonrv>Hylidae</taxonrv>
+                          <common>Hylids</common>
+                          <common>New World Tree Frogs</common>
+                          <common>Treefrogs</common>
+                          <common>hylidés</common>
+                          <common>hylidés arboricoles</common>
+                          <common>Hylid Frogs</common>
+                          <taxoncl>
+                            <taxonrn>Subfamily</taxonrn>
+                            <taxonrv>Hylinae</taxonrv>
+                            <taxoncl>
+                              <taxonrn>Genus</taxonrn>
+                              <taxonrv>Pseudacris</taxonrv>
+                              <common>Chorus Frogs</common>
+                              <common>Spring Peepers</common>
+                              <taxoncl>
+                                <taxonrn>Species</taxonrn>
+                                <taxonrv>Pseudacris maculata</taxonrv>
+                                <common>Boreal Chorus Frog</common>
+                                <common>rainette faux-grillon boréale</common>
+                              </taxoncl>
+                            </taxoncl>
+                          </taxoncl>
+                        </taxoncl>
+                      </taxoncl>
+                      <taxoncl>
+                        <taxonrn>Order</taxonrn>
+                        <taxonrv>Caudata</taxonrv>
+                        <common>salamandres</common>
+                        <common>salamandra</common>
+                        <common>Salamanders</common>
+                        <taxoncl>
+                          <taxonrn>Family</taxonrn>
+                          <taxonrv>Ambystomatidae</taxonrv>
+                          <common>Mole Salamanders</common>
+                          <taxoncl>
+                            <taxonrn>Genus</taxonrn>
+                            <taxonrv>Ambystoma</taxonrv>
+                            <common>Mole Salamanders</common>
+                            <taxoncl>
+                              <taxonrn>Species</taxonrn>
+                              <taxonrv>Ambystoma mavortium</taxonrv>
+                              <common>Western Tiger Salamander</common>
+                              <common>Barred Tiger Salamander</common>
+                            </taxoncl>
+                          </taxoncl>
+                        </taxoncl>
+                      </taxoncl>
+                    </taxoncl>
+                    <taxoncl>
+                      <taxonrn>Class</taxonrn>
+                      <taxonrv>Reptilia</taxonrv>
+                      <common>répteis</common>
+                      <common>reptiles</common>
+                      <common>Reptiles</common>
+                      <taxoncl>
+                        <taxonrn>Order</taxonrn>
+                        <taxonrv>Squamata</taxonrv>
+                        <common>Amphisbaenians</common>
+                        <common>Lizards</common>
+                        <common>Snakes</common>
+                        <common>amphisbènes</common>
+                        <common>lézards</common>
+                        <common>serpents</common>
+                        <taxoncl>
+                          <taxonrn>Suborder</taxonrn>
+                          <taxonrv>Serpentes</taxonrv>
+                          <common>Snakes</common>
+                          <common>cobra</common>
+                          <common>serpente</common>
+                          <common>serpents</common>
+                          <taxoncl>
+                            <taxonrn>Infraorder</taxonrn>
+                            <taxonrv>Alethinophidia</taxonrv>
+                            <taxoncl>
+                              <taxonrn>Family</taxonrn>
+                              <taxonrv>Colubridae</taxonrv>
+                              <common>Colubrids</common>
+                              <common>Typical Snakes</common>
+                              <taxoncl>
+                                <taxonrn>Subfamily</taxonrn>
+                                <taxonrv>Natricinae</taxonrv>
+                                <taxoncl>
+                                  <taxonrn>Genus</taxonrn>
+                                  <taxonrv>Thamnophis</taxonrv>
+                                  <common>Garter Snakes</common>
+                                  <common>Ribbon Snakes</common>
+                                  <taxoncl>
+                                    <taxonrn>Species</taxonrn>
+                                    <taxonrv>Thamnophis radix</taxonrv>
+                                    <common>Plains Garter Snake</common>
+                                  </taxoncl>
+                                </taxoncl>
+                              </taxoncl>
+                            </taxoncl>
+                          </taxoncl>
+                        </taxoncl>
+                      </taxoncl>
+                      <taxoncl>
+                        <taxonrn>Order</taxonrn>
+                        <taxonrv>Testudines</taxonrv>
+                        <common>tortues</common>
+                        <common>Turtles</common>
+                        <common>Terrapins</common>
+                        <common>Tortoises</common>
+                        <taxoncl>
+                          <taxonrn>Suborder</taxonrn>
+                          <taxonrv>Cryptodira</taxonrv>
+                          <taxoncl>
+                            <taxonrn>Superfamily</taxonrn>
+                            <taxonrv>Testudinoidea</taxonrv>
+                            <taxoncl>
+                              <taxonrn>Family</taxonrn>
+                              <taxonrv>Emydidae</taxonrv>
+                              <common>pond turtles</common>
+                              <common>terrapins</common>
+                              <common>Emydid Turtles</common>
+                              <taxoncl>
+                                <taxonrn>Subfamily</taxonrn>
+                                <taxonrv>Deirochelyinae</taxonrv>
+                                <taxoncl>
+                                  <taxonrn>Genus</taxonrn>
+                                  <taxonrv>Chrysemys</taxonrv>
+                                  <common>Painted Turtles</common>
+                                  <taxoncl>
+                                    <taxonrn>Species</taxonrn>
+                                    <taxonrv>Chrysemys picta</taxonrv>
+                                    <common>Painted Turtle</common>
+                                    <common>Tortuga pintada</common>
+                                    <common>tortue peinte</common>
+                                    <common>Eastern Painted Turtle</common>
+                                  </taxoncl>
+                                </taxoncl>
+                              </taxoncl>
+                            </taxoncl>
+                          </taxoncl>
+                        </taxoncl>
+                      </taxoncl>
+                    </taxoncl>
+                  </taxoncl>
+                </taxoncl>
+              </taxoncl>
+            </taxoncl>
+          </taxoncl>
+        </taxoncl>
+      </taxoncl>
+    </taxonomy>
+  </idinfo>
+  <dataqual>
+    <attracc>
+      <attraccr>Amphibian and reptile species identifications were conducted by trained technicians. Lithobates tadpoles were only identified to genus due to difficulties associated with accurate identification of tadpoles of this genus to the species level under field conditions.</attraccr>
+    </attracc>
+    <logic>Data were checked for logical consistency upon entry into the table. No record is repeated for a transect on a given date. If a species was recorded, counts are greater than 0. Months fall between May and September.</logic>
+    <complete>This dataset contains all recorded amphibian and reptile species within the Cottonwood Lake Study Area wetlands per sampling effort. Attempted but unsuccessful surveys were recorded and assigned counts of 0.</complete>
+    <lineage>
+      <procstep>
+        <procdesc>Amphibian and reptile identifications and counts were recorded on data sheets and transferred to an electronic spreadsheet. Data sheets were transferred via double entry and the comprehensive dataset was checked by the data curator.</procdesc>
+        <procdate>Unknown</procdate>
+      </procstep>
+      <method>
+        <methtype>Field</methtype>
+        <methodid>
+          <methkt>USGS Thesaurus</methkt>
+          <methkey>Long-term ecological monitoring</methkey>
+          <methkey>Animal and plant census</methkey>
+          <methkey>Capturing (animals)</methkey>
+          <methkey>Transect sampling</methkey>
+        </methodid>
+        <methdesc>Amphibians and reptiles were captured over one week in May-September from 1992-2017 using amphibian funnel traps (Mushet et al. 1997). Traps were placed along three existing transects within the central vegetation zone of each CLSA wetland. Funnel traps were constructed of 1/8 inch galvanized hardware cloth and had a 5-cm aperture at the funnel opening.  The funnel traps designed for use in this study have been shown to minimize injury rates (Mushet et al. 1997) and provide captured animals access to the surface.  Additionally, traps were checked daily to minimize the time captured animals spent in traps. Funnel traps were set on the morning of day one and checked each morning over four subsequent days. Adult amphibians and reptiles were identified to species, and tadpoles were identified to genus. All captured individuals were restrained and handled following procedures described in the Amphibian Research and Monitoring Initiative (ARMI) Restraint and Handling of Live Amphibians standard operating procedure (ARMI SOP #100).</methdesc>
+        <methcite>
+          <citeinfo>
+            <origin>David M. Mushet; Ned H. Euliss, Jr.; Bruce A. Hanson; and Sally G. Zodrow</origin>
+            <pubdate>1997</pubdate>
+            <title>A funnel trap for sampling salamanders in wetlands</title>
+            <geoform>Journal</geoform>
+            <serinfo>
+              <sername>Volume</sername>
+              <issue>28</issue>
+            </serinfo>
+            <pubinfo>
+              <pubplace>United States</pubplace>
+              <publish>Herpetological Review</publish>
+            </pubinfo>
+          </citeinfo>
+        </methcite>
+      </method>
+    </lineage>
+  </dataqual>
+  <spdoinfo>
+    <indspref>The attributes "WETLAND" and "TRANSECT" refer to a specific wetland of the Cottonwood Lake Study Area that was sampled.</indspref>
+  </spdoinfo>
+  <eainfo>
+    <detailed>
+      <enttyp>
+        <enttypl>CLSA_Amphibians.csv</enttypl>
+        <enttypd>Amphibian sample data from the Cottonwood Lake Study Area (CLSA) in North Dakota from 1992-2017. This table contains numbers of captured individuals by species, sex, and developmental stage per sampling effort.</enttypd>
+        <enttypds>Originator defined</enttypds>
+      </enttyp>
+      <attr>
+        <attrlabl>WETLAND</attrlabl>
+        <attrdef>Unique identifier of wetlands within the Cottonwood Lake Study Area</attrdef>
+        <attrdefs>Originator defined</attrdefs>
+        <attrdomv>
+          <udom>Wetland IDs that represent unique wetlands in the Cottonwood Lake Study Area.</udom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>TRANSECT</attrlabl>
+        <attrdef>The transect within each wetland that was sampled. The bearing of Transect A was randomly selected, then additional transects were located at 60 degree intervals from A.</attrdef>
+        <attrdefs>Originator defined</attrdefs>
+        <attrdomv>
+          <edom>
+            <edomv>A</edomv>
+            <edomvd>Transect A runs outward from the wetland center along a bearing of 158 degrees</edomvd>
+            <edomvds>Originator defined</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>B</edomv>
+            <edomvd>Transect B runs outward from the wetland center along a bearing of 218 degrees</edomvd>
+            <edomvds>Originator Defined</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>C</edomv>
+            <edomvd>Transect C runs outward from the wetland center along a bearing of 278 degrees</edomvd>
+            <edomvds>Originator defined</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>D</edomv>
+            <edomvd>Transect D runs outward from the wetland center along a bearing of 338 degrees</edomvd>
+            <edomvds>Originator defined</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>E</edomv>
+            <edomvd>Transect E runs outward from the wetland center along a bearing of 38 degrees</edomvd>
+            <edomvds>Originator defined</edomvds>
+          </edom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>SPECIES</attrlabl>
+        <attrdef>Unique species code of the amphibian or reptile captured</attrdef>
+        <attrdefs>Originator defined</attrdefs>
+        <attrdomv>
+          <edom>
+            <edomv>AMMA</edomv>
+            <edomvd>Ambystoma mavortium (Barred Tiger Salamander) present in trap</edomvd>
+            <edomvds>Originator defined</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>CHPI</edomv>
+            <edomvd>Chrysemys picta (Painted Turtle) present in trap</edomvd>
+            <edomvds>Originator defined</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>NONE</edomv>
+            <edomvd>No amphibians present in trap</edomvd>
+            <edomvds>Originator defined</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>LOST</edomv>
+            <edomvd>Amphibian lost from trap before identification</edomvd>
+            <edomvds>Originator defined</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>PSMA</edomv>
+            <edomvd>Pseudacris maculata (Boreal Chorus Frog) present in trap</edomvd>
+            <edomvds>Originator defined</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>FROTAD</edomv>
+            <edomvd>Lithobates tadpole present in trap</edomvd>
+            <edomvds>Originator defined</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>RAPI</edomv>
+            <edomvd>Lithobates pipiens (Northern Leopard Frog) present in trap</edomvd>
+            <edomvds>Originator defined</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>RASY</edomv>
+            <edomvd>Lithobates sylvaticus (Wood Frog) present in trap</edomvd>
+            <edomvds>Originator defined</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>THRA</edomv>
+            <edomvd>Thamnophis radix (Plains Garter Snake) present in trap</edomvd>
+            <edomvds>Originator defined</edomvds>
+          </edom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>STAGE</attrlabl>
+        <attrdef>The developmental stage of the captured amphibian/reptile</attrdef>
+        <attrdefs>Originator defined</attrdefs>
+        <attrdomv>
+          <edom>
+            <edomv>A</edomv>
+            <edomvd>Adult</edomvd>
+            <edomvds>Originator defined</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>L</edomv>
+            <edomvd>Larval</edomvd>
+            <edomvds>Originator defined</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>N</edomv>
+            <edomvd>Neotenic</edomvd>
+            <edomvds>Originator defined</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>YOY</edomv>
+            <edomvd>Young of the year</edomvd>
+            <edomvds>Originator defined</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>NA</edomv>
+            <edomvd>Not applicable - Used when no amphibians were captured in a trap (i.e.,  SPECIES = NONE)</edomvd>
+            <edomvds>Originator defined</edomvds>
+          </edom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>SEX</attrlabl>
+        <attrdef>Sex of the captured amphibians</attrdef>
+        <attrdefs>Originator defined</attrdefs>
+        <attrdomv>
+          <edom>
+            <edomv>F</edomv>
+            <edomvd>Female</edomvd>
+            <edomvds>Originator defined</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>M</edomv>
+            <edomvd>Male</edomvd>
+            <edomvds>Originator Defined</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>U</edomv>
+            <edomvd>Undetermined</edomvd>
+            <edomvds>Originator defined</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <edom>
+            <edomv>NA</edomv>
+            <edomvd>Not applicable - Used when no amphibians were captured in a trap (i.e.,  SPECIES = NONE)</edomvd>
+            <edomvds>Originator defined</edomvds>
+          </edom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>COUNT</attrlabl>
+        <attrdef>Number of amphibians captured</attrdef>
+        <attrdefs>Originator defined</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>0</rdommin>
+            <rdommax>834</rdommax>
+          </rdom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>MONTH</attrlabl>
+        <attrdef>Month of sampling</attrdef>
+        <attrdefs>Originator defined</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>5</rdommin>
+            <rdommax>9</rdommax>
+            <attrunit>Gregorian calendar month</attrunit>
+          </rdom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>DAY</attrlabl>
+        <attrdef>Day of sampling</attrdef>
+        <attrdefs>Originator defined</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>1</rdommin>
+            <rdommax>4</rdommax>
+            <attrunit>24 hour periods</attrunit>
+          </rdom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>YEAR</attrlabl>
+        <attrdef>Year of sampling</attrdef>
+        <attrdefs>Originator defined</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>1992</rdommin>
+            <rdommax>2017</rdommax>
+            <attrunit>Gregorian calendar year</attrunit>
+          </rdom>
+        </attrdomv>
+      </attr>
+    </detailed>
+  </eainfo>
+  <distinfo>
+    <distrib>
+      <cntinfo>
+        <cntorgp>
+          <cntorg>U.S. Geological Survey - ScienceBase</cntorg>
+        </cntorgp>
+        <cntaddr>
+          <addrtype>Mailing</addrtype>
+          <address>Denver Federal Center</address>
+          <address>Building 810, Mail Stop 302</address>
+          <city>Denver</city>
+          <state>CO</state>
+          <postal>80225</postal>
+          <country>United States</country>
+        </cntaddr>
+        <cntvoice>1-888-275-8747</cntvoice>
+        <cntemail>sciencebase@usgs.gov</cntemail>
+      </cntinfo>
+    </distrib>
+    <distliab>This dataset, identified as CLSA_Amphibians.csv, has been approved for release and publication by the U.S. Geological Survey (USGS).  Although this dataset has been subjected to rigorous review and is substantially complete, the USGS reserves the right to revise the data pursuant to further analysis and review.  Furthermore, it is released on condition that neither the USGS nor the U.S. Government may be held liable for any damages resulting from its authorized or unauthorized use.  Any use of trade, firm, or product names is for descriptive purposes only and does not imply endorsement from the U.S. Government.</distliab>
+    <stdorder>
+      <digform>
+        <digtinfo>
+          <formname>ASCII</formname>
+          <formvern>rfc4180; &lt;http://tools.ietf.org/html/rfc4180&gt;</formvern>
+          <formspec>Comma separated values</formspec>
+          <formcont>CLSA_Amphibians.csv</formcont>
+          <filedec>No compression applied.</filedec>
+          <asciistr>
+            <recdel>carriage return line feed (ASCII 13,10)</recdel>
+            <numheadl>1</numheadl>
+            <deschead>Field names</deschead>
+            <orienta>Columnmajor</orienta>
+            <casesens>N</casesens>
+            <datafiel>
+              <dfieldnm>WETLAND</dfieldnm>
+              <dfwidthd>,</dfwidthd>
+            </datafiel>
+            <datafiel>
+              <dfieldnm>TRANSECT</dfieldnm>
+              <dfwidthd>,</dfwidthd>
+            </datafiel>
+            <datafiel>
+              <dfieldnm>SPECIES</dfieldnm>
+              <dfwidthd>,</dfwidthd>
+            </datafiel>
+            <datafiel>
+              <dfieldnm>STAGE</dfieldnm>
+              <dfwidthd>,</dfwidthd>
+            </datafiel>
+            <datafiel>
+              <dfieldnm>SEX</dfieldnm>
+              <dfwidthd>,</dfwidthd>
+            </datafiel>
+            <datafiel>
+              <dfieldnm>COUNT</dfieldnm>
+              <missingv>NA</missingv>
+              <dfwidthd>,</dfwidthd>
+            </datafiel>
+            <datafiel>
+              <dfieldnm>MONTH</dfieldnm>
+              <dfwidthd>,</dfwidthd>
+            </datafiel>
+            <datafiel>
+              <dfieldnm>DAY</dfieldnm>
+              <dfwidthd>,</dfwidthd>
+            </datafiel>
+            <datafiel>
+              <dfieldnm>YEAR</dfieldnm>
+              <dfwidthd>none</dfwidthd>
+            </datafiel>
+          </asciistr>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>https://www.sciencebase.gov/catalog/file/get/59cab066e4b017cf314094e2?name=CLSA_Amphibians.csv</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+      <fees>None</fees>
+    </stdorder>
+  </distinfo>
+  <metainfo>
+    <metd>20200825</metd>
+    <metc>
+      <cntinfo>
+        <cntorgp>
+          <cntorg>Northern Prairie Wildlife Research Center</cntorg>
+        </cntorgp>
+        <cntaddr>
+          <addrtype>Physical and mailing</addrtype>
+          <address>8711 37th Street SE</address>
+          <city>Jamestown</city>
+          <state>ND</state>
+          <postal>58401</postal>
+          <country>United States</country>
+        </cntaddr>
+        <cntvoice>1-701-253-5500</cntvoice>
+        <cntemail>http://www.npwrc.usgs.gov/contact</cntemail>
+      </cntinfo>
+    </metc>
+    <metstdn>FGDC Biological Data Profile of the Content Standard for Digital Geospatial Metadata</metstdn>
+    <metstdv>FGDC-STD-001.1-1999</metstdv>
+    <metac>It is strongly recommended that this metadata record is directly acquired from the distributor described above or from U.S. Geological Survey Science Data Catalog (http://data.usgs.gov/) or ScienceBase Catalog Service (https://www.sciencebase.gov).</metac>
+    <metuc>Acknowledgment of U.S. Geological Survey Northern Prairie Wildlife Research Center as the metadata source would be appreciated. Please cite the original metadata when using summarized data herein or when using portions of the metadata record to create a similar record of slightly altered data, such as re-projection.</metuc>
+    <metalang>En</metalang>
+  </metainfo>
+</metadata>

@@ -1,0 +1,2 @@
+metadata manually downloaded from https://www.sciencebase.gov/catalog/item/59cab066e4b017cf314094e2
+data is automatically downloaded when running the code from https://www.sciencebase.gov/catalog/file/get/59cab066e4b017cf314094e2?name=CLSA_Amphibians.csv
