@@ -1,10 +1,10 @@
 variable name	definition
 dataset_id	"Unique ID linked to a publication (article or data set). If the data set was split because different taxa group are provided, a letter is added at the end. No missing value."
 year	"Year of sampling. If sampling was pooled over several years, the last sampling year is used here. No missing value."
-regional	"Region name, countains at least two localities. Can be a national park, a state or a forest name for example but smaller scales are also included where the region is an experimental sites. A data set can have several regions. No missing value."
-local	"Name or code of the sampled locality or experimental sample. For example, it can correspond to the name of an island, a lake or forest. No missing value."
-latitude	"Latitude North in decimal degree, WGS84 Empty cells indicate that information could not be collected."
-longitude	"Longitude East in decimal degree, WGS84 Empty cells indicate that information could not be collected."
+regional	"Region name, countains at least two localities. Can be a national park, a state or a forest name for example but smaller scales are also included where the region is an experimental sites. A data set can have several regions. No missing value. UTF-8 encoding."
+local	"Name or code of the sampled locality or experimental sample. For example, it can correspond to the name of an island, a lake or forest. No missing value. UTF-8 encoding."
+latitude	"Latitude North in decimal degree, WGS84. Empty cells indicate that information could not be collected."
+longitude	"Longitude East in decimal degree, WGS84. Empty cells indicate that information could not be collected."
 effort	"Either the number of visits to a plot, the total area sampled in a given year, etc. See Comment column for a description. No missing value."
 study_type	"one of ""resurvey"" or ""ecological sampling"". RESURVEY: typically two samplings separated by a long, 20+ years, stretch of time and a great deal of effort is put in matching very precisely historical plots or transects. ECOLOGICAL SAMPLING: these studies generally involve more samplings than resurveys: 10 samplings, 1 every few years. No missing value."
 data_pooled_by_authors	TRUE if the data provided by the authors was already pooled covering several years: several samples made over several years pooled together. No missing value.
@@ -21,6 +21,6 @@ gamma_sum_grains_type	"Category of gamma_sum_grains, one of: ""archipelago"", ""
 gamma_sum_grains_comment	Description or source of the gamma_sum_grains value. No missing value.
 realm	"Realm in which the sampling was done, one of: Freshwater or Terrestrial. No missing value."
 taxon	"Taxon group of the data set, one of: ""Plants"", ""Invertebrates"" or ""Fish"". No missing value."
-comment	"A description of the data set origin, goal and sampling method. No missing value."
+comment	"A description of the data set origin, goal and sampling method. No missing value. UTF-8 encoding."
 comment_standardisation	"A short description of the modifications we made to the data set to ensure standard effort: excluded sites or years, excluded taxa, etc. No missing value."
 is_coordinate_local_scale	Logical. TRUE if coordinates re given at the scale of the site/locality. FALSE if the coordinates are at the regional scale or missing. No missing value.
