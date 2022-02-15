@@ -31,7 +31,7 @@ ddata[, ":="(
   species = gsub("PA_|_AHI", "", species),
   metric = "pa",
   unit = "pa"
-)]
+)][species %in% df_species_info$idOnt, species := df_species_info$rfbName[match(species, df_species_info$idOnt)]]
 
 
 ddata <- unique(ddata)
