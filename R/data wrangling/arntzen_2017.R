@@ -16,6 +16,19 @@ ddata[, ":="(
   latitude = data.table::nafill(latitude, type = "nocb")
 )]
 
+## correcting (removing the dot...) and converting coordinates
+coords <- unique(ddata[, .(local, year, latitude, longitude)])
+adding_zeroes <- function(x, full_length) {
+   for (i in which(nchar(x) < full_length))   x[i] <- paste0(x[i], paste0(rep("0", times = full_length - nchar(x[i])), collapse = ""))
+   return(as.numeric(x))
+}
+coords[, latitude := adding_zeroes(gsub("\\.", "", latitude), full_length = 7L)]
+coords[, longitude := adding_zeroes(gsub("\\.", "", longitude), full_length = 6L)]
+sp::coordinates(coords) <- ~longitude+latitude
+sp::proj4string(coords) <- sp::CRS(SRS_string = 'EPSG:27571')
+coords <- sp::spTransform(x = coords, CRSobj = sp::CRS(SRS_string = 'EPSG:4326'))
+coords <- data.table::as.data.table(coords)
+
 
 ## deleting sites sampled only once
 ddata[, local := gsub("[^0-9]", "", local)]
