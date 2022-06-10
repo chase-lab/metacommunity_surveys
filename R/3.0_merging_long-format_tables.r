@@ -62,7 +62,11 @@ data.table::setorder(dt, dataset_id, regional, local, year, species)
 # Standardisation of timepoints ----
 # dt[, timepoints := as.integer(gsub('T', '', timepoints))]
 
-# Checks
+# Checks ----
+
+## checking duplicated rows ----
+if (anyDuplicated(dt)) warning("Duplicated rows in dt")
+
 ## checking values ----
 if (dt[unit == "count", any(!is.integer(value))]) warning(paste("Non integer values in", paste(dt[unit == "count" & !is.integer(value), unique(dataset_id)], collapse = ", ")))
 
@@ -163,6 +167,9 @@ meta[, is_coordinate_local_scale := length(unique(latitude)) != 1L && length(uni
 # sort(meta[(!is_coordinate_local_scale) & (!checklist), unique(dataset_id)])
 
 # Checks ----
+
+## checking duplicated rows ----
+if (anyDuplicated(meta)) warning("Duplicated rows in metadata")
 
 ## checking taxon ----
 if (any(meta[, length(unique(taxon)), by = dataset_id]$V1 != 1L)) warning(paste0("several taxa values in ", paste(meta[, length(unique(taxon)), by = dataset_id][V1 != 1L, dataset_id], collapse = ", ")))

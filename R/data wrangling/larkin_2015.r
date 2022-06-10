@@ -21,7 +21,7 @@ ddata <- data.table::melt(ddata,
   variable.name = "species",
   value.name = "value"
 )
-ddata <- ddata[value != 0]
+ddata <- unique(ddata[value != 0][, value := 1L]) # replacing all > 1 values
 
 # community data ----
 ddata[, ":="(
@@ -29,10 +29,18 @@ ddata[, ":="(
   regional = "Illinois",
 
   metric = "pa",
-  unit = "pa",
-  value = 1L # replacing all > 1 values
+  unit = "pa"
 
-)][species %in% taxonomy$Code, species := taxonomy$Species[match(species, taxonomy$Code)]]
+)]
+
+# taxonomy cleaning
+ddata <- ddata[!species %in% c("dicot", "unkforb", "grass1", "grass3", "grasssp")]
+taxonomy[Code == "polveriso", species := "Polygala verticillata iso"]
+ddata[species == "thadashyp", species := "Thalictrum dasycarpum hyp"]
+ddata[species == "astsp1", species := "Aster sp.1"]
+ddata[species == "astsp2", species := "Aster sp.2"]
+ddata[species %in% taxonomy$Code, species := taxonomy$Species[match(species, taxonomy$Code)]]
+
 
 # metadata ----
 meta <- unique(ddata[, .(dataset_id, regional, local, year)])

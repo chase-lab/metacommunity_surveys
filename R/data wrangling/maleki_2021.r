@@ -5,18 +5,16 @@ dataset_id <- "maleki_2021"
 ddata <- base::readRDS(file = paste0("./data/raw data/", dataset_id, "/ddata.rds"))
 
 # alive trees only
-ddata <- ddata[substr(ddata$status_id, 1L, 1L) == "A"]
+ddata <- ddata[!grepl(pattern = "A", x = status_id, fixed = TRUE)]
 
 # aggregating at the species level
-ddata <- ddata[, .(value = .N, lat, long), by = .(plot_id, year, species_name)]
+ddata <- ddata[, .(value = .N, lat = lat[1], long = long[1]), by = .(plot_id, year, species_name)]
 data.table::setnames(ddata, c("plot_id", "species_name", "lat", "long"), c("local", "species", "latitude", "longitude"))
 
 # community ----
 ddata[, ":="(
   dataset_id = dataset_id,
   regional = "Lake Duparquet Research and Teaching Forest in western Quebec",
-
-  
 
   metric = "abundance",
   unit = "count"
@@ -30,7 +28,7 @@ meta[, ":="(
   realm = "Terrestrial",
 
   effort = 1L,
-  
+
   study_type = "ecological_sampling",
 
   data_pooled_by_authors = FALSE,

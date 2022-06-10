@@ -4,11 +4,11 @@ dataset_id <- "myers-smith_2019"
 ddata <- base::readRDS(file = paste("data/raw data", dataset_id, "ddata.rds", sep = "/"))
 data.table::setnames(ddata, c("regional", "latitude", "longitude", "year", "local", "species", "value"))
 
+ddata <- unique(ddata[, value := 1L])
 ddata[, ":="(
   dataset_id = dataset_id,
   regional = c("Komakuk", "Herschel")[match(substr(regional, 5, 6), c("KO", "HE"))],
 
-  value = 1L,
   metric = "pa",
   unit = "pa"
 )]
