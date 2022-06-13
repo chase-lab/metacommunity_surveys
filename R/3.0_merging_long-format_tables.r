@@ -37,8 +37,8 @@ check_indispensable_variables <- function(dt, indispensable_variables) {
 check_indispensable_variables(dt, column_names_template[as.logical(template[, 2])])
 check_indispensable_variables(meta, column_names_template_metadata[as.logical(template_metadata[, 2])])
 
-if (any(is.na(dt$year))) warning(paste("missing _year_ value in ", unique(dt[is.na(year), dataset_id]), collapse = ", "))
-if (any(is.na(meta$year))) warning(paste("missing _year_ value in ", unique(meta[is.na(year), dataset_id]), collapse = ", "))
+if (anyNA(dt$year)) warning(paste("missing _year_ value in ", unique(dt[is.na(year), dataset_id]), collapse = ", "))
+if (anyNA(meta$year)) warning(paste("missing _year_ value in ", unique(meta[is.na(year), dataset_id]), collapse = ", "))
 if (any(dt[metric == "pa", value] != 1)) warning(paste("abnormal presence absence value in ", unique(dt[value != 1, dataset_id]), collapse = ", "))
 if (any(dt[, .(is.na(regional) | regional == "")])) warning(paste("missing _regional_ value in ", unique(dt[is.na(regional) | regional == "", dataset_id]), collapse = ", "))
 if (any(dt[, .(is.na(local) | local == "")])) warning(paste("missing _local_ value in ", unique(dt[is.na(local) | local == "", dataset_id]), collapse = ", "))
