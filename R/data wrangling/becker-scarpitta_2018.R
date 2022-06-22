@@ -1,5 +1,4 @@
 ## becker-scarpitta_2018
-
 dataset_id <- "becker-scarpitta_2018"
 
 ddata <- base::readRDS(file = paste0("data/raw data/", dataset_id, "/ddata_historical.rds"))
@@ -24,7 +23,6 @@ ddata <- data.table::melt(ddata,
 
 
 ddata <- ddata[!is.na(value) & value > 0 & !is.na(species) & value != "-"]
-# ddata[value >0 , value := 1]
 
 ddata[, ":="(
   dataset_id = dataset_id,
@@ -52,6 +50,7 @@ meta[, ":="(
   latitude = latitudes[match(local, c("Forillon", "Mont-Megantic", "Gatineau"))],
   longitude = longitudes[match(local, c("Forillon", "Mont-Megantic", "Gatineau"))],
   effort = c(49L, 48L, 28L)[match(local, c("Forillon", "Mont-Megantic", "Gatineau"))],
+  data_pooled_by_authors = FALSE,
 
 
   study_type = "resurvey",
@@ -86,3 +85,4 @@ data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset
 data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_metadata.csv"),
   row.names = FALSE
 )
+

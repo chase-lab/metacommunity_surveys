@@ -13,7 +13,7 @@ sampling_years	FALSE
 alpha_grain	TRUE
 alpha_grain_unit	TRUE
 alpha_grain_type	TRUE
-alpha_grain_comment	TRUE
+alpha_grain_comment	FALSE
 gamma_bounding_box	TRUE
 gamma_bounding_box_unit	TRUE
 gamma_bounding_box_type	TRUE

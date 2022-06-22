@@ -29,8 +29,8 @@ ddata[, ":="(
   dataset_id = dataset_id,
   regional = "Pelekane Bay",
 
-  metric = "pa",
   value = 1L,
+  metric = "pa",
   unit = "pa"
 )]
 
@@ -51,6 +51,11 @@ meta[, ":="(
   alpha_grain_unit = "m2",
   alpha_grain_type = "sample",
   alpha_grain_comment = c("One survey of 1000 m2", "9 surveys of 3*200m2")[data.table::chmatch(year, c("1976", "1996"))],
+
+  gamma_sum_grains = c(1000L, 5400L)[data.table::chmatch(year, c("1976", "1996"))] * 2L,
+  gamma_sum_grains_type = "sample",
+  gamma_sum_grains_unit = "m2",
+  gamma_sum_grains_comment = "sum of inner and outer sampling areas",
 
   gamma_bounding_box = sum(7593L, 21651L, 2758L, 4375L, 12111L),
   gamma_bounding_box_unit = "m2",

@@ -78,6 +78,7 @@ data.table::setDT(bh_species)
 
 dt <- merge(dt, bh_species[, .(dataset_id, species, species.new, gbif_specieskey)], by = c("dataset_id", "species"), all.x = TRUE)
 data.table::setnames(dt, c("species", "species.new"), c("species_original", "species"))
+dt[is.na(species), species := species_original]
 # unique(dt[grepl("[^a-zA-Z\\._ ]", species) & nchar(species) < 10L, .(dataset_id)])
 # unique(dt[grepl("[^a-zA-Z\\._ \\(\\)0-9\\-\\&]", species), .(dataset_id, species)])[sample(1:1299, 50)]
 # unique(dt[grepl("Â", species), .(dataset_id, species)])
@@ -89,7 +90,9 @@ if (any(dt[, length(unique(unit)), by = dataset_id]$V1) != 1L) warning("several 
 
 # Saving dt ----
 data.table::setcolorder(dt, c("dataset_id", "regional", "local", "year", "species", "species_original", "gbif_specieskey", "value", "metric", "unit"))
-data.table::fwrite(dt, "data/communities.csv", row.names = FALSE)
+
+data.table::fwrite(dt, "data/communities.csv", row.names = FALSE, na = "NA")
+
 if (file.exists("./data/references/homogenisation_dropbox_folder_path.rds")) {
    path_to_homogenisation_dropbox_folder <- base::readRDS(file = "./data/references/homogenisation_dropbox_folder_path.rds")
    data.table::fwrite(dt, paste0(path_to_homogenisation_dropbox_folder, "/_data_extraction/metacommunity-survey-communities.csv"), row.names = FALSE)
@@ -215,6 +218,6 @@ if (nrow(meta) != nrow(unique(dt[, .(dataset_id, regional, local, year)]))) warn
 
 
 # Saving meta ----
-data.table::fwrite(meta, "data/metadata.csv", sep = ",", row.names = FALSE)
+data.table::fwrite(meta, "data/metadata.csv", sep = ",", row.names = FALSE, na = "NA")
 if (file.exists("./data/references/homogenisation_dropbox_folder_path.rds"))
    data.table::fwrite(meta, paste0(path_to_homogenisation_dropbox_folder, "/_data_extraction/metacommunity-survey-metadata.csv"), sep = ",", row.names = FALSE)
