@@ -3,7 +3,7 @@ dataset_id <- "wright_2021"
 
 ddata <- data.table::fread(
   file = "./data/raw data/wright_2021/SEVBeeData2002-2019.csv", sep = ",", quote = '"',
-  drop = c("month", "start_date", "end_date", "complete_sampling_month", "direction", "color")
+  drop = c("month", "start_date", "end_date", "direction", "color")
 )
 taxo <- data.table::fread(
   file = "./data/raw data/wright_2021/SEVBeeSpeciesList2002-2019.csv", sep = ",", quote = '"',
@@ -12,17 +12,20 @@ taxo <- data.table::fread(
 taxo[grepl("[0-9]", species), species := paste("sp.", species)][, species := paste(genus, species, author)]
 
 # melting species
-variable_list <- c("year", "complete_sampling_year", "ecosystem", "transect")
+variable_list <- c("year", "complete_sampling_year", "complete_sampling_month", "ecosystem", "transect")
 species_list <- colnames(ddata)[!names(ddata) %in% variable_list]
 ddata[, (species_list) := lapply(.SD, function(column) replace(column, column == 0L, NA_integer_)), .SDcols = species_list] # replace all 0 values by NA
-ddata <- data.table::melt(ddata,
+
+ddata <- data.table::melt(
+  ddata,
   id.vars = variable_list,
+  measure.vars = species_list,
   variable.name = "species",
   na.rm = TRUE
 )
 
 # standardisation ----
-ddata <- ddata[complete_sampling_year == 1L, .(value = sum(value), regional = ecosystem), by = .(year, local = transect, species)]
+ddata <- ddata[complete_sampling_year == 1L & complete_sampling_month == 1L, .(value = sum(value), regional = unique(ecosystem)), by = .(year, local = transect, species)]
 
 # Ddata ----
 ddata[, ":="(

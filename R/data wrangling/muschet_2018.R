@@ -78,6 +78,11 @@ meta[, ":="(
   alpha_grain_type = "sample",
   alpha_grain_comment = "5cm wide aperture of the funnel opening",
 
+  gamma_sum_grains = NA,
+  gamma_sum_grains_type = "sample",
+  gamma_sum_grains_unit = "m2",
+  gamma_sum_grains_comment = "unknown number of trap per transect.",
+
   gamma_bounding_box = geosphere::areaPolygon(coords[grDevices::chull(coords$Longitude, coords$Latitude), c("Longitude", "Latitude")]) / 1000000,
   gamma_bounding_box_unit = "km2",
   gamma_bounding_box_type = "convex-hull",

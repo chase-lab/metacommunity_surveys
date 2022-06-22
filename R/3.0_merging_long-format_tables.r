@@ -37,8 +37,8 @@ check_indispensable_variables <- function(dt, indispensable_variables) {
 check_indispensable_variables(dt, column_names_template[as.logical(template[, 2])])
 check_indispensable_variables(meta, column_names_template_metadata[as.logical(template_metadata[, 2])])
 
-if (any(is.na(dt$year))) warning(paste("missing _year_ value in ", unique(dt[is.na(year), dataset_id]), collapse = ", "))
-if (any(is.na(meta$year))) warning(paste("missing _year_ value in ", unique(meta[is.na(year), dataset_id]), collapse = ", "))
+if (anyNA(dt$year)) warning(paste("missing _year_ value in ", unique(dt[is.na(year), dataset_id]), collapse = ", "))
+if (anyNA(meta$year)) warning(paste("missing _year_ value in ", unique(meta[is.na(year), dataset_id]), collapse = ", "))
 if (any(dt[metric == "pa", value] != 1)) warning(paste("abnormal presence absence value in ", unique(dt[value != 1, dataset_id]), collapse = ", "))
 if (any(dt[, .(is.na(regional) | regional == "")])) warning(paste("missing _regional_ value in ", unique(dt[is.na(regional) | regional == "", dataset_id]), collapse = ", "))
 if (any(dt[, .(is.na(local) | local == "")])) warning(paste("missing _local_ value in ", unique(dt[is.na(local) | local == "", dataset_id]), collapse = ", "))
@@ -62,7 +62,11 @@ data.table::setorder(dt, dataset_id, regional, local, year, species)
 # Standardisation of timepoints ----
 # dt[, timepoints := as.integer(gsub('T', '', timepoints))]
 
-# Checks
+# Checks ----
+
+## checking duplicated rows ----
+if (anyDuplicated(dt)) warning("Duplicated rows in dt")
+
 ## checking values ----
 if (dt[unit == "count", any(!is.integer(value))]) warning(paste("Non integer values in", paste(dt[unit == "count" & !is.integer(value), unique(dataset_id)], collapse = ", ")))
 
@@ -74,6 +78,7 @@ data.table::setDT(bh_species)
 
 dt <- merge(dt, bh_species[, .(dataset_id, species, species.new, gbif_specieskey)], by = c("dataset_id", "species"), all.x = TRUE)
 data.table::setnames(dt, c("species", "species.new"), c("species_original", "species"))
+dt[is.na(species), species := species_original]
 # unique(dt[grepl("[^a-zA-Z\\._ ]", species) & nchar(species) < 10L, .(dataset_id)])
 # unique(dt[grepl("[^a-zA-Z\\._ \\(\\)0-9\\-\\&]", species), .(dataset_id, species)])[sample(1:1299, 50)]
 # unique(dt[grepl("Â", species), .(dataset_id, species)])
@@ -85,7 +90,9 @@ if (any(dt[, length(unique(unit)), by = dataset_id]$V1) != 1L) warning("several 
 
 # Saving dt ----
 data.table::setcolorder(dt, c("dataset_id", "regional", "local", "year", "species", "species_original", "gbif_specieskey", "value", "metric", "unit"))
-data.table::fwrite(dt, "data/communities.csv", row.names = FALSE)
+
+data.table::fwrite(dt, "data/communities.csv", row.names = FALSE, na = "NA")
+
 if (file.exists("./data/references/homogenisation_dropbox_folder_path.rds")) {
    path_to_homogenisation_dropbox_folder <- base::readRDS(file = "./data/references/homogenisation_dropbox_folder_path.rds")
    data.table::fwrite(dt, paste0(path_to_homogenisation_dropbox_folder, "/_data_extraction/metacommunity-survey-communities.csv"), row.names = FALSE)
@@ -164,6 +171,9 @@ meta[, is_coordinate_local_scale := length(unique(latitude)) != 1L && length(uni
 
 # Checks ----
 
+## checking duplicated rows ----
+if (anyDuplicated(meta)) warning("Duplicated rows in metadata")
+
 ## checking taxon ----
 if (any(meta[, length(unique(taxon)), by = dataset_id]$V1 != 1L)) warning(paste0("several taxa values in ", paste(meta[, length(unique(taxon)), by = dataset_id][V1 != 1L, dataset_id], collapse = ", ")))
 if (any(!unique(meta$taxon) %in% c("Fish", "Invertebrates", "Plants", "Birds", "Mammals", "Herpetofauna", "Marine plants"))) warning(paste0("Non standard taxon category in ", paste(unique(meta[!taxon %in% c("Fish", "Invertebrates", "Plants", "Birds", "Mammals", "Herpetofauna", "Marine plants"), .(dataset_id), by = dataset_id]$dataset_id), collapse = ", ")))
@@ -208,6 +218,6 @@ if (nrow(meta) != nrow(unique(dt[, .(dataset_id, regional, local, year)]))) warn
 
 
 # Saving meta ----
-data.table::fwrite(meta, "data/metadata.csv", sep = ",", row.names = FALSE)
+data.table::fwrite(meta, "data/metadata.csv", sep = ",", row.names = FALSE, na = "NA")
 if (file.exists("./data/references/homogenisation_dropbox_folder_path.rds"))
    data.table::fwrite(meta, paste0(path_to_homogenisation_dropbox_folder, "/_data_extraction/metacommunity-survey-metadata.csv"), sep = ",", row.names = FALSE)

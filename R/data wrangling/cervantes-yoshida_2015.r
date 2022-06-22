@@ -1,7 +1,6 @@
 ## cervantes-yoshida_2015
-
-
 dataset_id <- "cervantes-yoshida_2015"
+
 ddata <- base::readRDS(file = paste0("data/raw data/", dataset_id, "/ddata.rds"))
 
 data.table::setnames(
@@ -45,6 +44,11 @@ meta[, ":="(
   alpha_grain_unit = "m2",
   alpha_grain_type = "sample",
   alpha_grain_comment = "estimated from effort (electrofishing of rivers, minimal length of the sampling reach = 30m. Constant through time for sites.)",
+
+  gamma_sum_grains = 100L * 32L,
+  gamma_sum_grains_unit = "m2",
+  gamma_sum_grains_type = "sample",
+  gamma_sum_grains_comment = "100m2 sample times 32 locations per year",
 
   gamma_bounding_box = 1800L,
   gamma_bounding_box_unit = "km2",

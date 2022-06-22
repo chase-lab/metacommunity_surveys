@@ -1,7 +1,6 @@
 # ellingsen_2018
 dataset_id <- "ellingsen_2018"
 
-
 ddata <- base::readRDS(paste("data/raw data", dataset_id, "ddata.rds", sep = "/"))
 data.table::setnames(ddata, "stat", "local")
 
@@ -21,7 +20,7 @@ ddata <- ddata[, value := as.integer(value)][, .(value = sum(value)), by = .(loc
 ddata[, ":="(
   dataset_id = dataset_id,
   regional = "Ekofisk-region",
-  
+
 
   metric = "abundance",
   unit = "count"
@@ -39,7 +38,7 @@ meta[, ":="(
 )][, ":="(
 
   effort = 1L,
-  
+
   study_type = "ecological_sampling",
 
   data_pooled_by_authors = FALSE,
@@ -49,14 +48,19 @@ meta[, ":="(
   alpha_grain_type = "sample",
   alpha_grain_comment = "area of the sediment sample",
 
+  gamma_sum_grains_unit = "m2",
+  gamma_sum_grains_type = "sample",
+  gamma_sum_grains_comment = "sum of sample areas per year",
+
   gamma_bounding_box_unit = "km2",
   gamma_bounding_box_type = "convex-hull",
   gamma_bounding_box_comment = "area of the convex-hull covering the stations",
 
 
   comment = "Data extracted from the dryad repository Ellingsen, Kari E. et al. (2018), Data from: Long-term environmental monitoring for assessment of change: measurement inconsistencies over time and potential solutions, Dryad, Dataset, https://doi.org/10.5061/dryad.2v7m4. The authors sampled benthic invertebrates in 11 stations on an oil field with several platforms every third year since 1996. Method data were also available in the paper https://doi.org/10.1007/s10661-017-6317-4. Coordinates are given in table 1 in the paper.",
-  comment_standardisation = "In each station, each year, all 5 replicates were pooled together and abundances summed. IMPORTANT: To avoid taxonomical issues, the data set r1bio.new2.n was used ; see data download/ellingsen_2018.r script or the authors helper MOD-DRYAD.R script for details on taxonomy cleaning."
-)][, gamma_bounding_box := geosphere::areaPolygon(meta[grDevices::chull(meta[, .(longitude, latitude)]), .(longitude, latitude)]) / 10^6]
+  comment_standardisation = "In each station, each year, all 5 replicates were pooled together and abundances summed. IMPORTANT: To avoid taxonomical issues, the data set r1bio.new2.n was used ; see /data download/ellingsen_2018.r script or the authors helper MOD-DRYAD.R script for details on taxonomy cleaning."
+)][, gamma_bounding_box := geosphere::areaPolygon(meta[grDevices::chull(meta[, .(longitude, latitude)]), .(longitude, latitude)]) / 10^6
+   ][, gamma_sum_grains := alpha_grain * length(unique(local)), by = year]
 
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
 data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, ".csv"),
