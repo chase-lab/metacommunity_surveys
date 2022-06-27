@@ -50,7 +50,7 @@ meta[, ":="(
 
   gamma_bounding_box = 240L * 680L,
   gamma_bounding_box_unit = "m2",
-  gamma_bounding_box_type = "functional",
+  gamma_bounding_box_type = "ecosystem",
   gamma_bounding_box_comment = "area of the SEFDP",
 
   comment = "Extracted from Swenson et al 2020 Dryad repository (https://doi.org/10.1111/avsc.12206). 'The SEFDP was originally censused in 1976 by George Stevens and Stephen Hubbell, where all woody stems greater than or equal to 3 cm diameter at 1.3 m off the ground including lianas had their diameter measured and their spatial location in the plot recorded'. A second and a third surveys were made in 1996 and 2006-2007. Regional is the SEFDP, local is a 20*20 square meter plot where all trees > 3cm diameter DBH were sampled. Coordinates are approximative: research centre in the Santa Rosa Sector of the Santa Rosa National Park.",

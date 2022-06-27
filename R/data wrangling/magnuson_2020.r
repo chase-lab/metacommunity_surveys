@@ -88,7 +88,7 @@ meta[, ":="(
 
   gamma_sum_grains = sum(c(396.3, 168.4, 0.5, 36.7, 64, 1.1, 1607.9)),
   gamma_sum_grains_unit = "ha",
-  gamma_sum_grains_type = "functional",
+  gamma_sum_grains_type = "ecosystem",
   gamma_sum_grains_comment = "sum of the areas of the lakes.",
 
   gamma_bounding_box = gamma_bounding_box,

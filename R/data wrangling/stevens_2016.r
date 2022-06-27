@@ -49,7 +49,7 @@ meta[, ":="(
 
   gamma_bounding_box = 2400L,
   gamma_bounding_box_unit = "km2",
-  gamma_bounding_box_type = "functional",
+  gamma_bounding_box_type = "ecosystem",
   gamma_bounding_box_comment = "The survey focused on a 2400 km2 area around Sheffield encompassing a large part of the Peak District National Park.",
 
   comment = "Extracted from stevens et al 2016, data extracted from supplementary excel file ( https://doi.org/10.1111/avsc.12206). Authors resurveyed the exact same sites as Lloyd in 1965-68 to analyse structuring factors of plant communities. Regional is the area covering all sampling sites, given by the authors, local are two habitat types sampled in many locations throughout the regional area. The number of quadrats per habitat is given as effort.",

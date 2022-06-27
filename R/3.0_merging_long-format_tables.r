@@ -198,12 +198,12 @@ if (anyNA(meta$comment_standardisation)) warning("Missing comment_standardisatio
 
 ## checking alpha_grain_type ----
 # meta[(!checklist), .(lterm = diff(range(year)), taxon = taxon, realm = realm, alpha_grain_type = alpha_grain_type), by = .(dataset_id, regional)][lterm >= 10L][taxon == "Fish" & realm == "Freshwater" & grep("lake",alpha_grain_type), unique(dataset_id)]
-if (any(!unique(meta$alpha_grain_type) %in% c("island", "plot", "sample", "lake_pond", "trap", "transect", "functional", "box", "quadrat"))) warning(paste("Invalid alpha_grain_type value in", paste(unique(meta[!alpha_grain_type %in% c("island", "plot", "sample", "lake_pond", "trap", "transect", "functional", "box", "quadrat"), dataset_id]), collapse = ", ")))
+if (any(!unique(meta$alpha_grain_type) %in% c("island", "plot", "sample", "lake_pond", "trap", "transect", "ecosystem", "box", "quadrat"))) warning(paste("Invalid alpha_grain_type value in", paste(unique(meta[!alpha_grain_type %in% c("island", "plot", "sample", "lake_pond", "trap", "transect", "ecosystem", "box", "quadrat"), dataset_id]), collapse = ", ")))
 
 ## checking gamma_sum_grains_type & gamma_bounding_box_type ----
-if (any(!na.omit(unique(meta$gamma_sum_grains_type)) %in% c("archipelago", "sample", "lake_pond", "plot", "quadrat", "transect", "functional", "box"))) warning(paste("Invalid gamma_sum_grains_type value in", paste(unique(meta[!is.na(gamma_sum_grains_type) & !gamma_sum_grains_type %in% c("archipelago", "sample", "lake_pond", "plot", "quadrat", "transect", "functional", "box"), dataset_id]), collapse = ", ")))
+if (any(!na.omit(unique(meta$gamma_sum_grains_type)) %in% c("archipelago", "sample", "lake_pond", "plot", "quadrat", "transect", "ecosystem", "box"))) warning(paste("Invalid gamma_sum_grains_type value in", paste(unique(meta[!is.na(gamma_sum_grains_type) & !gamma_sum_grains_type %in% c("archipelago", "sample", "lake_pond", "plot", "quadrat", "transect", "ecosystem", "box"), dataset_id]), collapse = ", ")))
 
-if (any(!na.omit(unique(meta$gamma_bounding_box_type)) %in% c("administrative", "island", "functional", "convex-hull", "watershed", "box", "buffer", "ecosystem", "shore", "lake_pond"))) warning(paste("Invalid gamma_bounding_box_type value in", paste(unique(meta[!is.na(gamma_bounding_box_type) & !gamma_bounding_box_type %in% c("administrative", "island", "functional", "convex-hull", "watershed", "box", "buffer", "ecosystem", "shore", "lake_pond"), dataset_id]), collapse = ", ")))
+if (any(!na.omit(unique(meta$gamma_bounding_box_type)) %in% c("administrative", "island", "ecosystem", "convex-hull", "watershed", "box", "buffer", "shore", "lake_pond"))) warning(paste("Invalid gamma_bounding_box_type value in", paste(unique(meta[!is.na(gamma_bounding_box_type) & !gamma_bounding_box_type %in% c("administrative", "island", "convex-hull", "watershed", "box", "buffer", "ecosystem", "shore", "lake_pond"), dataset_id]), collapse = ", ")))
 
 # Ordering metadata ----
 data.table::setorder(meta, dataset_id, regional, local, year)
@@ -221,3 +221,4 @@ if (nrow(meta) != nrow(unique(dt[, .(dataset_id, regional, local, year)]))) warn
 data.table::fwrite(meta, "data/metadata.csv", sep = ",", row.names = FALSE, na = "NA")
 if (file.exists("./data/references/homogenisation_dropbox_folder_path.rds"))
    data.table::fwrite(meta, paste0(path_to_homogenisation_dropbox_folder, "/_data_extraction/metacommunity-survey-metadata.csv"), sep = ",", row.names = FALSE)
+

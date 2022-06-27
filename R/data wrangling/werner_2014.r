@@ -49,7 +49,7 @@ meta[, ":="(
 
   gamma_bounding_box = 5.25,
   gamma_bounding_box_unit = "km2",
-  gamma_bounding_box_type = "functional",
+  gamma_bounding_box_type = "ecosystem",
   gamma_bounding_box_comment = "area of the ESGR according to the authors",
 
   comment = "Extracted from werner et al 2015 Dryad repo (https://datadryad.org/stash/dataset/doi:10.5061/dryad.js47k). Authors repeatedly sampled amphibian larvae. 'We estimated larval densities of 14 species of amphibians in 37 ponds on the University of Michigan’s E. S. George Reserve (hereafter ESGR) over 15 yrs (1996 to 2010).' Effort is constant.",

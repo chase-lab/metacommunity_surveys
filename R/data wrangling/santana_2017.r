@@ -57,7 +57,7 @@ meta[, ":="(
 
   gamma_bounding_box = data.table::fifelse(grepl("High-intensity", regional), 423.92, 456.08),
   gamma_bounding_box_unit = "km2",
-  gamma_bounding_box_type = "functional",
+  gamma_bounding_box_type = "ecosystem",
   gamma_bounding_box_comment = "areas of the high and low intensity areas estimated from figure 1",
 
   comment = "Extracted from Santana et al 2017 Dryad repo (https://datadryad.org/stash/dataset/doi:10.5061/dryad.kp3fv). Authors sampled birds in two rural areas of Portugal. Both areas differ by the agriculture intensity. No standardization needed, one sampling per year during 6 years, values are numbers of individual per transect. Each local is a buffer of 250 m along a transect (71 transects).",

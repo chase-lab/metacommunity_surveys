@@ -57,12 +57,12 @@ meta[, ":="(
 
   alpha_grain = c(245L, 55L, 361L)[match(local, c("Forillon", "Mont-Megantic", "Gatineau"))],
   alpha_grain_unit = "km2",
-  alpha_grain_type = "functional",
+  alpha_grain_type = "ecosystem",
   alpha_grain_comment = "area of the 3 national parks inside which samples were made",
 
   gamma_sum_grains = sum(245L, 55L, 361L),
   gamma_sum_grains_unit = "km2",
-  gamma_sum_grains_type = "functional",
+  gamma_sum_grains_type = "ecosystem",
   gamma_sum_grains_comment = "sum of the areas of the three parks",
 
   # gamma_bounding_box = 1365128L,

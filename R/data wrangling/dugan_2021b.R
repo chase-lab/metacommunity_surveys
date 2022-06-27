@@ -49,7 +49,7 @@ meta[, ":="(
 
   gamma_bounding_box = 6L,
   gamma_bounding_box_unit = "km2",
-  gamma_bounding_box_type = "functional",
+  gamma_bounding_box_type = "ecosystem",
   gamma_bounding_box_comment = "60km long coastline between the most distant sites (measured on Google Earth) * 100m wide beach (estimated)",
 
 

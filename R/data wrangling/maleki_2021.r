@@ -45,7 +45,7 @@ meta[, ":="(
 
   gamma_bounding_box = 8045L,
   gamma_bounding_box_unit = "ha",
-  gamma_bounding_box_type = "functional",
+  gamma_bounding_box_type = "ecosystem",
   gamma_bounding_box_comment = "area of the LDRTF",
 
 

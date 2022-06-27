@@ -56,7 +56,7 @@ meta[, ":="(
 
   gamma_bounding_box = 1000L,
   gamma_bounding_box_unit = "ha",
-  gamma_bounding_box_type = "functional",
+  gamma_bounding_box_type = "ecosystem",
 
   comment = "Extracted from supplementary material Table 1 in Vojik and Boublik 2018 (https://doi.org/10.1007/s11258-018-0831-5). Historical vegetation records of the Klinec forest, Czech Republic, were made in 1957. In 2015, M Vojik resampled the same 29 plots of 500m2 each using the same methodology.",
   comment_standardisation = "tree, shrub and herb layers pooled together"

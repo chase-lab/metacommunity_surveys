@@ -63,7 +63,7 @@ meta[, ":="(
 
   gamma_bounding_box = 7500L,
   gamma_bounding_box_unit = "m2",
-  gamma_bounding_box_type = "functional",
+  gamma_bounding_box_type = "ecosystem",
   gamma_bounding_box_comment = "area covering all transects (25m * 300m)",
 
   comment = "Extracted from dustan-halas 1987 table 3 (table extraction with tabula). Regional is the area covering all 21 25m long transects, local are transects. 'Carysfort Reef was surveyed in 1975 (Dustan 1985) and resurveyed in the summers of 1982 and 1983; it took two field sessions to find and resample all the transects. Transects 1-10 were surveyed in 1982 and 11-21 in 1983.' The observer then used the transect line to measure contact length with coral colonies hence the estimated 20cm width of sampling. 'The length of line crossing over coral colonies and the space between them was measured to the nearest 0.5 cm'. ",
