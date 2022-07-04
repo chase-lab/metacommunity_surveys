@@ -66,9 +66,7 @@ dt1$weight <- ifelse((trimws(as.character(dt1$weight))==trimws("NA")),NA,dt1$wei
 suppressWarnings(dt1$weight <- ifelse(!is.na(as.numeric("NA")) & (trimws(as.character(dt1$weight))==as.character(as.numeric("NA"))),NA,dt1$weight))
 dt1$tail <- as.factor(ifelse((trimws(as.character(dt1$tail))==trimws("NA")),NA,as.character(dt1$tail)))
 
-
-
-#help with metadata - where to find, what to usually include?
+#metadata
 meta <- unique(dt1[, .(date, zone, site, plot, pit)])
 
 meta[, ":="(
@@ -77,30 +75,31 @@ meta[, ":="(
   taxon = "Lizard",
   
   latitude = '32°40`08.4000"N',
-  longitude = '-106°51`54.0000"E',
+  longitude = '106°51`54.0000"W',
   
-  effort = 4L,  ###what means effort
+  effort = 16L,  #traps per plot oooor 11 as plots per area?
   
-  study_type = "resurvey",
   
-  data_pooled_by_authors = FALSE, ##what?
-  data_pooled_by_authors_comment = NA, ##
-  sampling_years = NA, ###
+  study_type = "ecological sampling", #two possible values, or NA if not sure 
   
-  alpha_grain = 100L,  ###what?
-  alpha_grain_unit = "m2", #
-  alpha_grain_type = "sample", #
-  alpha_grain_comment = "50m long 2m wide transect",  ###pitfall traps
+  data_pooled_by_authors = FALSE, 
+  data_pooled_by_authors_comment = NA, 
+  sampling_years = NA, 
   
-  gamma_bounding_box = 1002L, ###what?
-  gamma_bounding_box_unit = "acres", #
-  gamma_bounding_box_type = "administrative", #
-  gamma_bounding_box_comment = "sum of the water area of the War in Pacific National Park.", ##
+  alpha_grain = 15L,  #size/area of individual trap per local
+  alpha_grain_unit = "cm2", #"acres", "ha", "km2", "m2", "cm2"
+  alpha_grain_type = "trap", 
+  alpha_grain_comment = "15 cm2 diameter pitfall traps",
   
-  gamma_sum_grains = 4L * 100L, #
+  gamma_bounding_box = 120L, #size of biggest common scale can be different values for different areas per region
+  gamma_bounding_box_unit = "km2", #
+  gamma_bounding_box_type = "box", #
+  gamma_bounding_box_comment = "complete area in which the 11 plots are located", ##
+  
+  gamma_sum_grains = 4L * 15L, #sum of alpha for given region for given years 
   gamma_sum_grains_unit = "m2", #
   gamma_sum_grains_type = "plot", #
-  gamma_sum_grains_comment = "sum of sampled transects", ##
+  gamma_sum_grains_comment = "Each grid consisted of 4 x 4 rows of traps spaced at 15 meter intervals", ##
 )]
 
 #Exclude: 
