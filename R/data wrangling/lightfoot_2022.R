@@ -1,27 +1,7 @@
 ## lightfoot_2022
 
+dt1<- readRDS("data/raw data/lightfoot_2022/lizard_pitfall_data_89-06.rds")
 #data extraction
-dt1 <-read.csv("data/raw data/lightfoot_2022/lizard_pitfall_data_89-06.csv",header=F 
-               ,skip=1
-               ,sep=","  
-               ,quot='"' 
-               , col.names=c(
-                 "date",     
-                 "zone",     
-                 "site",     
-                 "plot",     
-                 "pit",     
-                 "spp",     
-                 "sex",     
-                 "rcap",     
-                 "toe_num",     
-                 "SV_length",     
-                 "total_length",     
-                 "weight",     
-                 "tail",     
-                 "pc"    ), check.names=TRUE)
-
-
 # Fix any interval or ratio columns mistakenly read in as nominal and nominal columns read as numeric or dates read as strings
 
 # attempting to convert dt1$date dateTime string to R date structure (date or POSIXct)                                
@@ -70,7 +50,6 @@ dt1$tail <- as.factor(ifelse((trimws(as.character(dt1$tail))==trimws("NA")),NA,a
 meta <- unique(dt1[, .(date, zone, site, plot, pit)])
 
 meta[, ":="(
-  
   realm = "Terrestrial",
   taxon = "Lizard",
   
@@ -94,12 +73,12 @@ meta[, ":="(
   gamma_bounding_box = 120L, #size of biggest common scale can be different values for different areas per region
   gamma_bounding_box_unit = "km2", #
   gamma_bounding_box_type = "box", #
-  gamma_bounding_box_comment = "complete area in which the 11 plots are located", ##
+  gamma_bounding_box_comment = "complete area in which the 11 plots are located",
   
-  gamma_sum_grains = 4L * 15L, #sum of alpha for given region for given years 
-  gamma_sum_grains_unit = "m2", #
-  gamma_sum_grains_type = "plot", #
-  gamma_sum_grains_comment = "Each grid consisted of 4 x 4 rows of traps spaced at 15 meter intervals", ##
+  gamma_sum_grains = 90L, #sum of alpha for given region for given years 
+  gamma_sum_grains_unit = "m2",
+  gamma_sum_grains_type = "plot",
+  gamma_sum_grains_comment = "Each grid consisted of 4 x 4 rows of traps spaced at 15 meter intervals",
 )]
 
 #Exclude: 
