@@ -20,7 +20,7 @@ gamma_sum_grains_km2	"Measure of the extent/regional scale area as the sum of th
 gamma_sum_grains_type	"Category of gamma_sum_grains, one of: ""archipelago"", ""administrative"", ""watershed"", ""sample"", ""lake_pond"", ""plot"", ""quadrat"", ""transect"", ""ecosystem"", ""functional"" or ""box"". NA values indicate that information could not be collected."
 gamma_sum_grains_comment	"Description or source of the gamma_sum_grains value."
 realm	"Realm in which the sampling was done, one of: Freshwater or Terrestrial. No missing value."
-taxon	"Taxon group of the data set, one of: ""Plants"", ""Invertebrates"" or ""Fish"". No missing value."
+taxon	"Taxon group of the data set, one of: ""Plants"", ""Invertebrates"", ""Birds"", ""Herpetofauna"", ""Marine Plants"" or ""Fish"". No missing value."
 comment	"A description of the data set origin, goal and sampling method. No missing value. UTF-8 encoding."
 comment_standardisation	"A short description of the modifications we made to the data set to ensure standard effort: excluded sites or years, excluded taxa, etc."
 is_coordinate_local_scale	Logical. TRUE if coordinates are given at the scale of the site/locality. FALSE if the coordinates are at the regional scale or missing. No missing value.
