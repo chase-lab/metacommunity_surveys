@@ -1,6 +1,12 @@
 # russel-smith_2017_shrubs
 dataset_id <- "russell-smith_2017_shrubs"
 
+###Data manually downloaded from:
+### https://datacommons.anu.edu.au/DataCommons/rest/records/anudc:5836/data/
+###  Spacial data manually downloaded from:
+###  https://datacommons.anu.edu.au/DataCommons/rest/records/anudc:5837/data/
+###  Login for Australian National University needed. Data accessible after login without further requests.
+
 # loading data ----
 datafiles <- c(
    "./data/raw data/russell-smith_2017/tpsk_shrubs_1994+_p831t1065.csv",
