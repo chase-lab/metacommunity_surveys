@@ -10,6 +10,7 @@ if (!file.exists("./data/raw data/moore_2022/rdata.rds")) {
       )
    )
    data.table::setDT(ddata)
+   ddata[, c("Easting_NAD83_UTM_Zone_12", "Northing_NAD83_UTM_Zone_12", "X_Coord_In_Quadrat", "Y_Coord_In_Quadrat", "Sq_Cm") := NULL]
 
    coords <- read.csv(
       unz(
