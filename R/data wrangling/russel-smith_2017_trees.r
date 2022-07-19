@@ -2,27 +2,21 @@
 dataset_id <- "russell-smith_2017_trees"
 
 ###Data manually downloaded from:
-### https://datacommons.anu.edu.au/DataCommons/rest/records/anudc:5836/data/
+### https://data/raw data/russell-smith_2017/datacommons.anu.edu.au/data/raw data/russell-smith_2017/dataCommons/rest/records/anudc:5836/data/raw data/russell-smith_2017/data/
 ###  Spacial data manually downloaded from:
-###  https://datacommons.anu.edu.au/DataCommons/rest/records/anudc:5837/data/
+###  https://data/raw data/russell-smith_2017/datacommons.anu.edu.au/data/raw data/russell-smith_2017/dataCommons/rest/records/anudc:5837/data/raw data/russell-smith_2017/data/
 ###  Login for Australian National University needed. Data accessible after login without further requests.
 
 # loading data ----
 datafiles <- c(
-  "./data/
-  /tpsk_trees_1994+_p831t1066.csv",
-  "./data/
-  /tpsl_trees_1994+_p831t1124.csv",
-  "./data/
-  /tpsn_trees_1994+_p831t1129.csv"
+  "./data/raw data/russell-smith_2017/data/tpsk_trees_1994+_p831t1066.csv",
+  "./data/raw data/russell-smith_2017/data/tpsl_trees_1994+_p831t1124.csv",
+  "./data/raw data/russell-smith_2017/data/tpsn_trees_1994+_p831t1129.csv"
 )
 datafiles_dates <- c(
-  "./data/
-  /tpsk_visit_date_1994+_p831t1067.csv",
-  "./data/
-  /tpsl_visit_date_1994+_p831t1125.csv",
-  "./data/
-  /tpsn_visit_date_1994+_p831t1153.csv"
+  "./data/raw data/russell-smith_2017/data/tpsk_visit_date_1994+_p831t1067.csv",
+  "./data/raw data/russell-smith_2017/data/tpsl_visit_date_1994+_p831t1125.csv",
+  "./data/raw data/russell-smith_2017/data/tpsn_visit_date_1994+_p831t1153.csv"
 )
 
 datafiles_spacial <- c(
@@ -51,7 +45,7 @@ dates <- data.table::rbindlist(
   use.names = TRUE, idcol = FALSE
 )
 
-spacial <- data.table::rbindlist(
+spatial <- data.table::rbindlist(
   lapply(
     datafiles_spacial,
     FUN = function(x)
@@ -93,11 +87,11 @@ meta[, ":="(
   data_pooled_by_authors_comment = NA,
   sampling_years = NA,
   
-  effort = 24L, # Effort is the minimal number of sampling operations ie the number of pitfall traps * the number of dates per local per year
+  effort = 1L, # Effort is the minimal number of sampling operations ie the number of pitfall traps * the number of dates per local per year
   
-  alpha_grain = 90L,  #size/area of individual trap
-  alpha_grain_unit = "cm2", #"acres", "ha", "km2", "m2", "cm2"
-  alpha_grain_type = "trap",
+  alpha_grain = 800L,  #area of individual plot
+  alpha_grain_unit = "m2", #"acres", "ha", "km2", "m2", "cm2"
+  alpha_grain_type = "plot",
   alpha_grain_comment = "15 cm2 diameter pitfall traps",
   
   gamma_bounding_box = 120L, #size of biggest common scale can be different values for different areas per region
