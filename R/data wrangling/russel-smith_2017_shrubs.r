@@ -55,14 +55,8 @@ spatial <- data.table::rbindlist(
 )
 
 # cleaning: deleting duplicated rows
-# unique(ddata[duplicated(ddata), .(park, plot, visit)])
-ddata <- ddata[!(
-   (park == "Kakadu" & plot == 61L & visit == "T4") |
-      (park == "Kakadu" & plot == 63L & visit == "T4") |
-      (park == "Kakadu" & plot == 90L & visit == "T5") |
-      (park == "Kakadu" & plot == 100L & visit == "T5") |
-      (park == "Kakadu" & plot == 203L & visit == "T5")
-)]
+duplicated_subsets <- unique(ddata[duplicated(ddata), .(park, plot, visit)])
+ddata <- ddata[!duplicated_subsets, on = c("park","plot","visit")]
 
 # merging data.table style ----
 ddata <- dates[ddata, on = c("park","plot","visit")]
