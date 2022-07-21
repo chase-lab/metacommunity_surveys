@@ -3,7 +3,7 @@ dataset_id <- "russell-smith_2017_shrubs"
 
 ###Data manually downloaded from:
 ### https://datacommons.anu.edu.au/DataCommons/rest/records/anudc:5836/data/
-###  Spacial data manually downloaded from:
+###  Spatial data manually downloaded from:
 ###  https://datacommons.anu.edu.au/DataCommons/rest/records/anudc:5837/data/
 ###  Login for Australian National University needed. Data accessible after login without further requests.
 
@@ -50,9 +50,19 @@ spatial <- data.table::rbindlist(
       datafiles_spatial,
       FUN = function(x)
          data.table::fread(file = x)
-   ), 
+   ),
    use.names = TRUE, idcol = FALSE, fill = TRUE
 )
+
+# cleaning: deleting duplicated rows
+# unique(ddata[duplicated(ddata), .(park, plot, visit)])
+ddata <- ddata[!(
+   (park == "Kakadu" & plot == 61L & visit == "T4") |
+      (park == "Kakadu" & plot == 63L & visit == "T4") |
+      (park == "Kakadu" & plot == 90L & visit == "T5") |
+      (park == "Kakadu" & plot == 100L & visit == "T5") |
+      (park == "Kakadu" & plot == 203L & visit == "T5")
+)]
 
 # merging data.table style ----
 ddata <- dates[ddata, on = c("park","plot","visit")]
@@ -81,6 +91,9 @@ ddata[, ":="(
 
    year = format(date, "%Y"),
 
+   metric = "abundance",
+   unit = "count",
+
    visit = NULL,
    date = NULL,
    comments = NULL,
@@ -88,47 +101,42 @@ ddata[, ":="(
    `count_50cm-2m` = NULL,
    count_greater_than_2m = NULL
 )]
+ddata <- ddata[!is.na(year)]
 
 meta <- unique(ddata[, .(dataset_id, year, regional, local)])
 meta <- meta[spatial[, .(local, regional, latitude, longitude)], on = c("local", "regional")]
 meta[, ":="(
    realm = "Terrestrial",
-   taxon = "Shrubs",
-   
-   latitude = as.numeric(spatial[, .(x = mean(latitude))]),
-   longitude = as.numeric(spatial[, .(x = mean(longitude))]),
-   
+   taxon = "Plants",
+
    study_type = "ecological sampling", #two possible values, or NA if not sure
-   
+
    data_pooled_by_authors = FALSE,
    data_pooled_by_authors_comment = NA,
    sampling_years = NA,
-   
-   effort = 1L, # Effort is the minimal number of sampling operations ie the number of pitfall traps * the number of dates per local per year
-   
+
+   effort = 1L,
+
    alpha_grain = 400L,  #area of individual plot
    alpha_grain_unit = "m2", #"acres", "ha", "km2", "m2", "cm2"
    alpha_grain_type = "plot",
    alpha_grain_comment = "all shrubs counted in 40m *10m plots",
-   
-   gamma_bounding_box = 0L, #size of biggest common scale can be different values for different areas per region
+
    gamma_bounding_box_unit = "km2",
    gamma_bounding_box_type = "convex-hull",
    gamma_bounding_box_comment = "convex-hull over the coordinates of sample points",
-   
-   gamma_sum_grains = 0L,
+
    gamma_sum_grains_unit = "m2",
    gamma_sum_grains_type = "plot",
    gamma_sum_grains_comment = "area of the sampled plots per year multiplied by amount of plots per region",
-   
-   comment = "Data manually downloaded via https://datacommons.anu.edu.au/DataCommons/rest/records/anudc:5836/data/ with login for national university of australia website.",
-   comment_standardisation = ""
-)]
 
+   comment = "Data manually downloaded via https://datacommons.anu.edu.au/DataCommons/rest/records/anudc:5836/data/ with login for national university of australia website. Authors sampled shrubs from the inner 40m*10m plot of their fixed 40m*20m plots once a year. They measured the height of all shrubs and we kept only abundances.",
+   comment_standardisation = "some visit numbers (T1, T2, ...) had no match (year) in the dates table so they were excluded. Authors sampled shrubs from the smallest size class in subplots but since the size of subplot is constant, no standardisation is needed. Some rows were duplicated so all results from these 5 problematic plot/year subsets were excluded."
+)]
 
 meta[, ":="(
    gamma_bounding_box = geosphere::areaPolygon(meta[grDevices::chull(meta[, .(longitude, latitude)]), .(longitude, latitude)]) / 10^6,
-   gamma_sum_grains = alpha_grain * length(unique(local))), 
-   
-   by = .(regional, year)]
-
+   gamma_sum_grains = sum(alpha_grain)
+),
+by = .(regional, year)
+]
