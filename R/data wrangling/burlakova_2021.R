@@ -1,5 +1,7 @@
 # burlakova_2021
 dataset_id <- "burlakova_2021"
+source("./R/functions/resampling.r")
+
 ddata <- base::readRDS(file = "./data/raw data/burlakova_2021/rdata.rds")
 
 # melting species
@@ -25,14 +27,6 @@ min_sample_size <- as.integer(ddata[effort == min(effort), min(sample_size)])
 ## resampling based on the smallest sample size from the smallest grabs ----
 ddata[, species := as.character(species)]
 data.table::setkey(ddata, species)
-
-resampling <- function(species, value, min_sample_size, replace = FALSE) {
-  comm <- table(sample(x = rep(species, times = value), min_sample_size, replace = replace))
-  if (length(comm) < length(value)) {
-    comm <- comm[match(species, names(comm), nomatch = NA)]
-  }
-  return(comm)
-}
 
 set.seed(42)
 ddata[sample_size > min_sample_size, value := resampling(species, value, min_sample_size), by = .(local, year)]
