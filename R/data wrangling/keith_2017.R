@@ -18,6 +18,9 @@ ddata[, ":="(
   dataset_id = dataset_id,
    regional = "Royal National Park",
 
+  metric = "abundance",
+  unit = "count",
+
   caps = NULL
 )]
 
