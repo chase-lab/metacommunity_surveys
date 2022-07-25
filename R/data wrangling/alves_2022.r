@@ -5,28 +5,25 @@ ddata <- data.table::fread(
    drop = c("V1","File.Name","Image.Code"),
    sep = ",", header = TRUE, colClasses = list(factor = c("Site", "ID"))
 )
-ddata <- ddata[ Cover != 0 ]
-ddata <- ddata[ !General.Type %in% c("Substrate","Dead","Equipment","Fish","Rubble","Sand.sediment","Unknown","Water","N.c","CTB")][, ":="(Specific.Type = NULL, General.Type = NULL, Cover = NULL)]
-ddata <- ddata[!ID %in% c("Calcareous", "Fleshy_Macroalgae", "Hydroid", "Macroalgae", "Mat.tunicate", "Soft.coral", "Sponge", "Zoanthid")]
+ddata <- ddata[ Cover != 0 ][, Cover := NULL]
+ddata <- ddata[ !General.Type %in% c("Substrate","Dead","Equipment","Fish","Rubble","Sand.sediment","Unknown","Water","N.c","CTB")][, ":="(Specific.Type = NULL, General.Type = NULL)]
+# ddata <- ddata[!ID %in% c("Calcareous", "Fleshy_Macroalgae", "Hydroid", "Macroalgae", "Mat.tunicate", "Soft.coral", "Sponge", "Zoanthid")]
 
 data.table::setnames(ddata, c("year","local","transect","species"))
 
 # Standardisation of effort ----
-## removing campaigns with less than 6 transects ----
-ddata <- ddata[ddata[, .(select = length(unique(transect)) >= 6L), by = .(local, year)][(select), .(local, year)], on = c("local","year")]
-
-## subsampling 6 transects in all sites ----
-### keeping transects that were sampled the most frequently: ordering them first ----
-ddata[, sampling_frequency := length(unique(year)), by = .(local, transect)]
-data.table::setorder(ddata, local, year, -sampling_frequency)
+# For each site, exclude transects sampled only once, then randomly select one transect. data.table style join
+set.seed(42)
 ddata <- ddata[
-   unique(ddata[, .(year, local, transect)])[, .SD[1L:6L], by = .(local, year)],
-   on = c("local", "year", "transect")
-] # data.table style join
-ddata[, sampling_frequency := NULL][, transect := NULL]
+   ddata[,
+         .(n_surveys = length(unique(year))),
+         by = .(local, transect)][n_surveys != 1L
+         ][,
+           .(transect = transect[sample(x = 1:.N, size = 1L)]),
+           by = local],
 
-### pooling transects together ----
-ddata <- unique(ddata)
+   on = c("local", "transect")
+]
 
 # GIS Data ----
 coords <- sf::st_read("./data/GIS data/alves_2022_site_coordinates.kml")
@@ -60,27 +57,33 @@ meta[, ":="(
    data_pooled_by_authors = FALSE,
    sampling_years = NA,
 
-   alpha_grain = 25L * 2L * 6L,
+   alpha_grain = 25L * 2L,
    alpha_grain_unit = "m2",
    alpha_grain_type = "plot",
-   alpha_grain_comment = "sum of the areas of 6 25m*2m transects",
+   alpha_grain_comment = "area of a 25m*2m transect",
 
    gamma_sum_grains_unit = "m2",
    gamma_sum_grains_type = "sample",
    gamma_sum_grains_comment = "sum of the areas of all transects of all sites on a given year",
 
-   gamma_bounding_box = geosphere::areaPolygon(coords[grDevices::chull(coords$longitude, coords$latitude), c("longitude", "latitude")]) / 1000000,
    gamma_bounding_box_unit = "km2",
    gamma_bounding_box_type = "convex-hull",
 
    comment = "Data were downloaded from https://github.com/calves06/Belizean_Barrier_Reef_Change associated to the article: Alves C, Valdivia A, Aronson RB, Bood N, Castillo KD, et al. (2022) Twenty years of change in benthic communities across the Belizean Barrier Reef. PLOS ONE 17(1): e0249155. https://doi.org/10.1371/journal.pone.0249155. Authors measured cover of the substrate by recording images along transects.",
-   comment_standardisation = "Items from the following types were excluded: Substrate, Dead, Equipment, Fish, Sponge, Rubble, Sand.sediment, Unknown, Water, N.c, CTB. Items from the following taxonomical groups were excluded: Calcareous, Fleshy_Macroalgae, Hydroid, Macroalgae, Mat.tunicate, Soft.coral, Sponge, Zoanthid. Campaigns with less than 6 transects were removed and only the 6 most frequently sampled transects from other sites were kept. Samples from these 6 transects were then pooled together"
-)][, gamma_sum_grains := sum(alpha_grain), by = .(regional, year)]
+   comment_standardisation = "Items from the following types were excluded: Substrate, Dead, Equipment, Fish, Rubble, Sand.sediment, Unknown, Water, N.c, CTB. For each location, we excluded transects sampled only once, then randomly selected one transect per year."
+)][, ":="(
+   gamma_sum_grains = sum(alpha_grain),
+   gamma_bounding_box = geosphere::areaPolygon(coords[grDevices::chull(coords$longitude, coords$latitude), c("longitude", "latitude")]) / 1000000),
+   by = .(regional, year)]
 
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, ".csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   x = ddata,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, ".csv"),
+   row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   x = meta,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_metadata.csv"),
+   row.names = FALSE
 )
