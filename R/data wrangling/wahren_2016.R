@@ -4,8 +4,8 @@ dataset_id = "wahren_2016"
 
 ddata <- data.table::fread(file = "./data/raw data/wahren_2016/vltm_vegetation_monitoring_1947-2013_p821t990.csv")
 
-ddata[,species := paste(genus,species)] #:= means: modify by reference: re write the same space of memory (if possible), paste brings two lines together by default seperates them by space 
-ddata[,unique(species)] #unique(ddata$species) is equivalent but slower than ddata[,unique(species)]
+ddata[,species := paste(genus,species)] 
+ddata[,unique(species)] 
 
 #exclude unknown lichen, moss, liverwort, rock, bare ground, no data, litter, 
 ddata <- ddata[!grepl(pattern = "no data|unknown|rock| litter|ground", x = species, ignore.case = TRUE)]

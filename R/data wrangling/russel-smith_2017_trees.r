@@ -72,7 +72,9 @@ ddata[, ":="(
   dataset_id = dataset_id,
   year = format(date, "%Y"),
   visit = NULL,
-  date = NULL
+  date = NULL,
+  metric = "abundance",
+  unit = "count"
 )]
 
 #remove NA values in year
@@ -100,23 +102,33 @@ meta[, ":="(
   alpha_grain_type = "plot",
   alpha_grain_comment = "all trees defined as wooden species with diameter at breast hight > 5cm are counted in 40*20m plot ",
   
-  gamma_bounding_box = 0L, #size of biggest common scale can be different values for different areas per region
+  
   gamma_bounding_box_unit = "km2",
   gamma_bounding_box_type = "convex-hull",
-  gamma_bounding_box_comment = "convex-hull over the coordinates of the plots",
+  gamma_bounding_box_comment = "convex-hull over the coordinates of sample points",
   
-  gamma_sum_grains = 0L,
+
   gamma_sum_grains_unit = "m2",
   gamma_sum_grains_type = "plot",
   gamma_sum_grains_comment = "area of the sampled plots per year multiplied by amount of plots per region",
   
-  comment = "Data manually downloaded via https://datacommons.anu.edu.au/DataCommons/rest/records/anudc:5836/data/ with login for national university of australia webpage.",
-  comment_standardisation = ""
+  comment = "Data manually downloaded via https://datacommons.anu.edu.au/DataCommons/rest/records/anudc:5836/data/ with login for national university of australia webpage. Authors sampled trees with DBH (diameter at breast hight) > 5cm in fixed 40m*20m plots once a year.",
+  comment_standardisation = "some visit numbers (T1, T2,...) have no match (year) in the dates table so they were excluded"
 )]
 
 
 meta[, ":="(
   gamma_bounding_box = geosphere::areaPolygon(meta[grDevices::chull(meta[, .(longitude, latitude)]), .(longitude, latitude)]) / 10^6,
-  gamma_sum_grains = alpha_grain * length(unique(local))), 
-  
-  by = .(regional, year)]
+  gamma_sum_grains = sum(alpha_grain)
+),
+by = .(regional, year)
+]
+
+
+dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
+data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, ".csv"),
+                   row.names = FALSE
+)
+data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_metadata.csv"),
+                   row.names = FALSE
+)
