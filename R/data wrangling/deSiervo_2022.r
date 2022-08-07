@@ -1,3 +1,6 @@
+install.packages("reshape2")
+library("reshape2") 
+
 dataset_id <- "deSiervo_2022"
 datapath <- "data/raw data/deSiervo_2022/.rdata.rds"
 
@@ -12,8 +15,12 @@ ddata <- cbind(ddata, sapply(unique(sub("[SEED]{4}[1-9]{4}", "", prefixes)),func
       }))
 
 ddata <- ddata[, grep("[CAN|SAP|SEED]{3}[1-9]{4}", colnames(ddata)):=NULL]
+ddata <- ddata[, c("Elev.dem.", "heatload"):= NULL]
 
 data.table::setnames(ddata, c("Plot.number", "Year"), c("local", "year"))
+
+#wide to long format
+ddata <- melt(ddata, id.vars = c("local", "year"))
 
 ddata[, ":="(
   dataset_id = dataset_id,
@@ -46,15 +53,15 @@ meta[, ":="(
   
   effort = 1L, #one observation in 1969 and 2015
   
-  alpha_grain =  804.25,  #no one knows how big the plots are, if same size unknown...
+  alpha_grain =  804.25, 
   alpha_grain_unit = "m2", #"acres", "ha", "km2", "m2", "cm2"
   alpha_grain_type = "plot",
   alpha_grain_comment = "16 m radius circular plot (804.25 m 2 ) and used this size and shape for plots. not certain that this was the exact plot size used in 1969, estimates of cover would be robust to slight differences in plot size, especially because the plots were located within larger, compositionally homogenous stands",
   
-  gamma_bounding_box = 5000L, #Russian Wilderness, a 5000 ha landscape within the east-central Klamath Mountain
+  gamma_bounding_box = 5000L, 
   gamma_bounding_box_unit = "ha",
   gamma_bounding_box_type = "box",
-  gamma_bounding_box_comment = "",
+  gamma_bounding_box_comment = "Russian Wilderness, a 5000 ha landscape within the east-central Klamath Mountain",
   
   gamma_sum_grains = "",
   gamma_sum_grains_unit = "m2",
