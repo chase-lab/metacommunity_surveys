@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Dryad Data -- The effects of a half century of warming and fire exclusion on montane forests of the Klamath Mountains, California, USA</title>
+
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#40853e">
+<meta name="msapplication-TileColor" content="#40853e">
+<meta name="theme-color" content="#ffffff">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-145629338-1"></script>
+  <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-145629338-1');
+  </script>
+
+
+<meta name="csrf-param" content="authenticity_token" />
+<meta name="csrf-token" content="ZZn59NnfVTzLi3qyQZ7u1gA2oUgK1d3VuPFF6W+oFmx3NwrD3GzYc/qwXGQoh33NAXl+mDS+hTRQh9bBdZxUzA==" />
+
+<link rel="shortcut icon" type="image/x-icon" href="/assets/favicon-978bb5663d41f1576d224da85d035e496d832c81438a449bf78127e94bc4419d.ico" />
+  <link rel="stylesheet" media="all" href="/assets/stash_engine/application-6ddc6f85549cf6309be4863c7c5cd0b75461bc4b5a197831acdb2b7806bc9ab5.css" />
+<link rel="stylesheet" media="all" href="/assets/stash_datacite/application-c7cba61b1a3237d62f693834b6d4c39ad2979c1d482f7556d09f48fd7400db1c.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/0.4.0/leaflet.draw.css"/>
+<script src="/assets/stash_engine/application-fe094e1ad71f8e7ac9fa25a2a27875bbb41e78df33cc4b94601e53673e7b3a6e.js" data-turbolinks-track="true"></script>
+<script src="/assets/stash_datacite/application-f604e3e38bd0fe843d1f76a77d949f464d2184b08f4a7c3c3602099c627fe6ec.js" data-turbolinks-track="true"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/0.4.0/leaflet.draw.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.15.1/moment.min.js"></script>
+      <!-- Track View for counter -->
+  <!-- We don't need to include doi since in schema.org, but if not the data-doi attribute is what we'd use -->
+  <script defer
+        data-repoid="datadryad.org"
+        data-metric="view"
+        src="https://cdn.jsdelivr.net/npm/@datacite/datacite-tracker"></script>
+
+</head>
+<body class='landing_show'>
+  <a class="c-skipnav" href="#maincontent">Skip to main content</a>
+
+  <header class="c-header">
+    <div class="c-header__logos">
+      <button aria-label="mobile menu" class="o-button__menu c-header__menu-button js-header__menu-button"></button>
+      <a class="c-header__dash-logo-link js-nav-out" href="/">
+        <img class="c-header__dash-logo-svg" alt="Dryad logo" src="/assets/stash_engine/logo_dryad-ff2e3c59f50010607cf5f232a735c1b6124e506df75728a9a36420a4683f6d26.png" />
+</a>    </div>
+
+  <nav class="c-header__nav js-header__nav">
+  <form role="search" class="o-global-search c-header__global-search" action="/search" accept-charset="UTF-8" method="get">
+    <input name="utf8" value="✓" type="hidden">
+    <label class="o-global-search__label" for="search-field-input1">Search Dryad site</label>
+    <input class="o-global-search__input" id="search-field-input1" type="search" name="q" placeholder="Search">
+    <button aria-label="Submit search" class="o-global-search__submit-button" type="submit" id="search"></button>
+  </form>
+
+  <div class="c-header__nav-group">
+    <a class="c-header__nav-item js-nav-out" href="/search">Explore Data</a>
+
+    <div class="c-header__nav-item">
+      <div class="o-sites">
+        <details class="o-showhide o-sites__details" role="group">
+          <summary class="o-showhide__summary o-sites__summary">About</summary>
+          <div class="o-sites__group">
+            <a class="o-sites__group-item" href="/stash/our_mission">Our Mission</a>
+            <a class="o-sites__subgroup-head" href="/stash/our_membership">Our Membership</a>
+              <a class="o-sites__subgroup-lastitem" href="/stash/join_us">Join Us</a>
+            <a class="o-sites__group-item" href="/stash/our_governance">Our Governance</a>
+            <a class="o-sites__group-item" href="/stash/our_staff">Our Team</a>
+            <a class="o-sites__group-item" href="/stash/our_advisors">Our Advisors</a>
+            <a class="o-sites__group-item" href="/stash/our_platform">Our Platform</a>
+	          <a class="o-sites__group-item" href="https://blog.datadryad.org/">Our Blog</a>
+            <a class="o-sites__group-item" href="/stash/code_of_conduct">Code of Conduct</a>
+            <a class="o-sites__group-item" href="/stash/ethics">Data Publishing Ethics</a>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <div class="c-header__nav-item">
+      <div class="o-sites">
+        <details class="o-showhide o-sites__details" role="group">
+          <summary class="o-showhide__summary o-sites__summary">Help</summary>
+          <div class="o-sites__group">
+              <a class="o-sites__group-item" href="/stash/submission_process">Submission Process</a>
+              <a class="o-sites__group-item" href="/stash/best_practices">Good Data Practices</a>
+              <a class="o-sites__group-item" href="/stash/faq">Frequently Asked Questions</a>
+          </div>
+        </details>
+      </div>
+    </div>
+
+      <a class="c-header__nav-item js-nav-out" href="/stash/sessions/choose_login">Login</a>
+
+  </div>
+</nav>
+
+
+  </header>
+  
+
+<script type="text/javascript">
+$(document).ready(function(e) {
+    $('.flash_button').click(function() {
+      $( this ).parent().remove();
+    });
+});
+</script>
+
+  <main id="maincontent">
+  <div class="c-columns">
+	<main class="t-landing__main c-columns__content">
+		<div id="display_resource">
+      <script type="application/ld+json">
+  {
+  "@context": "http://schema.org",
+  "@type": "Dataset",
+  "@id": "https://doi.org/10.5061/dryad.9s4mw6mj7",
+  "name": "The effects of a half century of warming and fire exclusion on montane forests of the Klamath Mountains, California, USA",
+  "description": [
+    "These files are the raw data used in the manuscript \"Effects of a half century of warming and fire exclusion on montane forests of the Klamath Mountains, California, USA\"\nManuscript authors: Erik S. Jules, Melissa H. DeSiervo, Matthew J. Reilly, Drew S. Bost, and Ramona J. Butz\nClimate warming and altered disturbance regimes are changing forest composition and structure worldwide. Given that species often exhibit individualistic responses to change, making predictions about the cumulative effects of multiple stressors across environmental gradients is challenging, especially in diverse communities. For example, warming temperatures are predicted to drive species upslope, while fire exclusion promotes expansion of species at lower elevations where fire was historically frequent.\nWe resampled 148 vegetation plots to assess 46-years (1969 to 2015) of species and community-level response to warming and fire exclusion in a topographically complex landscape in the Klamath Mountains, Californi...",
+    "The data file (“Klamath Site data.csv”) includes site information from 148 plots surveyed in the Russian Wilderness of northern California (USA).\nData column information:1. Plot number column includes the plot number and year (1969 or 2015).2. The column labelled Year is either 1969 or 2015, the two years of the survey.3. Elev(dem) is the elevation of each plot in meters.4. “heatload” is the heatload index, a proxy for solar radiation based on aspect, slope, and topographic position in the context of surrounding landscape (defined in McCune 2007).\nLiterature Cited:McCune, B. 2007. Improved estimates of incident radiation and heat load using non- parametric regression against topographic variables. Journal of Vegetation Science 18:751–754.\nThe data file (“Klamath tree data.csv”) includes the % cover from of trees from 148 plots surveyed in the Russian Wilderness of northern California (USA). All data were collected in the field by 2-4 observers in 1969 and 2014/5.\n1. Plot number column i...",
+    ""
+  ],
+  "url": "http://datadryad.org/stash/dataset/doi%253A10.5061%252Fdryad.9s4mw6mj7",
+  "contentUrl": [
+    "http://datadryad.org/stash/downloads/file_stream/1525737",
+    "http://datadryad.org/stash/downloads/file_stream/1525738",
+    "http://datadryad.org/stash/downloads/file_stream/1525739"
+  ],
+  "identifier": "https://doi.org/10.5061/dryad.9s4mw6mj7",
+  "version": 5,
+  "isAccessibleForFree": true,
+  "keywords": [
+    "anthropogenic climate change",
+    "fire suppression",
+    "releve plots",
+    "historical abundance",
+    "Forest Ecology",
+    "California",
+    "subalpine forest"
+  ],
+  "creator": [
+    {
+      "@type": "Person",
+      "name": "Melissa DeSiervo",
+      "givenName": "Melissa",
+      "familyName": "DeSiervo",
+      "sameAs": "http://orcid.org/0000-0002-6373-025X",
+      "affiliation": {
+        "@type": "Organization",
+        "sameAs": "https://ror.org/01485tq96",
+        "name": "University of Wyoming"
+      }
+    },
+    {
+      "@type": "Person",
+      "name": "Erik Jules",
+      "givenName": "Erik",
+      "familyName": "Jules",
+      "sameAs": "http://orcid.org/0000-0003-1359-3784",
+      "affiliation": {
+        "@type": "Organization",
+        "sameAs": "https://ror.org/02qt0xs84",
+        "name": "Humboldt State University"
+      }
+    }
+  ],
+  "distribution": {
+    "@type": "DataDownload",
+    "encodingFormat": "application/zip",
+    "contentUrl": "http://datadryad.org/api/v2/datasets/doi%253A10.5061%252Fdryad.9s4mw6mj7/download"
+  },
+  "temporalCoverage": "2022",
+  "spatialCoverage": [
+
+  ],
+  "license": {
+    "@type": "CreativeWork",
+    "name": "CC0 1.0 Universal (CC0 1.0) Public Domain Dedication",
+    "license": "https://creativecommons.org/publicdomain/zero/1.0/"
+  },
+  "publisher": {
+    "@id": "https://datadryad.org",
+    "@type": "Organization",
+    "legalName": "Dryad Digital Repository",
+    "name": "Dryad",
+    "url": "https://datadryad.org"
+  },
+  "provider": {
+    "@id": "https://datadryad.org"
+  }
+}
+</script>
+  <h1 class="o-heading__level1 ">The effects of a half century of warming and fire exclusion on montane forests of the Klamath Mountains, California, USA</h1>
+
+  <div class="t-landing__metadata o-metadata">
+      <div class="">
+	<div class="o-metadata__group1">
+		<span class='o-metadata__author'>DeSiervo, Melissa</span>, <span class='o-metadata__affiliation'>University of Wyoming</span>, <span class='c-orcid__icon'></span><span><a target="_blank" class="c-orcid__id" href="https://orcid.org/0000-0002-6373-025X">https://orcid.org/0000-0002-6373-025X</a></span>
+	</div>
+	<div class="o-metadata__group1">
+		<span class='o-metadata__author'>Jules, Erik</span>, <span class='o-metadata__affiliation'>Humboldt State University</span>, <span class='c-orcid__icon'></span><span><a target="_blank" class="c-orcid__id" href="https://orcid.org/0000-0003-1359-3784">https://orcid.org/0000-0003-1359-3784</a></span>
+	</div>
+    <div class="o-metadata__group1">
+	mdesierv@uwyo.edu, erik.jules@humboldt.edu
+    </div>
+  </div>
+
+    <div class="o-metadata__group2">
+  <div class="o-metadata__group2-item">Publication date: May 26, 2022</div>
+  <div class="o-metadata__group2-item">Publisher: Dryad</div>
+    <div class="o-metadata__group2-item">
+      https://doi.org/10.5061/dryad.9s4mw6mj7
+    </div>
+</div>
+
+  </div>
+
+  <section class="o-section">
+    <h2 class="o-heading__level2">Citation</h2>
+
+<p>DeSiervo, Melissa; Jules, Erik (2022), The effects of a half century of warming and fire exclusion on montane forests of the Klamath Mountains, California, USA, Dryad, Dataset, <a href="https://doi.org/10.5061/dryad.9s4mw6mj7">https://doi.org/10.5061/dryad.9s4mw6mj7</a></p>
+
+  </section>
+      <h2 class="o-heading__level2">Abstract</h2>
+  <div class="t-landing__text-wall ">
+    <p>These files are the raw data used in the manuscript "Effects of a half century of warming and fire exclusion on montane forests of the Klamath Mountains, California, USA"</p>
+<p>Manuscript authors: Erik S. Jules, Melissa H. DeSiervo, Matthew J. Reilly, Drew S. Bost, and Ramona J. Butz</p>
+<p>Climate warming and altered disturbance regimes are changing forest composition and structure worldwide. Given that species often exhibit individualistic responses to change, making predictions about the cumulative effects of multiple stressors across environmental gradients is challenging, especially in diverse communities. For example, warming temperatures are predicted to drive species upslope, while fire exclusion promotes expansion of species at lower elevations where fire was historically frequent.</p>
+<p>We resampled 148 vegetation plots to assess 46-years (1969 to 2015) of species and community-level response to warming and fire exclusion in a topographically complex landscape in the Klamath Mountains, California (USA), a diverse region that served as a climate refugia throughout the Holocene. We compared cover and assessed change in the elevational distributions of 12 conifer species at different life stages (i.e., seedlings, saplings, canopy).</p>
+<p>We observed consistent but non-significant shifts upward in elevation for eight species, and a significant shift upward for one species, all of which were far less than expectations based on recent warming. Six species declined in total cover and another five declined in at least one life stage, while the drought- and fire-intolerant <em>Abies concolor</em> increased by 30.7%. The largest declines were at lower elevations in drought-tolerant, early seral species (<em>Pinus lambertiana</em> and <em>Pinus ponderosa</em>) and at higher elevations for the shade-tolerant <em>Abies magnifica</em> var. <em>shastensis</em> and the regionally rare <em>Abies lasiocarpa</em>. Regionally rare (<em>Picea engelmannii</em>) and endemic (<em>Picea breweriana</em>) species had reductions in early life stages, portending future declines. Multivariate analyses revealed a high degree of inertia with a minor but significant shift in composition and a slight decrease in species turnover along the elevation gradient driven by expansion of <em>A. concolor</em>. Our results indicate that most species are declining, especially at lower- and mid-elevations where fire exclusion increased cover of shade-tolerant species and reduced recruitment for fire-adapted species. Collectively, declines in most species, insufficient upward movement to track warming, reductions in drought- and fire-tolerant early seral species, and an increase in a single, shade-tolerant species will leave these communities maladapted to projected climate scenarios and questions the potential for future climate refugia in this region.</p>
+  </div>
+
+    <h2 class="o-heading__level2">Methods</h2>
+  <div class="t-landing__text-wall ">
+    <p>The data file (“Klamath Site data.csv”) includes site information from 148 plots surveyed in the Russian Wilderness of northern California (USA).</p>
+<p>Data column information:<br>1. Plot number column includes the plot number and year (1969 or 2015).<br>2. The column labelled Year is either 1969 or 2015, the two years of the survey.<br>3. Elev(dem) is the elevation of each plot in meters.<br>4. “heatload” is the heatload index, a proxy for solar radiation based on aspect, slope, and topographic position in the context of surrounding landscape (defined in McCune 2007).</p>
+<p>Literature Cited:<br>McCune, B. 2007. Improved estimates of incident radiation and heat load using non- parametric regression against topographic variables. Journal of Vegetation Science 18:751–754.</p>
+<p>The data file (“Klamath tree data.csv”) includes the % cover from of trees from 148 plots surveyed in the Russian Wilderness of northern California (USA). All data were collected in the field by 2-4 observers in 1969 and 2014/5.</p>
+<p>1. Plot number column includes the plot number and year (1969 or 2015).</p>
+<p>2. Columns = tree species cover in three life stages. CAN = Canopy. SAP = sapling. SEED = Seedling. Tree species are in four letter codes. EX: ABMA = Abies magnifica. </p>
+<p>We converted cover class values for these 12 species to median values for both years as the following: cover class (1) 1 %; (2) 3%; (3) 7%; (4) 17.5%; (5) 37.5%; (6) 62.5%; and (7) 87.5%.</p>
+  </div>
+
+
+
+
+    	<h2 class="o-heading__level2">Funding</h2>
+  <div class="">    
+	  <p>
+	      U.S. Forest Service, <span>Award: 11-CS-11051000-023</span>
+	  </p>
+	  <p>
+	      U.S. Forest Service, <span>Award: 16-CS-11051000</span>
+	  </p>
+  </div>
+
+
+
+<script>
+  $( document ).ready( loadReviewMap(180157) );
+</script>
+
+		</div>
+	</main>
+	<aside class="t-landing__sidebar c-columns__sidebar2">
+		<div id="sidebar">
+		      <div class="c-sidebox">
+    <h2 class="c-sidebox__heading">Data Files</h2>
+
+    <!-- full download first -->
+    <div class="o-download">
+
+  <form class="button_to" method="post" action="/stash/downloads/download_resource/180157" data-remote="true"><input class="o-download__files js-download" id="dl_res_180157" type="submit" value="Download dataset" /><input type="hidden" name="authenticity_token" value="pYGSJgjFbDTbTNiqvALJGtULIW82snlf+hNFxuSgZlD+dkbWGdjc4Yxx4IMptYgtsiDQOXekwVyMYOBh8HU+5A==" /></form>
+
+  <div class="screen-reader-only" id="accessible-dl-msg" aria-live="assertive"></div>
+</div>
+
+<script>
+  $('#dl_res_180157').click(function(event) {
+    var item = $(this);
+    item.removeClass('o-download__files').addClass('o-download__wait');
+    event.preventDefault();
+    $(this).closest('form').submit();
+    item.prop('disabled', true);
+  });
+</script>
+
+
+    <!-- list individual files -->
+      <details class="c-file-group" role="group">
+        <summary role="button" class="o-showhide__summary c-file-group__summary">
+          May 26, 2022
+                  </summary>
+        <ul class="c-file-group__list">
+            <li>
+              <a title="Klamath_site_data.csv" target="_blank" href="/stash/downloads/file_stream/1525737">Klamath_sit...e_data.csv</a>
+              <div style="float: right;">8.21 kB</div>
+
+                <div style="clear: both">
+                  <div style="float: right">
+                    <form class="button_to" method="get" action="/stash/downloads/preview_csv/1525737" data-remote="true"><button class="c-file-group__preview" title="Preview Klamath_site_data.csv" aria-label="Preview Klamath_site_data.csv" type="submit">
+                      <i class="fa fa-search c-file-group__preview" aria-hidden="true"></i>
+</button></form>                  </div>
+                </div><div style="clear:both"></div>
+
+            </li>
+            <li>
+              <a title="Klamath_tree_data.csv" target="_blank" href="/stash/downloads/file_stream/1525738">Klamath_tre...e_data.csv</a>
+              <div style="float: right;">56.29 kB</div>
+
+                <div style="clear: both">
+                  <div style="float: right">
+                    <form class="button_to" method="get" action="/stash/downloads/preview_csv/1525738" data-remote="true"><button class="c-file-group__preview" title="Preview Klamath_tree_data.csv" aria-label="Preview Klamath_tree_data.csv" type="submit">
+                      <i class="fa fa-search c-file-group__preview" aria-hidden="true"></i>
+</button></form>                  </div>
+                </div><div style="clear:both"></div>
+
+            </li>
+            <li>
+              <a title="README.txt" target="_blank" href="/stash/downloads/file_stream/1525739">README.txt</a>
+              <div style="float: right;">1.19 kB</div>
+
+
+            </li>
+        </ul>
+      </details>
+  </div>
+
+
+<div class="c-sidebox" id="related_works_section">
+  <h2 class="c-sidebox__heading">Related Works</h2>
+  <div id="show_related_works"
+       data-load="/stash_datacite/related_identifiers/show.js?resource_id=180157">
+    <img alt="Loading spinner" src="/assets/stash_engine/spinner-47c716a105894b5888f62cfa3108a66830f958e41247c4396d70a57821464ffa.gif" width="80" height="60" />
+  </div>
+</div>
+
+<div class="c-sidebox">
+  <h2 class="c-sidebox__heading">Metrics</h2>
+  <div class="o-metrics">
+    <div id="show_metrics"
+         data-load="/stash/landing/metrics/83382">
+      <img alt="Loading spinner" src="/assets/stash_engine/spinner-47c716a105894b5888f62cfa3108a66830f958e41247c4396d70a57821464ffa.gif" width="80" height="60" />
+    </div>
+  </div>
+
+  <div style="clear:both"></div>
+</div>
+
+<div class="c-sidebox" id="keyword_section">
+  <h2 class="c-sidebox__heading">Keywords</h2>
+  <div id="show_subjects"
+       data-load="/stash_datacite/subjects/landing.js?resource_id=180157">
+    <img alt="Loading spinner" src="/assets/stash_engine/spinner-47c716a105894b5888f62cfa3108a66830f958e41247c4396d70a57821464ffa.gif" width="80" height="60" />
+  </div>
+</div>
+
+<div class="c-sidebox">
+  <h2 class="c-sidebox__heading">License</h2>
+  <div id="show_license"
+       data-load="/stash_datacite/licenses/details.js?resource_id=180157">
+    <img alt="Loading spinner" src="/assets/stash_engine/spinner-47c716a105894b5888f62cfa3108a66830f958e41247c4396d70a57821464ffa.gif" width="80" height="60" />
+  </div>
+</div>
+
+<script>
+  $( "#citation_link" ).click(function() {
+    $('#metrics_citation_spinner').show();
+    $('#metrics_citation_count').hide();
+  });
+</script>
+
+		</div>
+	</aside>
+</div>
+
+
+  </main>
+  <footer class="c-footer" id="page-footer">
+  <div class="c-footer__link-group">
+    <div class="c-footer__policy-group">
+      <a href="/stash/terms#privacy" class="js-nav-out">Privacy Policy</a>
+      <a href="http://www.cdlib.org/about/accessibility.html" class="js-nav-out">Accessibility Policy</a>
+      <a href="/stash/terms">Terms of Service</a>
+    </div>
+    <div class="c-footer__social-group">
+      <a href="https://twitter.com/datadryad" class="js-nav-out"><em class="fa fa-twitter-square fa-2x"></em> Follow us on Twitter</a>
+      <a href="https://blog.datadryad.org/" class="js-nav-out"><em class="fa fa-rss-square fa-2x"></em> Check out our Blog</a>
+    </div>
+  </div>
+  <p>Copyright (c) 2022 Dryad</p>
+</footer>
+
+
+  <dialog id="railsConfirmDialog" class="modalDialog">
+  <div>
+    <h1 id="railsConfMsg" style="width: 25rem; float: left;"></h1>
+    <button id="railsConfirmDialogClose" class="c-uploadmodal__button-close-modal" style="float: right;" aria-label="close" type="button"></button>
+    <div style="clear: both;">&nbsp;</div>
+    <button id="railsConfirmDialogYes" value="default">Yes</button>
+    <button id="railsConfirmDialogNo" value="cancel">No</button>
+  </div>
+</dialog>
+
+<script>
+  // adds the polyfill for firefox and some other browsers that are not up to date.
+  // https://github.com/GoogleChrome/dialog-polyfill
+
+  const modal = document.getElementById('railsConfirmDialog');
+  dialogPolyfill.registerDialog(modal);
+</script>
+
+  <dialog id="genericModalDialog" class="modalDialog">
+  <div>
+
+    <button id="genericModalClose" class="" style="float: right;" aria-label="close" type="button">
+      <i class="fa fa-window-close fa-lg" aria-hidden="true"></i>
+    </button>
+    <!-- to display anything in the dialog, replace content within the genericModalContent (using Javascript) and attach any events
+      you need for what you add.  The dialog comes with an event for closing and taking no action for the close button.
+
+      Open modal with <item>.showModal(); and close with <item>.close();
+      -->
+    <div id="genericModalContent" class="c-modal-content__normal" style="display: inline;">&nbsp;</div>
+  </div>
+</dialog>
+
+<script>
+  // adds the polyfill for firefox and some other browsers that are not up to date.
+  // https://github.com/GoogleChrome/dialog-polyfill
+
+  const modal2 = document.getElementById('genericModalDialog');
+  dialogPolyfill.registerDialog(modal2);
+
+  $('#genericModalClose').click(function(){
+    document.querySelector('#genericModalContent').classList.replace('c-modal-content__wide',
+        'c-modal-content__normal');
+    $('#genericModalDialog')[0].close(); // uses [0] to get native object rather than jQuery object (I think)
+  });
+</script>
+</body>
+</html>
