@@ -21,7 +21,7 @@ ddata <- ddata[year %in% c(1990, 1995, 2003, 2013, 2018)]
 ## effort ----
 ddata[, effort := c(0.053, 0.053, 0.053 * 3, 0.048 * 3, 0.0523 * 3)[match(year, c(1990, 1995, 2003, 2013, 2018))]]
 ddata[year %in% c(1990, 1995) & local %in% c("41", "81A", "93", "93A"), effort := 0.053 * 3]
-ddata[, sample_size := as.integer(sum(value)), by = .(local, year)]
+ddata[, value := as.integer(value)][, sample_size := sum(value), by = .(local, year)]
 min_sample_size <- as.integer(ddata[effort == min(effort), min(sample_size)])
 
 ## resampling based on the smallest sample size from the smallest grabs ----
@@ -31,8 +31,7 @@ data.table::setkey(ddata, species)
 set.seed(42)
 ddata[sample_size > min_sample_size, value := resampling(species, value, min_sample_size), by = .(local, year)]
 ddata[sample_size < min_sample_size, value := resampling(species, value, min_sample_size, replace = TRUE), by = .(local, year)]
-ddata[, value := as.integer(value)]
-ddata <- na.omit(ddata)
+ddata <- na.omit(ddata) # excluding species that were not selected by the resampling procedure
 
 ## keeping only stations sampled more than once (data.table style join to select sites sampled more than once)
 ddata <- ddata[ddata[, length(unique(year)), by = local][V1 > 1L][, .(local)], on = "local"]
