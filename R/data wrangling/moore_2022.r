@@ -1,7 +1,7 @@
 dataset_id <- "moore_2022"
 
-ddata <- readRDS("./data/raw data/moore_2022/rdata.rds")
-coords <- readRDS("./data/raw data/moore_2022/coords.rds")
+ddata <- base::readRDS("./data/raw data/moore_2022/rdata.rds")
+coords <- base::readRDS("./data/raw data/moore_2022/coords.rds")
 
 # counting individuals
 ddata <- ddata[, .(value = .N), by = .(year = Year, regional = Site, local = Quadrat, species)]
@@ -26,7 +26,7 @@ meta[, ":="(
 
    data_pooled_by_authors = FALSE,
    data_pooled_by_authors_comment = NA,
-   sampling_years = year,
+   sampling_years = NA,
 
    latitude = coords$Latitude_NAD_1983[match(local, coords$Quadrat)],
    longitude = coords$Longitude_NAD_1983[match(local, coords$Quadrat)],
@@ -44,10 +44,11 @@ meta[, ":="(
    gamma_bounding_box_type = "convex-hull",
    gamma_bounding_box_comment = "coordinates provided by the authors",
 
-   comment = "Extracted from Moore, Margaret M.; Jenness, Jeffrey S.; Laughlin, Daniel C.; Strahan, Robert T.; Bakker, Jonathan D.; Dowling, Helen E.; Springer, Judith D. 2021. Cover and density data of southwestern ponderosa pine understory plants in permanent chart quadrats (2002-2020+). Fort Collins, CO: Forest Service Research Data Archive. Updated 30 March 2022. https://doi.org/10.2737/RDS-2021-0092. METHODS: 'This data publication includes cover and density data collected on 101 permanent 1 meter (m) x 1 m (1-m2) quadrats located within southwestern ponderosa pine ecosystems near Flagstaff, Arizona, USA. Individual plants in these quadrats were identified and mapped annually for 19 years (2002-2021)[...]' Abundances were retrieved from table 6 ('(6) tabular representation of point locations for plant species mapped as points') LOCAL is a quadrat and regional is a site."
+   comment = "Extracted from Moore, Margaret M.; Jenness, Jeffrey S.; Laughlin, Daniel C.; Strahan, Robert T.; Bakker, Jonathan D.; Dowling, Helen E.; Springer, Judith D. 2021. Cover and density data of southwestern ponderosa pine understory plants in permanent chart quadrats (2002-2020+). Fort Collins, CO: Forest Service Research Data Archive. Updated 30 March 2022. https://doi.org/10.2737/RDS-2021-0092. METHODS: 'This data publication includes cover and density data collected on 101 permanent 1 meter (m) x 1 m (1-m2) quadrats located within southwestern ponderosa pine ecosystems near Flagstaff, Arizona, USA. Individual plants in these quadrats were identified and mapped annually for 19 years (2002-2021)[...]' Abundances were retrieved from table 6 ('(6) tabular representation of point locations for plant species mapped as points') LOCAL is a quadrat and regional is a site.",
+   comment_standardisation = "none needed"
 )][, ":="(
    gamma_sum_grains = length(unique(local)),
-   gamma_bounding_box = geosphere::areaPolygon(data.frame(longitude, latitude)[grDevices::chull(longitude, latitude), ]) / 1000000
+   gamma_bounding_box = geosphere::areaPolygon(data.frame(longitude, latitude)[grDevices::chull(longitude, latitude), ]) / 10^6
 ),
 by = .(year, regional)
 ]

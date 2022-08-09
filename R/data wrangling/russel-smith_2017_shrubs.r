@@ -98,7 +98,7 @@ ddata[, ":="(
 ddata <- ddata[!is.na(year)]
 
 meta <- unique(ddata[, .(dataset_id, year, regional, local)])
-meta <- meta[spatial[, .(local, regional, latitude, longitude)], on = c("local", "regional")]
+meta <- spatial[, .(local, regional, latitude, longitude)][meta, on = c("local", "regional")]
 meta[, ":="(
    realm = "Terrestrial",
    taxon = "Plants",
@@ -129,7 +129,7 @@ meta[, ":="(
 )]
 
 meta[, ":="(
-   gamma_bounding_box = geosphere::areaPolygon(meta[grDevices::chull(meta[, .(longitude, latitude)]), .(longitude, latitude)]) / 10^6,
+   gamma_bounding_box = geosphere::areaPolygon(data.frame(na.omit(longitude), na.omit(latitude))[grDevices::chull(na.omit(longitude), na.omit(latitude)), ]) / 10^6,
    gamma_sum_grains = sum(alpha_grain)
 ),
 by = .(regional, year)

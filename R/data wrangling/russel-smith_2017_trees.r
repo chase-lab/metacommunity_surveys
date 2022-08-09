@@ -50,7 +50,7 @@ spatial <- data.table::rbindlist(
     datafiles_spatial,
     FUN = function(x)
       data.table::fread(file = x)
-  ), 
+  ),
   use.names = TRUE, idcol = FALSE, fill = TRUE
 )
 
@@ -71,54 +71,54 @@ spatial[, local := stringi::stri_extract_all_regex(str = plot, pattern = "[0-9]{
 ddata[, ":="(
   dataset_id = dataset_id,
   year = format(date, "%Y"),
+
   visit = NULL,
   date = NULL,
+
   metric = "abundance",
   unit = "count"
 )]
 
-#remove NA values in year
+#remove NA values in year because of missing dates in original data
 ddata <- na.omit(ddata, cols = "year")
 
 meta <- unique(ddata[, .(dataset_id, year, regional, local)])
-meta <- meta[spatial[, .(local, regional, latitude, longitude)], on = c("local", "regional")]
+meta <- spatial[, .(local, regional, latitude, longitude)][meta, on = c("local", "regional")]
+
 meta[, ":="(
   realm = "Terrestrial",
-  taxon = "Trees",
-  
-  latitude = as.numeric(spatial[, .(x = mean(latitude))]),
-  longitude = as.numeric(spatial[, .(x = mean(longitude))]),
-  
+  taxon = "Plants",
+
   study_type = "ecological sampling", #two possible values, or NA if not sure
-  
+
   data_pooled_by_authors = FALSE,
   data_pooled_by_authors_comment = NA,
   sampling_years = NA,
-  
+
   effort = 1L, # Effort is the minimal number of sampling operations
-  
+
   alpha_grain = 800L,  #area of individual plot
   alpha_grain_unit = "m2", #"acres", "ha", "km2", "m2", "cm2"
   alpha_grain_type = "plot",
   alpha_grain_comment = "all trees defined as wooden species with diameter at breast hight > 5cm are counted in 40*20m plot ",
-  
-  
+
+
   gamma_bounding_box_unit = "km2",
   gamma_bounding_box_type = "convex-hull",
   gamma_bounding_box_comment = "convex-hull over the coordinates of sample points",
-  
+
 
   gamma_sum_grains_unit = "m2",
   gamma_sum_grains_type = "plot",
   gamma_sum_grains_comment = "area of the sampled plots per year multiplied by amount of plots per region",
-  
+
   comment = "Data manually downloaded via https://datacommons.anu.edu.au/DataCommons/rest/records/anudc:5836/data/ with login for national university of australia webpage. Authors sampled trees with DBH (diameter at breast hight) > 5cm in fixed 40m*20m plots once a year.",
   comment_standardisation = "some visit numbers (T1, T2,...) have no match (year) in the dates table so they were excluded"
 )]
 
 
 meta[, ":="(
-  gamma_bounding_box = geosphere::areaPolygon(meta[grDevices::chull(meta[, .(longitude, latitude)]), .(longitude, latitude)]) / 10^6,
+  gamma_bounding_box = geosphere::areaPolygon(data.frame(na.omit(longitude), na.omit(latitude))[grDevices::chull(na.omit(longitude), na.omit(latitude)), ]) / 10^6,
   gamma_sum_grains = sum(alpha_grain)
 ),
 by = .(regional, year)
