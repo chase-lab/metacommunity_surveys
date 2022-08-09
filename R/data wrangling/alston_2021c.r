@@ -68,7 +68,7 @@ meta[, ":="(
    comment = "Extracted from dryad data set 'Ecological consequences of large herbivore exclusion in an African savanna: 12 years of data from the UHURU experiment' https://doi.org/10.5061/dryad.1g1jwstxw. Tables PLOT_COORDINATES.csv and UNDERSTORY_LGQUAD_2008-2019.csv METHODS: 'Understory Monitoring: Grasses and forbs were surveyed biannually in February/March (dry season) and October (short rains). A 1-m2 quadrat was placed immediately to the north of each of the 49 stakes demarcating the 0.36-ha center grid in each plot, and a 0.25-m2 quadrat was placed within the larger quadrat. Species presence/absence was recorded within both quadrats. A 10-pinpoint frame was then positioned within the smaller quadrat, and the total number of vegetation pin hits was recorded for each species and/or the presence of bare soil. Individuals were identified to species (or to genus and morphospecies) using field guides and published species lists (Bogdan 1976, Blundell 1982, van Oudtshoorn 2009).' (https://www.esapubs.org/archive/ecol/E095/064/metadata.php) ",
    comment_standardisation = "only open plots i.e. control treatment are included here. Only spring surveys are included here because 2009 and 2019 have spring in common. Tree species are excluded as recommended by the authors. Cover turned into presence absence"
 )][, gamma_sum_grains := sum(alpha_grain), by = .(year, regional)
-   ][, gamma_bounding_box := geosphere::areaPolygon(coords[grDevices::chull(coords$longitude, coords$latitude), c("longitude","latitude")]) / 1000000]
+   ][, gamma_bounding_box := geosphere::areaPolygon(data.frame(longitude, latitude)[grDevices::chull(longitude, latitude), ]) / 10^6]
 
 ddata[, c("latitude","longitude") := NULL]
 
