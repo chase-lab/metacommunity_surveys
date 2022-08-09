@@ -1,17 +1,19 @@
 dataset_id <- "sonnier_2022"
 
-datapath <- "data/raw data/sonnier_2022/.rdata.rds"
+datapath <- "./data/raw data/sonnier_2022/rdata.rds"
 
-ddata <- readRDS(datapath)
+ddata <- base::readRDS(datapath)
 
 data.table::setnames(
    x = ddata,
-   old = c("wetland_ID", "scientific_name","incidence"),
-   new = c("local", "species","value")
+   old = c("wetland_ID", "scientific_name", "incidence"),
+   new = c("local", "species", "value")
 )
 
 #drop NA for year
 ddata <- na.omit(ddata, cols = c("year", "species"))
+
+ddata <- ddata[!grepl("Unknown", species)]
 
 ddata[, ":="(
    dataset_id = dataset_id,
@@ -21,14 +23,7 @@ ddata[, ":="(
    metric = "abundance",
    unit = "count",
 
-   species_ID = NULL,
-   family = NULL,
-   clade = NULL,
-   growthform = NULL,
-   duration = NULL,
-   origin = NULL,
-   wetland_status = NULL,
-   coefficient_conservatism = NULL
+   species_ID = NULL
 )]
 
 
