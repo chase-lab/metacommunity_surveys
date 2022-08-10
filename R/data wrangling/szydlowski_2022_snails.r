@@ -1,4 +1,4 @@
-# szydlowski_2022_molluscs
+# szydlowski_2022_snails
 dataset_id = "szydlowski_2022_snails"
 source("./R/functions/resampling.r")
 
@@ -79,7 +79,7 @@ meta[, ":="(
 
    comment = "Extracted from EDI repository - Aquatic snail and macrophyte abundance and richness data for ten lakes in Vilas County, WI, USA, 1987-2020 - https://doi.org/10.6073/pasta/29733b5269efe990c3d2d916453fe4dd and associated article . Authors sampled snails from the bottom substrate using different samplers following the lakes invasion by a crayfish. Sampling happened in 1987, 2002, 2011 and 2020. Ideally alpha_grain would be the size of the lakes but that information was not found.",
    comment_standardisation = "All abundances per m2 were turned into integers to allow resampling process. Sites with less than 5 sampling points were excluded. Abundances were resampled based on the minimal abundance found in lakes with only 5 sampling points. METHOD: 'Gear information for 2002 and 1987 is not available, though a combination of the same gears was still used'"
-)][, gamma_sum_grains := sum(alpha_grain) * length(unique(local)), by = year]
+)][, gamma_sum_grains := sum(alpha_grain), by = year]
 
 ddata[, c("latitude", "longitude", "alpha_grain") := NULL]
 
