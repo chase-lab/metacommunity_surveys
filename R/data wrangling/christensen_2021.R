@@ -35,54 +35,63 @@ taxo[, species := paste(genus, species)][species == " ", species := species_code
 
 # ddata ----
 ddata[, ":="(
-  dataset_id = dataset_id,
-  regional = "Jornada Experimental Range, USA",
+   dataset_id = dataset_id,
+   regional = "Jornada Experimental Range, USA",
 
-  species = taxo$species[match(species, taxo$species_code)],
+   species = taxo$species[match(species, taxo$species_code)],
 
-  metric = "abundance",
-  unit = "count",
+   metric = "abundance",
+   unit = "count",
 
 
 
-  month = NULL,
-  project_year = NULL,
-  notes = NULL,
-  order_month = NULL
+   month = NULL,
+   project_year = NULL,
+   notes = NULL,
+   order_month = NULL
 )]
 
 # Metadata ----
+coords <- data.frame(
+   latitude = c(NW = 32.737108, NE = 32.737108, SE = 32.466879, SW = 32.466879),
+   longitude = c(NW = -106.926435, NE = -106.528942, SE = -106.528942, SW = -106.926435)
+)
+
 meta <- unique(ddata[, .(dataset_id, regional, local, year)])
 meta[, ":="(
-  taxon = "Plants",
-  realm = "Terrestrial",
+   taxon = "Plants",
+   realm = "Terrestrial",
 
-  latitude = "32°37'N",
-  longitude = "106°45'W",
+   latitude = "32°37'N",
+   longitude = "106°45'W",
 
+   study_type = "ecological_sampling",
+   effort = 1L,
 
-  study_type = "ecological_sampling",
-  effort = 1L,
+   data_pooled_by_authors = FALSE,
 
-  data_pooled_by_authors = FALSE,
+   alpha_grain = 1L,
+   alpha_grain_unit = "m2",
+   alpha_grain_type = "plot",
+   alpha_grain_comment = "plot area",
 
-  alpha_grain = 1L,
-  alpha_grain_unit = "m2",
-  alpha_grain_type = "plot",
-  alpha_grain_comment = "plot area",
+   gamma_sum_grains_unit = "m2",
+   gamma_sum_grains_type = "sample",
+   gamma_sum_grains_comment = "sum of sampled areas per year",
 
-  gamma_sum_grains_unit = "m2",
-  gamma_sum_grains_type = "sample",
-  gamma_sum_grains_comment = "sum of sampled areas per year",
+   gamma_bounding_box = geosphere::areaPolygon(coords[, c("longitude", "latitude")] / 10^6),
+   gamma_bounding_box_unit = "km2",
+   gamma_bounding_box_type = "box",
+   gamma_bounding_box_comment = "coordinates provided by the authors",
 
-  comment = "Extracted from supplementary 2 associated to article Christensen, E., James, D., Maxwell, C., Slaughter, A., Adler, P.B., Havstad, K. and Bestelmeyer, B. (2021), Quadrat-based monitoring of desert grassland vegetation at the Jornada Experimental Range, New Mexico, 1915–2016. Ecology. Accepted Author Manuscript e03530. https://doi.org/10.1002/ecy.3530 . Methods: 'The data set includes 122 1 m by 1 m permanent quadrats, although not all quadrats were sampled in each year of the study and there is a gap in monitoring from 1980–1995'. Data from annual species counts and perennial species counts were included. Exact locations and gamma_bounding_box are unknown.",
-  comment_standardisation = "keeping only stations sampled more than 1 year. When sampled several times a year, sample from the generally most sampled month kept"
+   comment = "Extracted from supplementary 2 associated to article Christensen, E., James, D., Maxwell, C., Slaughter, A., Adler, P.B., Havstad, K. and Bestelmeyer, B. (2021), Quadrat-based monitoring of desert grassland vegetation at the Jornada Experimental Range, New Mexico, 1915–2016. Ecology. Accepted Author Manuscript e03530. https://doi.org/10.1002/ecy.3530 . Methods: 'The data set includes 122 1 m by 1 m permanent quadrats, although not all quadrats were sampled in each year of the study and there is a gap in monitoring from 1980–1995'. Data from annual species counts and perennial species counts were included. Exact locations and gamma_bounding_box are unknown.",
+   comment_standardisation = "keeping only stations sampled more than 1 year. When sampled several times a year, sample from the generally most sampled month kept"
 )][, gamma_sum_grains := sum(alpha_grain), by = year]
 
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
 data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, ".csv"),
-  row.names = FALSE
+                   row.names = FALSE
 )
 data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_metadata.csv"),
-  row.names = FALSE
+                   row.names = FALSE
 )

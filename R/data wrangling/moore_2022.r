@@ -21,7 +21,7 @@ meta[, ":="(
    taxon = "Plants",
    realm = "Terrestrial",
 
-   study_type = "ecological sampling",
+   study_type = "ecological_sampling",
    effort = 1L,
 
    data_pooled_by_authors = FALSE,

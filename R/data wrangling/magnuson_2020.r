@@ -94,6 +94,7 @@ meta[, ":="(
   gamma_bounding_box = gamma_bounding_box,
   gamma_bounding_box_unit = "km2",
   gamma_bounding_box_type = "convex-hull",
+  gamma_bounding_box_comment = "coordinates extracted fromm the data set metadata",
 
   comment = "Extracted from EDI data repository knb-lter-ntl.13.32 by John Magnuson et al. The authors sampled macroinvertebrates of 7 lakes every year between 1983 and 2020. Effort is the number of replicates per year per lake (1 to 5)",
   comment_standardisation = "abundances were turned into presence/absence. Chaoborus pupae and larvae were counted with the adults. Replicate samples were pooled together"

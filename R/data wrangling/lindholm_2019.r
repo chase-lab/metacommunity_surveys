@@ -68,8 +68,9 @@ meta[, ":="(
   gamma_bounding_box = 27100L,
   gamma_bounding_box_unit = "km2",
   gamma_bounding_box_type = "watershed",
+  gamma_bounding_box_comment = "area found online https://www.kokemaenjoki.fi/",
 
-  comment = "Extracted from Dryad (https://doi.org/10.5061/dryad.t1g1jwsxv). The authors sampled macrophytes from 27 boreal lakes from a Finnish watershed during the 1940s, 1970s, 1990s, 2000s and 2010s. Effort depends on the lake size: the whole lakes have been sampled at each survey and size varies from 2 10E-1 to 2 10E2.",
+  comment = "Extracted from Dryad (https://doi.org/10.5061/dryad.t1g1jwsxv). The authors sampled macrophytes from 27 boreal lakes from a Finnish watershed during the 1940s, 1970s, 1990s, 2000s and 2010s. Effort depends on the lake size: the whole lakes have been sampled at each survey and size varies from 2 10E-1 to 2 10E2. Coordinates provided by the authors",
   comment_standardisation = "none needed"
 
 )]

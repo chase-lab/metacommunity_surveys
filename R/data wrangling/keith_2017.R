@@ -27,13 +27,13 @@ ddata[, ":="(
 # meta ----
 meta <- unique(ddata[, .(dataset_id, year, regional, local)])
 meta[, ":="(
-  realm = "Plants",
-  taxon = "Vegetation",
+  realm = "Terrestrial",
+  taxon = "Plants",
 
   latitude = "34°05′46.00″ S",
   longitude = "151°09′02.73″ E",
 
-  study_type = "ecological sampling", #two possible values, or NA if not sure
+  study_type = "ecological_sampling", #two possible values, or NA if not sure
 
   data_pooled_by_authors = FALSE,
   data_pooled_by_authors_comment = NA,

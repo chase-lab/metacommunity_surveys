@@ -68,6 +68,7 @@ meta[, ":="(
   gamma_bounding_box = geosphere::areaPolygon(coordinates[grDevices::chull(coordinates$longitude, coordinates$latitude), c("longitude", "latitude")]) / 10^6,
   gamma_bounding_box_unit = "km2",
   gamma_bounding_box_type = "convex-hull",
+  gamma_bounding_box_comment = "coordinates provided by the authors",
 
   comment = "Extracted from Lelli et all 2020 appendices 6 and 7. 23 plots in Central Italy sampled for plants between 1934 and 1960 (historical record) and 2018. Methods: '22 historical plots were localized with a high confidence level and three replicates were performed for each historical record, with a final dataset of 88 plots (22 original plots and 66 resampled plots).[...]We carried out the field work from May to July 2018. We recorded the species composition following a protocol similar to that of the original surveyor and in the same period of the year (Chytrý et al., 2014; Becker, Spanka, Schröder, and Leuschner, 2017; Giarrizzo et al., 2017). We adopted the same plot size as indicated in the original data (Hédl, 2004; Förster, Becker, Gerlach, Meesenburg, and Leuschner, 2017), ranging from 40 m2 to 100 m2, in the form of squared plots placed in the direction of the maximum slope.' ",
   comment_standardisation = "Subplots sampled during the resurvey were pooled together"

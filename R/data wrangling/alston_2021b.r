@@ -47,7 +47,7 @@ meta[, ":="(
    taxon = "Mammals",
    realm = "Terrestrial",
 
-   study_type = "ecological sampling",
+   study_type = "ecological_sampling",
    effort = 18L,  # Effort is the minimal number of sampling nights per local per year (all traps together)
 
    data_pooled_by_authors = FALSE,

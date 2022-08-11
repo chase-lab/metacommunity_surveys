@@ -73,6 +73,7 @@ meta[, ":="(
   gamma_bounding_box = 18960L, # area of the Ontario lake
   gamma_bounding_box_unit = "km2",
   gamma_bounding_box_type = "lake_pond",
+  gamma_bounding_box_comment = "coordinates provided by the authors",
 
   comment = "Extracted from 'Density data for Lake Ontario benthic invertebrate assemblages from 1964 to 2018' data paper doi: 10.1002/ECY.3528. Methods: 'All benthic invertebrate data were collected during lake-wide surveys conducted in summer and fall months between 1964 and 2018'. Effort is the sampled area, all samplers are not strictly identical and in some cases only one replicate was made per station instead of three.",
   comment_standardisation = "Only samples from the following years were kept because they followed a comparable sampling design: 1990, 1995, 2003, 2013, 2018. Only locations sampled more than once were kept. Since the exact size of the grab samplers and the number of samples varied, we standardised by randomly sampling the minimal number of individuals found in one of the smallest grabs in every other community. This resampling sometimes reduced the specific richness compared to the full observed sample. In rare cases, larger grabs had fewer individuals and we sampled with replacement to get to the target number of individuals."

@@ -44,7 +44,7 @@ meta[, ":="(
   latitude =  "41° 19′ 12″ N",
   longitude = "122° 28′ 44.4″ W", #coordinates from wikipedia klamath mountains
 
-  study_type = "ecological sampling", #two possible values, or NA if not sure
+  study_type = "ecological_sampling", #two possible values, or NA if not sure
 
   data_pooled_by_authors = FALSE,
 

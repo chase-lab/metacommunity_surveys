@@ -1,13 +1,9 @@
 dataset_id <- "alves_2022"
 
-ddata <- data.table::fread(
-   file = "./data/cache/alves_2021_Long.Master.Species.Groups.csv",
-   drop = c("V1","File.Name","Image.Code"),
-   sep = ",", header = TRUE, colClasses = list(factor = c("Site", "ID"))
-)
+ddata <- base::readRDS(file = "./data/raw data/alves_2022/rdata.rds")
 ddata <- ddata[ Cover != 0 ][, Cover := NULL]
 ddata <- ddata[ !General.Type %in% c("Substrate","Dead","Equipment","Fish","Rubble","Sand.sediment","Unknown","Water","N.c","CTB")][, ":="(Specific.Type = NULL, General.Type = NULL)]
-# ddata <- ddata[!ID %in% c("Calcareous", "Fleshy_Macroalgae", "Hydroid", "Macroalgae", "Mat.tunicate", "Soft.coral", "Sponge", "Zoanthid")]
+ddata <- unique(ddata)
 
 data.table::setnames(ddata, c("year","local","transect","species"))
 
@@ -68,12 +64,13 @@ meta[, ":="(
 
    gamma_bounding_box_unit = "km2",
    gamma_bounding_box_type = "convex-hull",
+   gamma_bounding_box_comment = "sites located by hand on maps",
 
-   comment = "Data were downloaded from https://github.com/calves06/Belizean_Barrier_Reef_Change associated to the article: Alves C, Valdivia A, Aronson RB, Bood N, Castillo KD, et al. (2022) Twenty years of change in benthic communities across the Belizean Barrier Reef. PLOS ONE 17(1): e0249155. https://doi.org/10.1371/journal.pone.0249155. Authors measured cover of the substrate by recording images along transects.",
+   comment = "Data were downloaded from https://github.com/calves06/Belizean_Barrier_Reef_Change associated to the article: Alves C, Valdivia A, Aronson RB, Bood N, Castillo KD, et al. (2022) Twenty years of change in benthic communities across the Belizean Barrier Reef. PLOS ONE 17(1): e0249155. https://doi.org/10.1371/journal.pone.0249155. Authors measured cover of the substrate by recording images along transects. Site coordinates were looked for on maps",
    comment_standardisation = "Items from the following types were excluded: Substrate, Dead, Equipment, Fish, Rubble, Sand.sediment, Unknown, Water, N.c, CTB. For each location, we excluded transects sampled only once, then randomly selected one transect per year."
 )][, ":="(
    gamma_sum_grains = sum(alpha_grain),
-   gamma_bounding_box = geosphere::areaPolygon(coords[grDevices::chull(coords$longitude, coords$latitude), c("longitude", "latitude")]) / 1000000),
+   gamma_bounding_box = geosphere::areaPolygon(coords[grDevices::chull(coords$longitude, coords$latitude), c("longitude", "latitude")]) / 10^6),
    by = .(regional, year)]
 
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)

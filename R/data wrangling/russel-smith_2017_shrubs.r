@@ -63,6 +63,8 @@ ddata <- dates[ddata, on = c("park","plot","visit")]
 # unique(ddata[is.na(as.integer(`count_50cm-2m`))]$`count_50cm-2m`)
 # unique(ddata[is.na(as.integer(count_less_than_50cm))]$count_less_than_50cm)
 # unique(ddata[is.na(as.integer(count_greater_than_2m))]$count_greater_than_2m)
+
+# Summing abundances from different size class ----
 ddata[, ":="(
    count_less_than_50cm = as.integer(count_less_than_50cm),
    `count_50cm-2m` = as.integer(`count_50cm-2m`),
@@ -70,6 +72,8 @@ ddata[, ":="(
 )]
 
 ddata[, value := apply(ddata[, .(count_less_than_50cm, `count_50cm-2m`, count_greater_than_2m)], 1, sum, na.rm = TRUE)]
+# remove null values in value
+ddata <- ddata[value != 0L]
 
 data.table::setnames(ddata, c("park", "plot","genus_species"), c("regional","local","species"))
 
@@ -95,7 +99,12 @@ ddata[, ":="(
    `count_50cm-2m` = NULL,
    count_greater_than_2m = NULL
 )]
+
+# remove NA values in year because of missing dates in original data
 ddata <- ddata[!is.na(year)]
+
+# deleting site sampled only once with a data.table style join
+ddata <- ddata[ ddata[, .(n_years = length(unique(year))), by = .(regional, local)][n_years > 1L][, .(regional, local)], on = .(regional, local)]
 
 meta <- unique(ddata[, .(dataset_id, year, regional, local)])
 meta <- spatial[, .(local, regional, latitude, longitude)][meta, on = c("local", "regional")]
@@ -103,7 +112,7 @@ meta[, ":="(
    realm = "Terrestrial",
    taxon = "Plants",
 
-   study_type = "ecological sampling", #two possible values, or NA if not sure
+   study_type = "ecological_sampling", #two possible values, or NA if not sure
 
    data_pooled_by_authors = FALSE,
    data_pooled_by_authors_comment = NA,
@@ -116,16 +125,16 @@ meta[, ":="(
    alpha_grain_type = "plot",
    alpha_grain_comment = "all shrubs counted in 40m *10m plots",
 
-   gamma_bounding_box_unit = "km2",
-   gamma_bounding_box_type = "convex-hull",
-   gamma_bounding_box_comment = "convex-hull over the coordinates of sample points",
-
    gamma_sum_grains_unit = "m2",
    gamma_sum_grains_type = "plot",
    gamma_sum_grains_comment = "area of the sampled plots per year multiplied by amount of plots per region",
 
+   gamma_bounding_box_unit = "km2",
+   gamma_bounding_box_type = "convex-hull",
+   gamma_bounding_box_comment = "convex-hull over the coordinates of sample points",
+
    comment = "Data manually downloaded via https://datacommons.anu.edu.au/DataCommons/rest/records/anudc:5836/data/ with login for national university of australia website. Authors sampled shrubs from the inner 40m*10m plot of their fixed 40m*20m plots once a year. They measured the height of all shrubs and we kept only abundances.",
-   comment_standardisation = "some visit numbers (T1, T2, ...) had no match (year) in the dates table so they were excluded. Authors sampled shrubs from the smallest size class in subplots but since the size of subplot is constant, no standardisation is needed. Some rows were duplicated so all results from these 5 problematic plot/year subsets were excluded."
+   comment_standardisation = "some visit numbers (T1, T2, ...) had no match (year) in the dates table so they were excluded. Authors sampled shrubs from the smallest size class in subplots but since the size of subplot is constant, no standardisation is needed. Some rows were duplicated so all results from these 5 problematic plot/year subsets were excluded. Sites sampled only one year were excluded."
 )]
 
 meta[, ":="(

@@ -78,7 +78,7 @@ meta[, ":="(
    latitude = '32°40`08.4000"N',
    longitude = '106°51`54.0000"W',
 
-   study_type = "ecological sampling", #two possible values, or NA if not sure
+   study_type = "ecological_sampling", #two possible values, or NA if not sure
 
    data_pooled_by_authors = FALSE,
    data_pooled_by_authors_comment = NA,

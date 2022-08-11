@@ -64,6 +64,9 @@ meta[, ":="(
 
    effort = 5L,
 
+   study_type = "ecological_sampling",
+   data_pooled_by_authors = FALSE,
+
    alpha_grain_unit = "m2",
    alpha_grain_type = "sample",
    alpha_grain_comment = "sample of the area of the gear used per sampling. Unknown but comparable in 1987 and 2002",
