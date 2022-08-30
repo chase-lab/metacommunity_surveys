@@ -10,6 +10,7 @@ data/communities.csv
 data/metadata.csv
 data/wrangled data
 .Rproj.user/shared/notebooks/paths
+data/cache 
 
 R/data download/depauw_2020.r
 R/data wrangling/depauw_2020.r
