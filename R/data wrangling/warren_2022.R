@@ -24,7 +24,7 @@ ddata[, longitude := mean(longitude), by = .(regional, local)]
 ddata <- ddata[month %in% c(01,12,10)]
 ddata <- ddata[!ddata[(regional == "ESCA"| regional == "riparian") & month == "12" & year == "2003"], on = c("year", "regional", "local")]
 
-#Only one obeserver per local per year:
+#Only one observer per local per year:
 set.seed(42)
 ddata <- ddata[ddata[,.(observer = observer[sample(x = 1:.N, size = 1L)]),
                      by = local],on = c("local", "observer")]

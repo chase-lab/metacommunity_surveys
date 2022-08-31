@@ -12,7 +12,7 @@ ddata <- ddata[!grepl(pattern = "no data|unknown|rock| litter|ground", x = speci
 
 ddata[,unique(site)]
 # effort = 44sites per year except: site_out = 1958 - 42, 1951 - 43, site_in = 1979 - 45, 1966 - 42, 1951 - 45
-ddata[,length(unique(tr)), by = .(site,year)] #datatable way of gropuing #standartisation
+ddata[,length(unique(tr)), by = .(site,year)] #datatable way of grouping #standartisation
 ddata[,length(unique(date)), by = .(site,year,tr)]$V1 %>% summary()#. = list #no need to do standartisation in time
 ddata[,unique(tr), by = .(site,year)]
 #Two adjacent plots were established, 5 m apart, one fenced and one unfenced, and each approximately 400 m2
