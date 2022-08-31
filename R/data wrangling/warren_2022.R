@@ -8,15 +8,27 @@ spatial <- base::readRDS(datapath2)
 #remove duplicated entries in ddata - why there are duplicates?
 ddata <- unique(ddata)
 #unique site-code entries in spatial data
-spatial <- unique(spatial, by = "site_code" )
+spatial <- unique(spatial, by = "site_code")
 #combine spatial and observational data
 ddata <- ddata[spatial, on = "site_code"]
 
+#renaming
 ddata[, year := format(ddata$survey_date, "%Y")]
 ddata[, month := format(ddata$survey_date, "%m")]
-data.table::setnames(ddata, c("location_type", "site_code", "common_name", "lat", "long"), c("regional", "local", "species", "latutide", "longitude"))
+data.table::setnames(ddata, c("location_type", "site_code", "common_name", "lat", "long"), c("regional", "local", "species", "latitude", "longitude"))
 ddata[, latitude := mean(latitude), by = .(regional, local)]
 ddata[, longitude := mean(longitude), by = .(regional, local)]
+
+#One sampling month: 01,12 or 10 
+#aka ugly but workin.
+ddata <- ddata[month %in% c(01,12,10)]
+ddata <- ddata[!ddata[(regional == "ESCA"| regional == "riparian") & month == "12" & year == "2003"], on = c("year", "regional", "local")]
+
+#Only one obeserver per local per year:
+set.seed(42)
+ddata <- ddata[ddata[,.(observer = observer[sample(x = 1:.N, size = 1L)]),
+                     by = local],on = c("local", "observer")]
+
 
 ddata[, ":="(
   dataset_id = dataset_id,
@@ -41,8 +53,19 @@ ddata[, ":="(
   begin_date_year = NULL, 
   end_date = NULL, 
   end_date_month = NULL, 
-  end_date_year = NULL, 
+  end_date_year = NULL
 )]
+
+#remove rows with sum_value = NA
+ddata <- ddata[!ddata[rowSums(is.na(ddata))>0,], on = c("local","year","species")]
+
+#sum bird count over direction, Seen heard, distance
+ddata[, sum_value := sum(bird_count), by = .(local, year, species)]
+
+#remove duplicates, keep summed bird count
+ddata <- ddata[!duplicated(ddata), ]
+
+
 
 
 # meta ----
@@ -51,24 +74,21 @@ meta[, ":="(
   realm = "Terrestrial",
   taxon = "Birds",
   
-  
-  longitude = "from ddata", #average
+  latitude = ddata[,mean(latitude)],
+  longitude = ddata[,mean(longitude)], 
   
   study_type = "ecological_sampling", #two possible values, or NA if not sure
   
   data_pooled_by_authors = FALSE,
   
-  #unclear, depends whether regional stays regional - then there are years in which there was only one month sampled -> effort = 1?
-  effort = 1L,
+  effort = 1L, #visit bird point once a year
   
   alpha_grain = 1L ,
   alpha_grain_unit = "m2",
   alpha_grain_type = "radius",
   alpha_grain_comment = "Open Radius sampling of birds seen or heard",
   
-
-  gamma_bounding_box = ,
-  gamma_bounding_box_unit = "ha",
+  gamma_bounding_box_unit = "km2",
   gamma_bounding_box_type = "box",
   gamma_bounding_box_comment = "",
   
@@ -77,20 +97,16 @@ meta[, ":="(
   gamma_sum_grains_comment = "sampled area per year",
   
   comment = "",
-  comment_standardisation = ""
+  comment_standardisation = "reducing dataset to one sampling event per year in same season. reducing to one observer per sampling event per year. removing NA in bird_count. Summing bird_counts for different direction, condition and distance to one abundance measure"
 )]
-[, ":="(
+
+meta[, ":="(
   gamma_sum_grains = sum(alpha_grain),
   gamma_bounding_box = geosphere::areaPolygon(data.frame(longitude, latitude)[grDevices::chull(longitude, latitude), ]) / 10^6
 ),
   by = .(year, regional)
 ] 
 
-meta[, ":="(
-  gamma_sum_grains = sum(alpha_grain)
-),
-by = .(regional, year)
-]
 
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
 data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, ".csv"),
