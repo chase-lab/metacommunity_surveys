@@ -16,26 +16,14 @@ if (FALSE) {
    ddata[ddata[Quadrat_Area == 0.5, diff(range(Year)), by = .(Site, Plot)][V1 >= 10L], on = c("Site","Plot")][, length(unique(Plot)), by = .(Year, Site)][V1 >= 4]
 }
 
-# data selection and cleaning ----
-ddata <- ddata[Quadrat_Area == 0.5]
-## excluding empty sites ----
-ddata <- ddata[Mollusc_Count != 0L]
-
-ddata[Site_Name == "", Site_Name := paste0("GCE", Site)]
-ddata[,]
+# Raw data ----
 data.table::setnames(ddata,
                      c("Year", "Site_Name", "Location", "Longitude", "Latitude", "Species", "Mollusc_Count", "Quadrat_Area"),
                      c("year", "regional", "local", "longitude", "latitude", "species", "value", "alpha_grain")
 )
-## excluding regions/years with less than 4 locations with observed mollusks. data.table style join ----
-ddata <- ddata[ddata[, .(n_locations = length(unique(local))), by = .(year, regional)][n_locations >= 4L], on = c("year", "regional")]
-## averaging coordinates per location ----
-# ddata[, ":="(
-#    latitude = mean(latitude),
-#    longitude = mean(longitude)
-# ), by = .(regional, local)]
+ddata[regional == "", regional := paste0("GCE", Site)]
 
-# communities ----
+## communities ----
 ddata[, ":="(
    dataset_id = dataset_id,
 
@@ -51,12 +39,10 @@ ddata[, ":="(
    Flag_Latitude = NULL,
    Location_Notes = NULL,
    Mollusc_Density = NULL,
-   Notes = NULL,
-   n_locations = NULL
+   Notes = NULL
 )]
 
-
-# metadata ----
+## metadata ----
 meta <- unique(ddata[, .(dataset_id, regional, local, year, latitude, longitude, alpha_grain)])
 meta[, ":="(
    taxon = "Invertebrates",
@@ -82,22 +68,80 @@ meta[, ":="(
    gamma_bounding_box_comment = "coordinates provided by the authors",
 
    comment = "Data were downloaded from DOI:10.6073/pasta/651d603e2930d7ff608d7325230418e8 . METHODS: 'This data set includes long-term observational data on mollusc species abundance and size distribution at 10 Georgia Coastal Ecosystems marsh sites used for annual plant and invertebrate population monitoring. Infaunal and epifaunal molluscs were hand-collected from within quadrats of known area in mid-marsh and creekbank zones (n = 4 quadrats per zone) at all sites annually in October' also see: https://gce-lter.marsci.uga.edu/public/app/dataset_details.asp?accession=INV-GCES-1610",
+   comment_standardisation = "none needed"
+)]
+
+meta_0.25 <- meta[alpha_grain == 0.25]
+meta_0.5 <- meta[alpha_grain == 0.5]
+
+meta_0.25[, ":="(
+   gamma_sum_grains = sum(alpha_grain),
+   gamma_bounding_box = geosphere::areaPolygon(data.frame(longitude, latitude)[grDevices::chull(longitude, latitude), ]) / 10^6),
+   by = .(regional, year)]
+meta_0.5[, ":="(
+   gamma_sum_grains = sum(alpha_grain),
+   gamma_bounding_box = geosphere::areaPolygon(data.frame(longitude, latitude)[grDevices::chull(longitude, latitude), ]) / 10^6),
+   by = .(regional, year)]
+
+ddata[, c("latitude","longitude") := NULL]
+
+## splitting and saving into 2 studies because 2 sampling gears were used ----
+drop_col <-  "alpha_grain"
+### 0.25 m2
+dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
+data.table::fwrite(
+   x = ddata[alpha_grain == 0.25, !..drop_col],
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_0.25_raw.csv"),
+   row.names = FALSE
+)
+data.table::fwrite(
+   x = meta_0.25,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_0.25_raw_metadata.csv"),
+   row.names = FALSE
+)
+### 0.5 m2
+dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
+data.table::fwrite(
+   x = ddata[alpha_grain == 0.5, !..drop_col],
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_0.5_raw.csv"),
+   row.names = FALSE
+)
+data.table::fwrite(
+   x = meta_0.5,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_0.5_raw_metadata.csv"),
+   row.names = FALSE
+)
+
+
+# Standardised data ----
+## data selection ----
+ddata <- ddata[alpha_grain == 0.5]
+## excluding empty sites ----
+ddata <- ddata[value != 0L]
+
+## excluding regions/years with less than 4 locations with observed mollusks. data.table style join ----
+ddata <- ddata[ddata[, .(n_locations = length(unique(local))), by = .(year, regional)][n_locations >= 4L], on = c("year", "regional")]
+
+## metadata ----
+### subsetting original meta with standardised ddata ----
+meta <- meta[ddata[,.(regional, local, year)], on = .(regional, local, year)]
+### updating extent values ----
+meta[, ":="(
    comment_standardisation = "Only quadrats of 0.5m2 were kept. We excluded regions/years with less than 4 locations with observed molluscs."
 )][, ":="(
    gamma_sum_grains = sum(alpha_grain),
    gamma_bounding_box = geosphere::areaPolygon(data.frame(longitude, latitude)[grDevices::chull(longitude, latitude), ]) / 10^6),
    by = .(regional, year)]
 
-ddata[, c("latitude","longitude","alpha_grain") := NULL]
-
+## saving standardised data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
 data.table::fwrite(
    x = ddata,
-   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, ".csv"),
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standadised.csv"),
    row.names = FALSE
 )
 data.table::fwrite(
    x = meta,
-   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_metadata.csv"),
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standadised_metadata.csv"),
    row.names = FALSE
 )

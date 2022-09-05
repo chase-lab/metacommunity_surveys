@@ -48,8 +48,7 @@ if (!file.exists(infile1)) {
    # Keep the new dates only if they all converted correctly
    if(length(tmp1Date) == length(tmp1Date[!is.na(tmp1Date)])){dt1$Date <- tmp1Date } else {print("Date conversion failed for dt1$Date. Please inspect the data and do the date conversion yourself.")}
    rm(tmpDateFormat,tmp1Date)
-   if (class(dt1$Year)=="factor") dt1$Year <-as.numeric(levels(dt1$Year))[as.integer(dt1$Year) ]
-   if (class(dt1$Year)=="character") dt1$Year <-as.numeric(dt1$Year)
+   if (class(dt1$Year) !="factor") dt1$Year <- as.factor(dt1$Year)
    if (class(dt1$Site_Name)!="factor") dt1$Site_Name<- as.factor(dt1$Site_Name)
    if (class(dt1$Site)!="factor") dt1$Site<- as.factor(dt1$Site)
    if (class(dt1$Zone)!="factor") dt1$Zone<- as.factor(dt1$Zone)
