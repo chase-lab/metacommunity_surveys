@@ -95,7 +95,7 @@ data.table::fwrite(
   row.names = FALSE
 )
 
-# Standardized Data ----
+# Standardised Data ----
 
 ## selecting data with complete_sampling_year & complete_sampling_month = 1 ----
 ## pooling species abundances at the transect level ----
