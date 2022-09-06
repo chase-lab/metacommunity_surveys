@@ -12,13 +12,6 @@ data/wrangled data
 .Rproj.user/shared/notebooks/paths
 data/cache 
 
-R/data download/depauw_2020.r
-R/data wrangling/depauw_2020.r
-data/raw data/depauw_2020/tabula-Depauw et al. 2020.csv
-data/raw data/depauw_2020/table1_depauw_2020.csv
-data/raw data/depauw_2020/rdata.csv
-data/raw data/depauw_2020/forestReplotInfo.csv
-data/raw data/depauw_2020/Depauwetal_JECOL_Data.xlsx
 data/references/homogenisation_dropbox_folder_path.rds
 
 # Created by https://www.toptal.com/developers/gitignore/api/macos,windows
