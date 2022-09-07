@@ -1,4 +1,4 @@
-#wardle_2014_vegetation
+
 dataset_id <- "wardle_2014_plants"
 
 ###Data manually downloaded from:
@@ -8,9 +8,10 @@ dataset_id <- "wardle_2014_plants"
 
 datapath <- "./data/raw data/wardle_2014_vegetation/derg_vegetation_1993+_p903t1208.csv"
 
-ddata <- unique(data.table::fread(file = datapath)) # replicated rows in raw data
+# Raw Data ----
 
-# program uses a core of 12 sites which are spaced at least 15 km apart, each comprising two 1-ha trapping grids program uses a core of 12 sites which are spaced at least 15 km apart, each comprising two 1-ha trapping grids - Vegetation attribute are recorded in a 2.5 m radius around six pitfall traps on each vertebrate trapping grid. have been aggregated to grid level data
+ddata <- unique(data.table::fread(file = datapath))
+
 
 #coordinates:
 coords <- data.frame(longitude = c(137.86511, 138.6059, 137.86511, 138.6059),
@@ -18,12 +19,13 @@ coords <- data.frame(longitude = c(137.86511, 138.6059, 137.86511, 138.6059),
 
 data.table::setnames(ddata, c("site_name", "site_grid"), c("regional", "local"))
 
-#remove NAs in Column percent coverage
-ddata <- na.omit(ddata, on = "avg_of_cover")
-#remove rows with percent coverage of dead plants
-ddata <- ddata[dead_alive == "Alive"]
+#extract month
+ddata[,month := stringi::stri_extract_all_regex(str = month_year, pattern = "[A-Z][a-z]{1,3}")]
 
+#copy for later standartisation
+raw <- data.table::copy(ddata)
 
+## community ----
 ddata[, ":="(
 
    dataset_id = dataset_id,
@@ -38,11 +40,12 @@ ddata[, ":="(
    trip_no = NULL,
    avg_of_fl = NULL,
    avg_of_seed = NULL,
-   dead_alive = NULL
+   dead_alive = NULL,
+   
+   day = NA
 )]
-ddata <- unique(ddata)
 
-# meta ----
+## meta ----
 meta <- unique(ddata[, .(dataset_id, year, regional, local)])
 meta[, ":="(
    realm = "Terrestrial",
@@ -59,7 +62,6 @@ meta[, ":="(
 
    effort = 6L, #sampled annualy every April-May - constant? different amount of local per regional over time
 
-
    alpha_grain = 6 * pi * 2.5^2,
    alpha_grain_unit = "m2", #"acres", "ha", "km2", "m2", "cm2"
    alpha_grain_type = "plot",
@@ -75,15 +77,39 @@ meta[, ":="(
    gamma_bounding_box_comment = "coordinates provided by the authors",
 
    comment = "Data manually downloaded via https://datacommons.anu.edu.au/DataCommons/rest/display/anudc:5755 for national university of australia. The authors estimated percent coverage in an area occupying 2.5 m radius around six traps on each plot and have been aggregated to plot level data. Regional in this dataset is defined as Site, local is defined as Plot ",
-   comment_standardisation = "Converted percent of cover into presence absence. Exclude rows with NA values for perent coverage. Exclude percent coverage of dead plants"
+   comment_standardisation = "Converted percent of cover into presence absence"
 )]
 
 meta[, gamma_sum_grains := sum(alpha_grain), by = .(regional, year)]
 
+# save data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, ".csv"),
+data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
                    row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_metadata.csv"),
+data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
+                   row.names = FALSE
+)
+
+# Standardised Data ----
+## remove duplicated rows ----
+raw <- raw[,unique(raw)]
+## eclude rows with NA in Column percent coverage ----
+raw <- na.omit(raw, on = "percent coverage")
+## exclude rows with percent coverage of dead plants ----
+ddata <- raw[dead_alive == "Alive"]
+
+# update meta ----
+meta <- meta[unique(ddata[,.(dataset_id, regional, local, year)]), on = .(regional, local, year)]
+meta[, ":=" (
+   comment_standardisation = "Converted percent of cover into presence absence. Exclude rows with NA values for perent coverage. Exclude percent coverage of dead plants"
+)][, gamma_sum_grains := sum(alpha_grain), by = .(regional, year)]
+
+# save data -----
+dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
+data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
+                   row.names = FALSE
+)
+data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
                    row.names = FALSE
 )
