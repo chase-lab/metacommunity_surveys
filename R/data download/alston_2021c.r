@@ -4,7 +4,6 @@ if (!file.exists("./data/raw data/alston_2021c/rdata.rds")) {
    # loading data
    ddata <- data.table::fread(file = rdryad::dryad_download("10.5061/dryad.1g1jwstxw")[[1L]][11L], # UNDERSTORY_LGQUAD_2008-2019.csv
                               drop = c("survey","Bare_ground","treatment"))
-   ddata <- ddata[grepl("OPEN", plot)]
 
    # loading coordinates
    coords <- data.table::fread(file = rdryad::dryad_download("10.5061/dryad.1g1jwstxw")[[1L]][4L],

@@ -4,7 +4,6 @@ if (!file.exists("./data/raw data/alston_2021b/rdata.rds")) {
    # loading data
    ddata <- data.table::fread(file = rdryad::dryad_download("10.5061/dryad.1g1jwstxw")[[1L]][7L], # SMALL_MAMMALS_2009-2019.csv
                               drop = c("condition","age","sex","left_hind_foot_mm","left_tag","original_tag","marks","weight_g","notes"))
-   ddata <- ddata[treatment == "OPEN"][, treatment := NULL]
 
    # loading coordinates
    coords <- data.table::fread(file = rdryad::dryad_download("10.5061/dryad.1g1jwstxw")[[1L]][4L],
