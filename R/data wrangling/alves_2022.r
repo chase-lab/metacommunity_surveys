@@ -34,6 +34,7 @@ ddata[, ":="(
    dataset_id = dataset_id,
    regional = "Belizean Barrier Reef",
 
+   species = gsub(pattern = ".", replacement = " ", x = species, fixed = TRUE),
    value = 1L,
    metric = "pa",
    unit = "pa"
