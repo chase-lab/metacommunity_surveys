@@ -93,6 +93,7 @@ meta[, c("month","day") := NULL]
 meta <- unique(unique(meta)[ddata[, .(regional, local, year)], on = .(regional, local, year)])
 meta[, ":="(
    effort = 5L,
+   data_pooled_by_authors = FALSE,
 
    alpha_grain = 25L * 25L * 5L,
    alpha_grain_unit = "cm2",
@@ -108,7 +109,8 @@ meta[, ":="(
    gamma_bounding_box_comment = "area of the Wizard islet given by the authors",
 
    comment_standardisation = "Bare rock was excluded. Only the 5 middle tidal heights kept and only samples with all of these 5 tidal heights sampled kept. Samples from these 5 quadrats were then pooled together"
-)][, gamma_sum_grains := sum(alpha_grain), by = .(regional, year)][local == "Wizard", gamma_bounding_box := 1.73]
+)][, gamma_sum_grains := sum(alpha_grain), by = .(regional, year)][regional == "Wizard", gamma_bounding_box := 1.73]
+
 
 ## Saving standardised data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)

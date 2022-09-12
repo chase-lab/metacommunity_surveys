@@ -15,6 +15,8 @@ ddata[, ":="(
 
    local = paste(sep = "-", local, transect),
 
+   species = gsub(pattern = ".", replacement = " ", x = species, fixed = TRUE),
+
    value = 1L,
    metric = "pa",
    unit = "pa",
