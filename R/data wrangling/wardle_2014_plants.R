@@ -16,7 +16,7 @@ ddata <- unique(data.table::fread(file = datapath)) # replicated rows in raw dat
 coords <- data.frame(longitude = c(137.86511, 138.6059, 137.86511, 138.6059),
                      latitude = c(-23.20549, -23.20549, -23.99417, -23.99417))
 
-data.table::setnames(ddata, c("site_name", "site_grid"), c("regional", "local"))
+data.table::setnames(ddata, "site_grid", "local")
 
 #remove NAs in Column percent coverage
 ddata <- na.omit(ddata, on = "avg_of_cover")
@@ -27,6 +27,8 @@ ddata <- ddata[dead_alive == "Alive"]
 ddata[, ":="(
 
    dataset_id = dataset_id,
+
+   regional = "Simpson Desert",
 
    metric = "pa", #percent coverage transformed to presence absence data
    unit = "pa",
@@ -78,7 +80,7 @@ meta[, ":="(
    comment_standardisation = "Converted percent of cover into presence absence. Exclude rows with NA values for perent coverage. Exclude percent coverage of dead plants"
 )]
 
-meta[, gamma_sum_grains := sum(alpha_grain), by = .(regional, year)]
+meta[, gamma_sum_grains := sum(alpha_grain), by = year]
 
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
 data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, ".csv"),

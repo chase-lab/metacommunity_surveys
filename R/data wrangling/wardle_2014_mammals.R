@@ -10,7 +10,7 @@ datapath <- "./data/raw data/wardle_2014_mammal/derg_small_mammal_trapping_data_
 ddata <- data.table::fread(file = datapath)
 
 coords <- data.frame(longitude = c(137.86511, 138.6059, 137.86511, 138.6059),
-                     lattude = c(-23.20549, -23.20549, -23.99417, -23.99417))
+                     latitude = c(-23.20549, -23.20549, -23.99417, -23.99417))
 
 
 #capture data for a specified duration of trapping nights (usually 3 night session) in the Simpson Desert
@@ -22,20 +22,23 @@ coords <- data.frame(longitude = c(137.86511, 138.6059, 137.86511, 138.6059),
 #unitnumbercaptures_100tn
 #definition	Captures standardised for unequal trapping effort. captures/100 trap nights = captures/(number pitfalls (usually 36)*nights opened (usually 3))*100
 
-data.table::setnames(ddata,
-                     c("site_name", "site_grid", "captures_100tn"),
-                     c("regional", "local", "value")
+data.table::setnames(
+   x = ddata,
+   old = c("site_grid", "captures_100tn"),
+   new = c("local", "value")
 )
 
 #extract month
-ddata[,month := stringi::stri_extract_all_regex(str = month_year, pattern = "[A-Z][a-z]{1,3}")]
+ddata[,month := stringi::stri_extract_first_regex(str = month_year, pattern = "[A-Z][a-z]{1,3}")]
 #standartisation - only sample once a year, not multiple times per year?
 #only use data from Apr and March whih been sampled every year in every site
-ddata <- ddata[month == "Apr" | month == "may"]
+ddata <- ddata[month == "Apr" | month == "May"]
 
 
 ddata[, ":="(
    dataset_id = dataset_id,
+
+   regional = "Simpson Desert",
 
    metric = "abundance",
    unit = "count",
@@ -51,10 +54,7 @@ ddata[, ":="(
    month_year = NULL,
    month = NULL
    #month = unlist(month)
-)
-]
-
-
+)]
 
 # meta ----
 meta <- unique(ddata[, .(dataset_id, year, regional, local)])
@@ -91,7 +91,7 @@ meta[, ":="(
    comment_standardisation = "Standartisation to achieve same Effort was given by the authors, already present in raw data: unitnumbercaptures_100tn. Captures standardised for unequal trapping effort. captures/100 trap nights = captures/(number pitfalls (usually 36)*nights opened (usually 3))*100. Only sample months april and may were kept as there was an uneven sampling effort per year, per site. Months april and may have been sampled every year at every site. "
 )]
 
-meta[, gamma_sum_grains := sum(alpha_grain), by = .(regional, year)]
+meta[, gamma_sum_grains := sum(alpha_grain), by = year]
 
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
 data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, ".csv"),
