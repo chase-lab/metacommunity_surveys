@@ -31,7 +31,7 @@ ddata[, ":="(
    metric = "abundance",
    unit = "count",
    
-   regional = "Simpson Dessert",
+   regional = "Simpson Desert",
    trip_no = NULL,
    nights = NULL,
    no_traps = NULL,
