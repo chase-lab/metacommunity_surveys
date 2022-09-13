@@ -37,13 +37,14 @@ ddata[, ":="(
 
    value = 1L,
 
+   site_name = NULL,
    avg_of_cover = NULL,
    month_year = NULL,
    trip_no = NULL,
    avg_of_fl = NULL,
    avg_of_seed = NULL,
    dead_alive = NULL,
-   
+
    day = NA
 )]
 
@@ -95,7 +96,7 @@ data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_
 
 # Standardised Data ----
 ## remove duplicated rows ----
-raw <- raw[,unique(raw)]
+raw <- unique(raw)
 ## eclude rows with NA in Column percent coverage ----
 raw <- na.omit(raw, on = "percent coverage")
 ## exclude rows with percent coverage of dead plants ----
