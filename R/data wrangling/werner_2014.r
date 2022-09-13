@@ -20,7 +20,9 @@ ddata[, ":="(
 
   species = substr(species, 1L, 3L),
   metric = "pa",
-  unit = "pa"
+  unit = "pa",
+  month = NA, 
+  day = NA
 )]
 
 ddata <- ddata[value != 0L]
@@ -63,3 +65,27 @@ data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset
 data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_metadata.csv"),
   row.names = FALSE
 )
+<<<<<<< Updated upstream
+=======
+
+
+# Standardised Data ----
+
+##exclude absence data ----
+ddata <- ddata[value != 0L]
+
+## meta data ----
+# update meta ----
+meta <- meta[unique(ddata[,.(dataset_id, regional, local, year)]), on = .(regional, local, year)]
+meta[, ":=" (
+  comment_standardisation = "Many ponds were sampled only once and excluded"
+)][, gamma_sum_grains := 200L * length(unique(local)), by = year]
+
+dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
+data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised_.csv"),
+                   row.names = FALSE
+)
+data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised_metadata.csv"),
+                   row.names = FALSE
+)
+>>>>>>> Stashed changes
