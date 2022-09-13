@@ -17,7 +17,7 @@ ddata <- unique(data.table::fread(file = datapath))
 coords <- data.frame(longitude = c(137.86511, 138.6059, 137.86511, 138.6059),
                      latitude = c(-23.20549, -23.20549, -23.99417, -23.99417))
 
-data.table::setnames(ddata, c("site_name", "site_grid"), c("regional", "local"))
+data.table::setnames(ddata, "site_grid", "local")
 
 #extract month
 ddata[,month := stringi::stri_extract_all_regex(str = month_year, pattern = "[A-Z][a-z]{1,3}")]
@@ -29,6 +29,8 @@ raw <- data.table::copy(ddata)
 ddata[, ":="(
 
    dataset_id = dataset_id,
+
+   regional = "Simpson Desert",
 
    metric = "pa", #percent coverage transformed to presence absence data
    unit = "pa",
@@ -80,7 +82,7 @@ meta[, ":="(
    comment_standardisation = "Converted percent of cover into presence absence"
 )]
 
-meta[, gamma_sum_grains := sum(alpha_grain), by = .(regional, year)]
+meta[, gamma_sum_grains := sum(alpha_grain), by = year]
 
 # save data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)

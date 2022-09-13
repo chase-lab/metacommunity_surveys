@@ -79,7 +79,7 @@ meta[, ":="(
    gamma_sum_grains_type = "sample",
    gamma_sum_grains_comment = "sum of sampled areas per year",
 
-   gamma_bounding_box = geosphere::areaPolygon(coords[, c("longitude", "latitude")] / 10^6),
+   gamma_bounding_box = geosphere::areaPolygon(coords[, c("longitude", "latitude")]) / 10^6,
    gamma_bounding_box_unit = "km2",
    gamma_bounding_box_type = "box",
    gamma_bounding_box_comment = "coordinates provided by the authors",
