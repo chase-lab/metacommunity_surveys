@@ -1,6 +1,6 @@
 ## werner_2014
 
-
+# Raw Data ----
 dataset_id <- "werner_2014"
 ddata <- base::readRDS(file = paste0("data/raw data/", dataset_id, "/ddata.rds"))
 
@@ -12,8 +12,14 @@ ddata <- data.table::melt(ddata,
   measure.name = "value",
   na.rm = TRUE
 )
+
+## excluding  empty rows ----
 ddata[, which(!colnames(ddata) %in% c("local", "year", "species", "value")) := NULL]
 
+ddata <- ddata[value != 0L]
+
+
+## community ----
 ddata[, ":="(
   dataset_id = dataset_id,
   regional = "ES George Reserve",
@@ -25,8 +31,7 @@ ddata[, ":="(
   day = NA
 )]
 
-ddata <- ddata[value != 0L]
-
+##meta ----
 meta <- unique(ddata[, .(dataset_id, regional, local, year)])
 meta[, ":="(
   realm = "Freshwater",
@@ -59,23 +64,16 @@ meta[, ":="(
 )][, gamma_sum_grains := 200L * length(unique(local)), by = year]
 
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, ".csv"),
+data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
   row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_metadata.csv"),
+data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
   row.names = FALSE
 )
-<<<<<<< Updated upstream
-=======
-
 
 # Standardised Data ----
 
-##exclude absence data ----
-ddata <- ddata[value != 0L]
-
-## meta data ----
-# update meta ----
+## update meta ----
 meta <- meta[unique(ddata[,.(dataset_id, regional, local, year)]), on = .(regional, local, year)]
 meta[, ":=" (
   comment_standardisation = "Many ponds were sampled only once and excluded"
@@ -88,4 +86,3 @@ data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset
 data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised_metadata.csv"),
                    row.names = FALSE
 )
->>>>>>> Stashed changes
