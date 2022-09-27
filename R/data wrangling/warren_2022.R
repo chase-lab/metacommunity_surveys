@@ -2,8 +2,8 @@ dataset_id <- "warren_2022"
 datapath <- "data/raw data/warren_2022/rdata1.rds"
 spatialpath <- "data/raw data/warren_2022/rdata2.rds"
 if (FALSE) {
-   ddata <- base::readRDS(datapath1)
-   spatial <- base::readRDS(datapath2)
+   ddata <- base::readRDS(datapath)
+   spatial <- base::readRDS(spatialpath)
 
    #remove duplicated entries in ddata - why there are duplicates?
    ddata <- unique(ddata)
@@ -69,13 +69,10 @@ if (FALSE) {
 
 
    # meta ----
-   meta <- unique(ddata[, .(dataset_id, year, regional, local)])
+   meta <- unique(ddata[, .(dataset_id, year, regional, local, latitude, longitude)])
    meta[, ":="(
       realm = "Terrestrial",
       taxon = "Birds",
-
-      latitude = ddata[,mean(latitude)],
-      longitude = ddata[,mean(longitude)],
 
       study_type = "ecological_sampling", #two possible values, or NA if not sure
 
