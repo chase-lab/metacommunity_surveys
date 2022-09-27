@@ -8,12 +8,13 @@ if (FALSE) {
    ddata <- base::readRDS(datapath)
 
    #sum percent_coverage and density measurement collecting all pa info
-   ddata[, value := sum(PERCENT_COVER, DENSITY, na.rm = TRUE), by = c("SITE", "TRANSECT", "SP_CODE", "DATE")]
+   ddata[, value := sum(PERCENT_COVER, DENSITY, WM_GM2, DM_GM2, SFDM, AFDM,  na.rm = TRUE), by = c("SITE", "TRANSECT", "SP_CODE", "DATE")]
    ddata <- ddata[value > 0, value := 1L][value != 0]
 
    #rename cols
-   data.table::setnames(ddata, c("YEAR", "MONTH", "SITE", "TRANSECT", "SCIENTIFIC_NAME"), c("year", "month", "local", "transect", "species"))
+   data.table::setnames(ddata, c("YEAR", "MONTH", "SITE", "TRANSECT", "SCIENTIFIC_NAME","lat", "lon"), c("year", "month", "local", "transect", "species", "latitude", "longitude"))
 
+<<<<<<< Updated upstream
    #split dataset:
    #group fish
    ddata_fish <- ddata[TAXON_CLASS == "Elasmobranchii" | TAXON_CLASS == "Actinopterygii"]
@@ -58,16 +59,19 @@ if (FALSE) {
 
    ddata_fish[, ":="(
       dataset_id = dataset_id_fish,
+=======
+# community ----   
+   ddata[, ":="(
+>>>>>>> Stashed changes
 
       metric = "pa",
       count = "pa",
-
+      
+      value = 1, 
+      
       regional = "Santa Barbara Channel",
-
+      
       DATE = NULL,
-      TAXON_KINGDOM = NULL,
-      TAXON_PHYLUM = NULL,
-      TAXON_CLASS = NULL,
       TAXON_ORDER = NULL,
       TAXON_FAMILY = NULL,
       TAXON_GENUS = NULL,
@@ -82,10 +86,18 @@ if (FALSE) {
       GROUP = NULL,
       MOBILITY = NULL,
       GROWTH_MORPH = NULL,
-      COARSE_GROUPING = NULL,
-      value = NULL
+      COARSE_GROUPING = NULL
    )]
+   
+   #split dataset:
+   #group fish
+   ddata_fish <- ddata[TAXON_CLASS == "Elasmobranchii" | TAXON_CLASS == "Actinopterygii"][,":="( dataset_id = dataset_id_fish, TAXON_KINGDOM = NULL, TAXON_PHYLUM = NULL, TAXON_CLASS = NULL)]
+   #group invertebrates
+   ddata_invertebrate <- ddata[TAXON_KINGDOM == "Animalia" & TAXON_PHYLUM != "Chordata"][,":="( dataset_id = dataset_id_invertebrate, TAXON_KINGDOM = NULL, TAXON_PHYLUM = NULL, TAXON_CLASS = NULL)]
+   #group macroalgae
+   ddata_macroalgae <- ddata[TAXON_KINGDOM == "Plantae"][,":="( dataset_id = dataset_id_macroalgae, TAXON_KINGDOM = NULL, TAXON_PHYLUM = NULL, TAXON_CLASS = NULL)]
 
+<<<<<<< Updated upstream
    #duplicates! WHY THOUGH
    ddata_macroalgae[, ":="(
       dataset_id = dataset_id_macroalgae,
@@ -131,8 +143,16 @@ if (FALSE) {
 
       latitude =  "",
       longitude = "",
+=======
+# meta ----
+   meta_fish <- unique(ddata_fish[, .(dataset_id_fish, year, regional, local, latitude, longitude)])
+   meta_fish[, ":="(
 
-      study_type = "ecological_sampling", #two possible values, or NA if not sure
+      realm = "Aquatic",
+      taxon = "Fish", 
+>>>>>>> Stashed changes
+
+      study_type = "ecological_sampling", 
 
       data_pooled_by_authors = FALSE,
 
@@ -144,8 +164,13 @@ if (FALSE) {
       alpha_grain_type = "transect",
       alpha_grain_comment = " fixed plots i.e. 40 m x 2 m transects",
 
+<<<<<<< Updated upstream
       #
       gamma_bounding_box = ,
+=======
+      
+      gamma_bounding_box = "",
+>>>>>>> Stashed changes
       gamma_bounding_box_unit = "ha",
       gamma_bounding_box_type = "box",
       gamma_bounding_box_comment = "",
@@ -154,8 +179,8 @@ if (FALSE) {
       gamma_sum_grains_type = "plot",
       gamma_sum_grains_comment = "sampled area per year",
 
-      comment = "",
-      comment_standardisation = ""
+      comment = "These data are part of a larger collection of ongoing data sets that describe the temporal and spatial dynamics of kelp forest communities in the Santa Barbara Channel. Data on the abundance (density or percent cover) and size of ~250 species of reef associated macroalgae, invertebrates and fishes, substrate type and bottom topography are collected annually by divers in the summer within fixed plots (i.e. 40 m x 2 m transects) at 11 sites (n = 2 to 8 transects per site) that have historically supported giant kelp (Macrocystis pyrifera). Species-specific relationships between size (or percent cover) and mass developed for the region are used to covert abundance data to common metrics of mass (e.g., wet, dry, de-calcified dry) to facilitate analyses of community dynamics involving all species. Data collection began in 2000 and is ongoing.",
+      comment_standardisation = "percent_coverage, WM_GM2, DM_GM2, SFDM, AFDM and density pooled together and translated to presence absence data. dataset split by coarse grouping into fish, invertebrate and algae"
    )]
 
    meta_fish[, ":="(
@@ -163,9 +188,18 @@ if (FALSE) {
    ),
    by = .(regional, year)
    ]
+<<<<<<< Updated upstream
 
 
    meta_invertebrate <- unique(ddata_invertebrate[, .(dataset_id_invertebrate, year, regional, local)])
+=======
+   meta_fish[, ":="(
+   gamma_bounding_box = geosphere::areaPolygon(data.frame(longitude, latitude)[grDevices::chull(longitude, latitude), ]) / 10^6),
+   by = .(year, local, regional)]
+   
+   
+   meta_invertebrate <- unique(ddata_invertebrate[, .(dataset_id_invertebrate, year, regional, local, latitude, longitude)])
+>>>>>>> Stashed changes
    meta_invertebrate[, ":="(
 
       realm = "Aquatic",
@@ -199,8 +233,8 @@ if (FALSE) {
       gamma_sum_grains_type = "plot",
       gamma_sum_grains_comment = "sampled area per year",
 
-      comment = "",
-      comment_standardisation = ""
+      comment = "These data are part of a larger collection of ongoing data sets that describe the temporal and spatial dynamics of kelp forest communities in the Santa Barbara Channel. Data on the abundance (density or percent cover) and size of ~250 species of reef associated macroalgae, invertebrates and fishes, substrate type and bottom topography are collected annually by divers in the summer within fixed plots (i.e. 40 m x 2 m transects) at 11 sites (n = 2 to 8 transects per site) that have historically supported giant kelp (Macrocystis pyrifera). Species-specific relationships between size (or percent cover) and mass developed for the region are used to covert abundance data to common metrics of mass (e.g., wet, dry, de-calcified dry) to facilitate analyses of community dynamics involving all species. Data collection began in 2000 and is ongoing.",
+      comment_standardisation = "percent_coverage, WM_GM2, DM_GM2, SFDM, AFDM and density pooled together and translated to presence absence data. dataset split by coarse grouping into fish, invertebrate and algae"
    )]
 
    meta_invertebrate[, ":="(
@@ -244,8 +278,8 @@ if (FALSE) {
       gamma_sum_grains_type = "plot",
       gamma_sum_grains_comment = "sampled area per year",
 
-      comment = "",
-      comment_standardisation = ""
+      comment = "These data are part of a larger collection of ongoing data sets that describe the temporal and spatial dynamics of kelp forest communities in the Santa Barbara Channel. Data on the abundance (density or percent cover) and size of ~250 species of reef associated macroalgae, invertebrates and fishes, substrate type and bottom topography are collected annually by divers in the summer within fixed plots (i.e. 40 m x 2 m transects) at 11 sites (n = 2 to 8 transects per site) that have historically supported giant kelp (Macrocystis pyrifera). Species-specific relationships between size (or percent cover) and mass developed for the region are used to covert abundance data to common metrics of mass (e.g., wet, dry, de-calcified dry) to facilitate analyses of community dynamics involving all species. Data collection began in 2000 and is ongoing.",
+      comment_standardisation = "percent_coverage, WM_GM2, DM_GM2, SFDM, AFDM and density pooled together and translated to presence absence data. dataset split by coarse grouping into fish, invertebrate and algae"
    )]
 
    meta_macroalgae[, ":="(
