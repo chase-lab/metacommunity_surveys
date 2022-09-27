@@ -29,6 +29,13 @@ if (FALSE) {
    ddata <- ddata[ddata[,.(observer = observer[sample(x = 1:.N, size = 1L)]),
                         by = local],on = c("local", "observer")]
 
+   
+
+   #sum bird count over direction, Seen heard, distance
+   ddata[, value := sum(bird_count), by = .(local, year, species)]
+   
+
+   
 
    ddata[, ":="(
       dataset_id = dataset_id,
@@ -53,20 +60,17 @@ if (FALSE) {
       begin_date_year = NULL,
       end_date = NULL,
       end_date_month = NULL,
-      end_date_year = NULL
+      end_date_year = NULL,
+      month = NULL, 
+      bird_count = NULL
    )]
 
    #remove rows with sum_value = NA
    ddata <- ddata[!ddata[rowSums(is.na(ddata))>0,], on = c("local","year","species")]
-
-   #sum bird count over direction, Seen heard, distance
-   ddata[, sum_value := sum(bird_count), by = .(local, year, species)]
-
+   
    #remove duplicates, keep summed bird count
    ddata <- ddata[!duplicated(ddata), ]
-
-
-
+   
 
    # meta ----
    meta <- unique(ddata[, .(dataset_id, year, regional, local, latitude, longitude)])
@@ -93,15 +97,15 @@ if (FALSE) {
       gamma_sum_grains_type = "plot",
       gamma_sum_grains_comment = "sampled area per year",
 
-      comment = "",
-      comment_standardisation = "reducing dataset to one sampling event per year in same season. reducing to one observer per sampling event per year. removing NA in bird_count. Summing bird_counts for different direction, condition and distance to one abundance measure"
+      comment = "Long term bird survey of greater Phoenix metropolitan area. Each bird survey location is visited independently by three birders who count all birds seen or heard within a 15-minute window. The frequency of surveys has varied through the life of the project. The first year of the project (2000) was generally a pilot year in which each site was visited approximately twice by a varying number of birders. The monitoring became more formalized beginning in 2001, and each site was visited in each of four seasons by three birders. The frequency of visits was reduced to three seasons in 2005, and to two season (spring, winter) beginning in 2006.",
+      comment_standardisation = "reducing dataset to one sampling event per year in same season. reducing to one observer per sampling event per year. removing NA in bird_count. Summing bird_counts for different direction, condition and distance to one abundance value"
    )]
 
    meta[, ":="(
       gamma_sum_grains = sum(alpha_grain),
       gamma_bounding_box = geosphere::areaPolygon(data.frame(longitude, latitude)[grDevices::chull(longitude, latitude), ]) / 10^6
    ),
-   by = .(year, regional)
+   by = .(year)
    ]
 
 
