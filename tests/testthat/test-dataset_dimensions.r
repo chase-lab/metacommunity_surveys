@@ -8,7 +8,7 @@ listfiles_community_raw <- list.files(
    full.names = TRUE, recursive = TRUE
 )
 listfiles_metadata_raw <- list.files(
-   path = "./data/wrangled data",
+   path = "/data/wrangled data",
    pattern = "raw_metadata.csv",
    full.names = TRUE, recursive = TRUE
 )
@@ -20,7 +20,7 @@ listfiles_community_standardised <- list.files(
    full.names = TRUE, recursive = TRUE
 )
 listfiles_metadata_standardised <- list.files(
-   path = "./data/wrangled data",
+   path = "/data/wrangled data",
    pattern = "standardised_metadata.csv",
    full.names = TRUE, recursive = TRUE
 )
@@ -33,7 +33,7 @@ lst_column_names_community_raw <- sapply(
    FUN = data.table::fread, integer64 = "character", encoding = "UTF-8", sep = ",", nrows = 1L, header = FALSE
 )
 
-template_community_raw <- utils::read.table(file = paste0(absolute_path, "./data/template_communities_raw.txt"), header = TRUE, sep = "\t")
+template_community_raw <- utils::read.table(file = paste0(absolute_path, "/data/template_communities_raw.txt"), header = TRUE, sep = "\t")
 reference_column_names_community_raw <- template_community_raw[, 1]
 
 testthat::test_that(desc = "only valid column names - community data - raw data", code =
@@ -53,7 +53,7 @@ lst_column_names_community_standardised <- sapply(
    FUN = data.table::fread, integer64 = "character", encoding = "UTF-8", sep = ",", nrows = 1L, header = FALSE
 )
 
-template_community_standardised <- utils::read.table(file = paste0(absolute_path, "./data/template_communities_raw.txt"), header = TRUE, sep = "\t")
+template_community_standardised <- utils::read.table(file = paste0(absolute_path, "/data/template_communities_raw.txt"), header = TRUE, sep = "\t")
 reference_column_names_community_standardised <- template_community_standardised[, 1]
 
 testthat::test_that(desc = "only valid column names - community data - standardised data", code =
@@ -77,7 +77,7 @@ lst_column_names_metadata_raw <- sapply(
    FUN = data.table::fread, integer64 = "character", encoding = "UTF-8", sep = ",", nrows = 1L, header = FALSE
 )
 
-template_metadata_raw <- utils::read.table(file = paste0(absolute_path, "./data/template_communities_raw.txt"), header = TRUE, sep = "\t")
+template_metadata_raw <- utils::read.table(file = paste0(absolute_path, "/data/template_communities_raw.txt"), header = TRUE, sep = "\t")
 reference_column_names_metadata_raw <- template_metadata_raw[, 1]
 
 testthat::test_that(desc = "only valid column names - metadata - raw data", code =
@@ -97,7 +97,7 @@ lst_column_names_metadata_standardised <- sapply(
    FUN = data.table::fread, integer64 = "character", encoding = "UTF-8", sep = ",", nrows = 1L, header = FALSE
 )
 
-template_metadata_standardised <- utils::read.table(file = paste0(absolute_path, "./data/template_communities_raw.txt"), header = TRUE, sep = "\t")
+template_metadata_standardised <- utils::read.table(file = paste0(absolute_path, "/data/template_communities_raw.txt"), header = TRUE, sep = "\t")
 reference_column_names_metadata_standardised <- template_metadata_standardised[, 1]
 
 testthat::test_that(desc = "only valid column names - metadata - standardised data", code =
