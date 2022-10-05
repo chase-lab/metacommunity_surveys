@@ -1,0 +1,22 @@
+variable name	necessary
+dataset_id	TRUE
+year	TRUE
+month FALSE
+day	FALSE
+regional	TRUE
+local	TRUE
+latitude	TRUE
+longitude	TRUE
+effort	TRUE
+study_type	TRUE
+data_pooled_by_authors	TRUE
+data_pooled_by_authors_comment	FALSE
+sampling_years	FALSE
+alpha_grain	TRUE
+alpha_grain_unit	TRUE
+alpha_grain_type	TRUE
+alpha_grain_comment	FALSE
+realm	TRUE
+taxon	TRUE
+comment	TRUE
+comment_standardisation	TRUE
