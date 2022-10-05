@@ -2,82 +2,177 @@
 absolute_path <- rprojroot::find_rstudio_root_file()
 
 ## raw data ----
-listfiles_raw <- list.files(
+listfiles_community_raw <- list.files(
    path = paste0(absolute_path, "/data/wrangled data"),
    pattern = "_raw.csv",
    full.names = TRUE, recursive = TRUE
 )
-listfiles_raw_metadata <- list.files(
+listfiles_metadata_raw <- list.files(
    path = "./data/wrangled data",
    pattern = "raw_metadata.csv",
    full.names = TRUE, recursive = TRUE
 )
 
 ## standardised data ----
-listfiles_standardised <- list.files(
+listfiles_community_standardised <- list.files(
    path = paste0(absolute_path, "/data/wrangled data"),
    pattern = "_standardised.csv",
    full.names = TRUE, recursive = TRUE
 )
-listfiles_standardised_metadata <- list.files(
+listfiles_metadata_standardised <- list.files(
    path = "./data/wrangled data",
    pattern = "standardised_metadata.csv",
    full.names = TRUE, recursive = TRUE
 )
 
 # Testing column names ----
-
-## raw data ----
-lst_column_names_raw <- sapply(
-   X = listfiles_raw,
+## community data ----
+### raw data ----
+lst_column_names_community_raw <- sapply(
+   X = listfiles_community_raw,
    FUN = data.table::fread, integer64 = "character", encoding = "UTF-8", sep = ",", nrows = 1L, header = FALSE
 )
 
-template_raw <- utils::read.table(file = paste0(absolute_path, "./data/template_communities.txt"), header = TRUE, sep = "\t")
-column_names_reference_raw <- template_raw[, 1]
+template_community_raw <- utils::read.table(file = paste0(absolute_path, "./data/template_communities_raw.txt"), header = TRUE, sep = "\t")
+reference_column_names_community_raw <- template_community_raw[, 1]
 
-test_that(desc = "only valid column names - raw data", code =
-             for (i in listfiles_raw) {
-                tested_column_names <-  lst_column_names_raw[[i]]
-                expect_true(all(tested_column_names %in% column_names_reference_raw), info = i)
-             }
+testthat::test_that(desc = "only valid column names - community data - raw data", code =
+                       for (i in listfiles_community_raw) {
+                          tested_column_names_community_raw <-  lst_column_names_community_raw[[i]]
+
+                          testthat::expect_true(
+                             all(tested_column_names_community_raw %in% reference_column_names_community_raw),
+                             info = i
+                          )
+                       }
 )
 
-## standardised data ----
-lst_column_names_standardised <- sapply(
-   X = listfiles_standardised,
+### standardised data ----
+lst_column_names_community_standardised <- sapply(
+   X = listfiles_community_standardised,
    FUN = data.table::fread, integer64 = "character", encoding = "UTF-8", sep = ",", nrows = 1L, header = FALSE
 )
 
-template_standardised <- utils::read.table(file = paste0(absolute_path, "./data/template_communities.txt"), header = TRUE, sep = "\t")
-column_names_reference_standardised <- template_standardised[, 1]
+template_community_standardised <- utils::read.table(file = paste0(absolute_path, "./data/template_communities_raw.txt"), header = TRUE, sep = "\t")
+reference_column_names_community_standardised <- template_community_standardised[, 1]
 
-test_that(desc = "only valid column names - standardised data", code =
-             for (i in listfiles_standardised) {
-                tested_column_names <-  lst_column_names_standardised[[i]]
-                expect_true(all(tested_column_names %in% column_names_reference_standardised), info = i)
-             }
+testthat::test_that(desc = "only valid column names - community data - standardised data", code =
+                       for (i in listfiles_community_standardised) {
+                          tested_column_names_community_standardised <-  lst_column_names_community_standardised[[i]]
+
+                          testthat::expect_true(
+                             all(tested_column_names_community_standardised %in% reference_column_names_community_standardised),
+                             info = i
+                          )
+                       }
 )
+
+
+
+
+## metadata ----
+### raw data ----
+lst_column_names_metadata_raw <- sapply(
+   X = listfiles_metadata_raw,
+   FUN = data.table::fread, integer64 = "character", encoding = "UTF-8", sep = ",", nrows = 1L, header = FALSE
+)
+
+template_metadata_raw <- utils::read.table(file = paste0(absolute_path, "./data/template_communities_raw.txt"), header = TRUE, sep = "\t")
+reference_column_names_metadata_raw <- template_metadata_raw[, 1]
+
+testthat::test_that(desc = "only valid column names - metadata - raw data", code =
+                       for (i in listfiles_metadata_raw) {
+                          tested_column_names_metadata_raw <-  lst_column_names_metadata_raw[[i]]
+
+                          testthat::expect_true(
+                             all(tested_column_names_metadata_raw %in% reference_column_names_metadata_raw),
+                             info = i
+                          )
+                       }
+)
+
+### standardised data ----
+lst_column_names_metadata_standardised <- sapply(
+   X = listfiles_metadata_standardised,
+   FUN = data.table::fread, integer64 = "character", encoding = "UTF-8", sep = ",", nrows = 1L, header = FALSE
+)
+
+template_metadata_standardised <- utils::read.table(file = paste0(absolute_path, "./data/template_communities_raw.txt"), header = TRUE, sep = "\t")
+reference_column_names_metadata_standardised <- template_metadata_standardised[, 1]
+
+testthat::test_that(desc = "only valid column names - metadata - standardised data", code =
+                       for (i in listfiles_metadata_standardised) {
+                          tested_column_names_metadata_standardised <-  lst_column_names_metadata_standardised[[i]]
+
+                          testthat::expect_true(
+                             all(tested_column_names_metadata_standardised %in% reference_column_names_metadata_standardised),
+                             info = i
+                          )
+                       }
+)
+
+
 
 
 
 
 # Testing data dimension ----
 ## raw data ----
-lst_one_column_raw <- sapply(X = listfiles_raw, FUN = data.table::fread, integer64 = "character", encoding = "UTF-8", sep = ",", select = "value")
-lst_metadata_one_column_raw <- sapply(X = listfiles_raw_metadata, FUN = data.table::fread, integer64 = "character", encoding = "UTF-8", sep = ",", select = "year")
+tested_column_name_community <- "value"
+testthat::test_that(desc = paste0("all community raw files have a _", tested_column_name_community, "_ column"),
+                    testthat::expect_silent({
+                       lst_one_column_community_raw <- sapply(
+                          X = listfiles_community_raw,
+                          FUN = data.table::fread, integer64 = "character", encoding = "UTF-8", sep = ",", select = tested_column_name_community
+                       )
+                    })
+)
+
+tested_column_name_metadata <- "year"
+testthat::test_that(desc = paste0("all metadata raw files have a _", tested_column_name_metadata, "_ column"),
+                    testthat::expect_silent({
+                       lst_one_column_metadata_raw <- sapply(
+                          X = listfiles_metadata_raw,
+                          FUN = data.table::fread, integer64 = "character", encoding = "UTF-8", sep = ",", select = tested_column_name_metadata
+                       )
+                    })
+)
 
 
-test_that(desc = "ddata has mor rows than meta - raw data", code =
-             expect_gte(sum(sapply(lst_one_column_raw, nrow)), sum(sapply(lst_metadata_one_column_raw, length)))
+
+testthat::test_that(desc = "ddata has mor rows than meta - raw data",
+                    code = testthat::expect_gte(
+                       sum(sapply(lst_one_column_community_raw, nrow)),
+                       sum(sapply(lst_one_column_metadata_raw, length))
+                    )
 )
 
 ## standardised data ----
-lst_one_column_standardised <- sapply(X = listfiles_standardised, FUN = data.table::fread, integer64 = "character", encoding = "UTF-8", sep = ",", select = "value")
-lst_metadata_one_column_standardised <- sapply(X = listfiles_standardised_metadata, FUN = data.table::fread, integer64 = "character", encoding = "UTF-8", sep = ",", select = "year")
-
-
-test_that(desc = "ddata has mor rows than meta - standardised data", code =
-             expect_gte(sum(sapply(lst_one_column_standardised, length)), sum(sapply(lst_metadata_one_column_standardised, length)))
+testthat::test_that(desc = paste0("all community standardised files have a _", tested_column_name_community, "_ column"),
+                    testthat::expect_silent({
+                       lst_one_column_community_standardised <- sapply(
+                          X = listfiles_community_standardised,
+                          FUN = data.table::fread, integer64 = "character", encoding = "UTF-8", sep = ",", select = tested_column_name_community
+                       )
+                    })
 )
 
+testthat::test_that(desc = paste0("all metadata standardised files have a _", tested_column_name_metadata, "_ column"),
+                    testthat::expect_silent({
+                       lst_one_column_metadata_standardised <- sapply(
+                          X = listfiles_metadata_standardised,
+                          FUN = data.table::fread, integer64 = "character", encoding = "UTF-8", sep = ",", select = tested_column_name_metadata
+                       )
+                    })
+)
+
+
+testthat::test_that(desc = "ddata has mor rows than meta - standardised data",
+                    code = testthat::expect_gte(
+                       sum(sapply(lst_one_column_community_standardised, length)),
+                       sum(sapply(lst_one_column_metadata_standardised, length))
+                    )
+)
+
+# Every site/year in community is also in metadata ----
+# Checking for NAs ----
