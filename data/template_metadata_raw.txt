@@ -1,7 +1,7 @@
 variable name	necessary
 dataset_id	TRUE
 year	TRUE
-month FALSE
+month	FALSE
 day	FALSE
 regional	TRUE
 local	TRUE
