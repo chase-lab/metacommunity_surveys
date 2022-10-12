@@ -11,27 +11,27 @@ listfiles_community_raw <- list.files(
    pattern = "_raw.csv",
    full.names = TRUE, recursive = TRUE
 )
-
+#intersect listfiles_community_raw with modified listfiles
 listfiles_community_raw <- unique (grep(paste(listfiles,collapse="|"), 
                                         listfiles_community_raw, value=TRUE))
-
 
 listfiles_metadata_raw <- list.files(
    path = "/data/wrangled data",
    pattern = "raw_metadata.csv",
    full.names = TRUE, recursive = TRUE
 )
+#intersect listfiles_metadata_raw with modified listfiles
 listfiles_metadata_raw<- unique (grep(paste(listfiles,collapse="|"), 
                                       listfiles_metadata_raw, value=TRUE))
+
 ## standardised data ----
 listfiles_community_standardised <- list.files(
    path = paste0(absolute_path, "/data/wrangled data"),
    pattern = "_standardised.csv",
    full.names = TRUE, recursive = TRUE
 )
-
-listfiles_community_standardised<- unique (grep(paste(listfiles,collapse="|"), 
-                                                listfiles_community_standardised, value=TRUE))
+#intersect listfiles_community_standardsed with modified listfiles
+listfiles_community_standardised<- unique (grep(paste(listfiles,collapse="|"),                                               listfiles_community_standardised, value=TRUE))
 
 
 listfiles_metadata_standardised <- list.files(
@@ -39,9 +39,8 @@ listfiles_metadata_standardised <- list.files(
    pattern = "standardised_metadata.csv",
    full.names = TRUE, recursive = TRUE
 )
-
-listfiles_metadata_standardised<- unique (grep(paste(listfiles,collapse="|"), 
-                                      listfiles_metadata_standardised, value=TRUE))
+#intersect listfiles_metadata_standardised with modified listfiles
+listfiles_metadata_standardised<- unique (grep(paste(listfiles,collapse="|"),                                                listfiles_metadata_standardised, value=TRUE))
 
 # Testing column names ----
 ## community data ----
@@ -57,7 +56,7 @@ reference_column_names_community_raw <- template_community_raw[, 1]
 testthat::test_that(desc = "only valid column names - community data - raw data", code =
                        for (i in listfiles_community_raw) {
                           tested_column_names_community_raw <-  lst_column_names_community_raw[[i]]
-
+                          
                           testthat::expect_true(
                              all(tested_column_names_community_raw %in% reference_column_names_community_raw),
                              info = i
