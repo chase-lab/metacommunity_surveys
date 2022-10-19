@@ -37,7 +37,8 @@ ddata[, ":="(
    species = gsub(pattern = ".", replacement = " ", x = species, fixed = TRUE),
    value = 1L,
    metric = "pa",
-   unit = "pa"
+   unit = "pa",
+   transect = NULL
 )]
 
 # metadata ----

@@ -35,6 +35,7 @@ ddata[, ":="(
 
    value = 1L,
 
+   site_name = NULL,
    avg_of_cover = NULL,
    month_year = NULL,
    trip_no = NULL,

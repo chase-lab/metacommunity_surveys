@@ -42,6 +42,7 @@ ddata[, ":="(
    metric = "abundance",
    unit = "count",
 
+   site_name = NULL,
    trip_no = NULL,
    nights = NULL,
    no_traps = NULL,

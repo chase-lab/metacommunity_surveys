@@ -82,7 +82,7 @@ meta[, ":="(
 
    alpha_grain = pi * 40^2,
    alpha_grain_unit = "m2",
-   alpha_grain_type = "listening point",
+   alpha_grain_type = "listening_point",
    alpha_grain_comment = "Open Radius sampling of birds seen or heard",
 
    gamma_bounding_box_unit = "km2",
@@ -102,6 +102,8 @@ meta[, ":="(
 ),
 by = .(year)
 ]
+
+ddata[, c("longitude","latitude") := NULL]
 
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
 data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, ".csv"),
