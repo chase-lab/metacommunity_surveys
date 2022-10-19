@@ -90,7 +90,7 @@ data.table::fwrite(dt_standardised, "data/communities_standardised.csv", row.nam
 
 if (file.exists("./data/references/homogenisation_dropbox_folder_path.rds")) {
    path_to_homogenisation_dropbox_folder <- base::readRDS(file = "./data/references/homogenisation_dropbox_folder_path.rds")
-   data.table::fwrite(dt_standardised, paste0(path_to_homogenisation_dropbox_folder, "/_data_extraction/metacommunity-survey-raw-communities.csv"), row.names = FALSE)
+   data.table::fwrite(dt_standardised, paste0(path_to_homogenisation_dropbox_folder, "/metacommunity-survey-raw-communities.csv"), row.names = FALSE)
 }
 
 
@@ -242,5 +242,5 @@ if (nrow(meta_standardised) != nrow(unique(dt_standardised[, .(dataset_id, regio
 ## Saving meta ----
 data.table::fwrite(meta_standardised, "data/metadata_standardised.csv", sep = ",", row.names = FALSE, na = "NA")
 if (file.exists("./data/references/homogenisation_dropbox_folder_path.rds"))
-   data.table::fwrite(meta_standardised, paste0(path_to_homogenisation_dropbox_folder, "/_data_extraction/metacommunity-survey-metadata-raw.csv"), sep = ",", row.names = FALSE)
+   data.table::fwrite(meta_standardised, paste0(path_to_homogenisation_dropbox_folder, "/metacommunity-survey-metadata-raw.csv"), sep = ",", row.names = FALSE)
 

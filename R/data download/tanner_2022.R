@@ -25,8 +25,11 @@ rdata <- data.table::rbindlist(
    l = list(NCNE = NCNE, NCNW = NCNW, NCSE = NCSE, NCSW = NCSW, NCNR = NCNR),
    use.names = TRUE, idcol = TRUE
 )
-rdata <- unique(rdata[, SPECIES := species_names$...2[match(SPECIES, species_names$...1)]][, COLONY_ID := NULL])
 
+rdata[, SPECIES := as.character(SPECIES)][SPECIES %in% species_names$...1, SPECIES := species_names$...2[match(SPECIES, species_names$...1)]]
+rdata[, COLONY_ID := NULL]
+
+rdata <- unique(rdata)
 
 dir.create(path = "data/raw data/tanner_2022/", showWarnings = FALSE)
 base::saveRDS(
