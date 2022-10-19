@@ -34,10 +34,10 @@ if (anyNA(meta_raw$year)) warning(paste("missing _year_ value in ", unique(meta_
 if (any(dt_raw[metric == "pa", value] != 1)) warning(paste("abnormal presence absence value in ", unique(dt_raw[value != 1, dataset_id]), collapse = ", "))
 if (any(dt_raw[, .(is.na(regional) | regional == "")])) warning(paste("missing _regional_ value in ", unique(dt_raw[is.na(regional) | regional == "", dataset_id]), collapse = ", "))
 if (any(dt_raw[, .(is.na(local) | local == "")])) warning(paste("missing _local_ value in ", unique(dt_raw[is.na(local) | local == "", dataset_id]), collapse = ", "))
-if (any(dt_raw[, .(is.na(species) | species == "")])) warning(paste("missing _species_  value in ", unique(dt_raw[is.na(species) | species == "", dataset_id]), collapse = ", "))
-if (any(dt_raw[, .(is.na(value) | value == "" | value <= 0)])) warning(paste("missing _value_  value in ", unique(dt_raw[is.na(value) | value == "" | value <= 0, dataset_id]), collapse = ", "))
-if (any(dt_raw[, .(is.na(metric) | metric == "")])) warning(paste("missing _metric_  value in ", unique(dt_raw[is.na(metric) | metric == "", dataset_id]), collapse = ", "))
-if (any(dt_raw[, .(is.na(unit) | unit == "")])) warning(paste("missing _unit_  value in ", unique(dt_raw[is.na(unit) | unit == "", dataset_id]), collapse = ", "))
+if (any(dt_raw[, .(is.na(species) | species == "")])) warning(paste("missing _species_ value in ", unique(dt_raw[is.na(species) | species == "", dataset_id]), collapse = ", "))
+if (any(dt_raw[, .(is.na(value) | value == "" | value < 0)])) warning(paste("missing _value_ value in ", unique(dt_raw[is.na(value) | value == "" | value < 0, dataset_id]), collapse = ", "))
+if (any(dt_raw[, .(is.na(metric) | metric == "")])) warning(paste("missing _metric_ value in ", unique(dt_raw[is.na(metric) | metric == "", dataset_id]), collapse = ", "))
+if (any(dt_raw[, .(is.na(unit) | unit == "")])) warning(paste("missing _unit_ value in ", unique(dt_raw[is.na(unit) | unit == "", dataset_id]), collapse = ", "))
 
 ### Counting the study cases ----
 dt_raw[, .(nsites = length(unique(local))), by = dataset_id][order(nsites, decreasing = TRUE)]
@@ -90,7 +90,7 @@ data.table::fwrite(dt_raw, "data/communities_raw.csv", row.names = FALSE, na = "
 
 if (file.exists("./data/references/homogenisation_dropbox_folder_path.rds")) {
    path_to_homogenisation_dropbox_folder <- base::readRDS(file = "./data/references/homogenisation_dropbox_folder_path.rds")
-   data.table::fwrite(dt_raw, paste0(path_to_homogenisation_dropbox_folder, "/metacommunity-survey-raw-communities.csv"), row.names = FALSE)
+   # data.table::fwrite(dt_raw, paste0(path_to_homogenisation_dropbox_folder, "/metacommunity-survey-raw-communities.csv"), row.names = FALSE)
 }
 
 
@@ -171,10 +171,6 @@ if (any(!meta_raw$study_type %in% c("ecological_sampling","resurvey")))
       )
    )
 
-### checking effort ----
-unique(meta_raw[effort == "unknown" | is.na(effort), .(dataset_id, effort)])
-# all(meta[(checklist), effort] == 1)
-
 ### checking data_pooled_by_authors ----
 meta_raw[is.na(data_pooled_by_authors), data_pooled_by_authors := FALSE]
 if (any(meta_raw[(data_pooled_by_authors), is.na(sampling_years)])) warning(
@@ -198,12 +194,12 @@ data.table::setcolorder(meta_raw, base::intersect(column_names_template_metadata
 
 ## Checking that all data sets have both community and metadata data ----
 if (length(base::setdiff(unique(dt_raw$dataset_id), unique(meta_raw$dataset_id))) > 0L) warning("Incomplete community or metadata tables")
-if (nrow(meta_raw) != nrow(unique(meta_raw[, .(dataset_id, regional, local, year)]))) warning("Redundant rows in meta")
-if (nrow(meta_raw) != nrow(unique(dt_raw[, .(dataset_id, regional, local, year)]))) warning("Discrepancies between dt and meta")
+if (nrow(meta_raw) != nrow(unique(meta_raw[, .(dataset_id, regional, local, year, month, day)]))) warning("Redundant rows in meta")
+if (nrow(meta_raw) != nrow(unique(dt_raw[, .(dataset_id, regional, local, year, month, day)]))) warning("Discrepancies between dt and meta")
 
 
 ## Saving meta ----
 data.table::fwrite(meta_raw, "data/metadata_raw.csv", sep = ",", row.names = FALSE, na = "NA")
-if (file.exists("./data/references/homogenisation_dropbox_folder_path.rds"))
-   data.table::fwrite(meta_raw, paste0(path_to_homogenisation_dropbox_folder, "/metacommunity-survey-metadata-raw.csv"), sep = ",", row.names = FALSE)
-
+if (file.exists("./data/references/homogenisation_dropbox_folder_path.rds")) {
+   # data.table::fwrite(meta_raw, paste0(path_to_homogenisation_dropbox_folder, "/metacommunity-survey-metadata-raw.csv"), sep = ",", row.names = FALSE)
+}

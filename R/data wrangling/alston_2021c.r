@@ -29,7 +29,8 @@ ddata[, ":="(
    metric = "pa",
    unit = "pa",
 
-   plot = NULL
+   plot = NULL,
+   date = NULL
 )]
 
 ## metadata ----
@@ -40,7 +41,6 @@ meta[, ":="(
    realm = "Terrestrial",
 
    study_type = "ecological_sampling",
-   effort = 1L,
 
    data_pooled_by_authors = FALSE,
    sampling_years = NA,
@@ -96,6 +96,7 @@ ddata <- ddata[species %in% species_list]
 meta <- unique(meta[ddata[, .(dataset_id, regional, local, year, month)], on = .(regional, local, year, month)])
 
 meta[, ":="(
+   effort = 1L,
    comment_standardisation = "only open plots i.e. control treatment are included here. Only spring surveys are included here because 2009 and 2019 have spring in common. Tree species are excluded as recommended by the authors. Cover turned into presence absence"
 )][, ":="(
    gamma_sum_grains = sum(alpha_grain),

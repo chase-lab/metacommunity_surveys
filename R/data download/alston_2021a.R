@@ -11,7 +11,7 @@ if (!file.exists("./data/raw data/alston_2021a/rdata.rds")) {
    data.table::setnames(coords, c("dd_lat","dd_long"), c("latitude","longitude"))
    ddata[, site := c("NORTH","CENTRAL","SOUTH")[match(site, c("N","C","S"))]]
    coords <- coords[, .(longitude = mean(longitude), latitude = mean(latitude)), by = .(site, block)]
-   ddata <- ddata[coords, on = c("site", "block")]
+   ddata <- unique(ddata[coords, on = c("site", "block")])
 
    dir.create("./data/raw data/alston_2021a", showWarnings = FALSE)
    saveRDS(ddata, "./data/raw data/alston_2021a/rdata.rds")

@@ -7,6 +7,7 @@ ddata <- readRDS("./data/raw data/alston_2021b/rdata.rds") # SMALL_MAMMALS_2009-
 # Raw data ----
 data.table::setnames(ddata, c("site","plot"), c("regional","local"))
 ddata <- ddata[!is.na(rebar) & !is.na(species)]
+ddata <- ddata[, .(value = .N), by = .(year, date, regional, local, rebar, species, longitude, latitude)]
 
 ## communities ----
 ddata[, ":="(
@@ -16,13 +17,7 @@ ddata[, ":="(
    date = as.POSIXct(x = date, format = "%d-%b-%y"),
 
    metric = "abundance",
-   unit = "count",
-
-   survey = NULL,
-   block = NULL,
-   night = NULL,
-   capture = NULL,
-   id = NULL
+   unit = "count"
 )][, ":="(
    month = format(date, "%m"),
    day = format(date, "%d")
@@ -35,7 +30,6 @@ meta[, ":="(
    realm = "Terrestrial",
 
    study_type = "ecological_sampling",
-   effort = 1L,
 
    data_pooled_by_authors = FALSE,
    data_pooled_by_authors_comment = NA,
@@ -110,7 +104,7 @@ ddata[, ":="(
 
 ## metadata ----
 ### subsetting original meta with standardised ddata ----
-meta[, local := gsub(pattern = "_.*$", replacement = "", x = local)][, c("month", "day", "effort") := NULL]
+meta[, local := gsub(pattern = "_.*$", replacement = "", x = local)][, c("month", "day") := NULL]
 meta <- unique(unique(meta)[ddata[,.(regional, local, year, effort)], on = .(regional, local, year)])
 
 ### updating extent values ----
@@ -118,6 +112,8 @@ meta[, ":="(
    alpha_grain = 0.36,
    alpha_grain_unit = "ha",
    alpha_grain_type = "plot",
+
+   effort = 1L,
 
    comment = "Extracted from dryad repository Alston, Jesse et al. (2021), Ecological consequences of large herbivore exclusion in an African savanna: 12 years of data from the UHURU experiment, Dryad, Dataset, https://doi.org/10.5061/dryad.1g1jwstxw . In the UHURU experiment, 3 sites, North, Central and South are located on a 20km climatic gradient. Each site has 3 replicates/blocks in which several exclusion treatments are applied. In each treatment plot, small mammals were captured every other month with 49 cage traps placed at fixed locations marked by a rebar stuck in the ground regularly placed on a 60m*60m grid. They stay open overnight and are used several times a year. This data is provided by the authors in the table SMALL_MAMMALS_2009-2019.csv. The region is one of the 3 sites North, Central and South, and local scale is a plot: one of the 3 replicates found in a site. Coordinates are provided by the authors in PLOT_COORDINATES.csv. Additional sampling information found in previous study: https://www.esapubs.org/archive/ecol/E095/064/metadata.php : 'Small mammals were live trapped at two-month intervals in total-exclusion and open plots using Sherman live-traps (Goheen et al. 2013). In each trapping session, and for four consecutive days, a single trap was set at each of the 49 grid stakes in the center of each plot, opened in the late afternoon, and checked and closed in the early morning.' ",
    comment_standardisation = "Following author's informations: all empty traps are recorded with a NA in the species field, the number of nights a trap is left open is stored in the night field. Only OPEN treatment plots were used. because effort varies: varying number of traps and varying number of sampling events per year, samples with less than 10 individuals were excluded and communities are resampled down to 10 individuals."

@@ -7,7 +7,6 @@ regional	TRUE
 local	TRUE
 latitude	TRUE
 longitude	TRUE
-effort	TRUE
 study_type	TRUE
 data_pooled_by_authors	TRUE
 data_pooled_by_authors_comment	FALSE

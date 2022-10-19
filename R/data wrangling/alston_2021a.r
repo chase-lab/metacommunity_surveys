@@ -30,7 +30,6 @@ meta[, ":="(
    realm = "Terrestrial",
 
    study_type = "ecological_sampling",
-   effort = 1L,
 
    data_pooled_by_authors = FALSE,
    data_pooled_by_authors_comment = NA,
@@ -88,6 +87,7 @@ ddata <- ddata[, .(value = as.integer(ceiling(mean(value)))), by = .(year, regio
 meta <- unique(meta[ddata[,.(regional, local, year)], on = .(regional, local, year)])
 ### updating extent values ----
 meta[, ":="(
+   effort = 1L,
    comment = "Extracted from dryad repository Alston, Jesse et al. (2021), Ecological consequences of large herbivore exclusion in an African savanna: 12 years of data from the UHURU experiment, Dryad, Dataset, https://doi.org/10.5061/dryad.1g1jwstxw . In the UHURU experiment, 3 sites, North, Central and South are located on a 20km climatic gradient. Each site has 3 replicates/blocks in which several exclusion treatments are applied. We include only the OPEN treatment. In each treatment plot, 36 10*10m plots are surveyed: all trees measured. This data is provided by the authors in the table TREE_CENSUS_DETAILED_2009-2019.csv. The region is one of the 3 sites North, Central and South, and local scale is the section scale. Coordinates are provided by the authors in PLOT_COORDINATES.csv.",
    comment_standardisation = "Following author's recommendations found in the README file provided in the Dryad repository: Euphorbia species were excluded and when a species was recorded in two rows in a given section year, abundances were averaged."
 )][, ":="(

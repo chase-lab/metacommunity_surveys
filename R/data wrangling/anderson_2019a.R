@@ -34,7 +34,8 @@ ddata[, ":="(
 )][, ":="(
    year = format(x = date, format = "%Y"),
    month = format(x = date, format = "%m"),
-   day = format(x = date, format = "%d")
+   day = format(x = date, format = "%d"),
+   date = NULL
 )]
 
 ## metadata ----
@@ -45,8 +46,6 @@ meta[, ":="(
 
    latitude = "48°51’29.5”N",
    longitude = "125°09’31”W",
-
-   effort = 1L,
 
    study_type = "ecological_sampling",
 
@@ -87,6 +86,8 @@ ddata <- unique(ddata[effort == 5L][, .(value = sum(value)), by = .(regional, lo
 meta[, local := gsub("_[123]\\.*5*", "", local)][, c("month","day") := NULL]
 meta <- unique(unique(meta)[ddata[, .(regional, local, year)], on = .(regional, local, year)])
 meta[, ":="(
+   effort = 1L,
+
    gamma_sum_grains_unit = "m2",
    gamma_sum_grains_type = "sample",
    gamma_sum_grains_comment = "sum of the areas of quadrats of each island",

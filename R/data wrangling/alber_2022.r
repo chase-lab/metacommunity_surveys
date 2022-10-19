@@ -86,28 +86,30 @@ meta_0.5[, ":="(
 ddata[, c("latitude","longitude") := NULL]
 
 ## splitting and saving into 2 studies because 2 sampling gears were used ----
-drop_col <-  "alpha_grain"
+drop_col_community <-  "alpha_grain"
+drop_col_metadata <-  "effort"
+
 ### 0.25 m2
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
 data.table::fwrite(
-   x = ddata[alpha_grain == 0.25, !..drop_col],
+   x = ddata[alpha_grain == 0.25, !..drop_col_community],
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_0.25_raw.csv"),
    row.names = FALSE
 )
 data.table::fwrite(
-   x = meta_0.25,
+   x = meta_0.25[, !..drop_col_metadata],
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_0.25_raw_metadata.csv"),
    row.names = FALSE
 )
 ### 0.5 m2
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
 data.table::fwrite(
-   x = ddata[alpha_grain == 0.5, !..drop_col],
+   x = ddata[alpha_grain == 0.5, !..drop_col_community],
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_0.5_raw.csv"),
    row.names = FALSE
 )
 data.table::fwrite(
-   x = meta_0.5,
+   x = meta_0.5[, !..drop_col_metadata],
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_0.5_raw_metadata.csv"),
    row.names = FALSE
 )

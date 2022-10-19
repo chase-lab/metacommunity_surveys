@@ -21,7 +21,7 @@ ddata <- data.table::melt(data = ddata,
 ## community data ----
 ddata[, ":="(
    dataset_id = dataset_id,
-   local = paste(exposure, local, sep = "_"),
+   local = paste(exposure, local, `Tidal Height`, sep = "_"),
 
    date = as.POSIXct(x = date, format = "%d-%b-%y"),
 
@@ -93,7 +93,6 @@ meta[, c("month","day") := NULL]
 meta <- unique(unique(meta)[ddata[, .(regional, local, year)], on = .(regional, local, year)])
 meta[, ":="(
    effort = 5L,
-   data_pooled_by_authors = FALSE,
 
    alpha_grain = 25L * 25L * 5L,
    alpha_grain_unit = "cm2",
