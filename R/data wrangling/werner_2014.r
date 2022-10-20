@@ -37,7 +37,6 @@ meta[, ":="(
   latitude = "42°28'N",
   longitude = "84°00'W",
   
-  effort = 1L,
   study_type = "ecological_sampling",
   
   data_pooled_by_authors = FALSE,
@@ -47,19 +46,11 @@ meta[, ":="(
   alpha_grain_type = "lake_pond",
   alpha_grain_comment = "estimated area of individual ponds. The small ones are <100m2",
   
-  gamma_sum_grains_unit = "m2",
-  gamma_sum_grains_type = "lake_pond",
-  gamma_sum_grains_comment = "200m2 * number of sampled ponds during that year",
-  
-  gamma_bounding_box = 5.25,
-  gamma_bounding_box_unit = "km2",
-  gamma_bounding_box_type = "functional",
-  gamma_bounding_box_comment = "area of the ESGR according to the authors",
-  
   comment = "Extracted from werner et al 2015 Dryad repo (https://datadryad.org/stash/dataset/doi:10.5061/dryad.js47k). Authors repeatedly sampled amphibian larvae. 'We estimated larval densities of 14 species of amphibians in 37 ponds on the University of Michigan’s E. S. George Reserve (hereafter ESGR) over 15 yrs (1996 to 2010).' Effort is constant.",
   comment_standardisation = "None"
-)][, gamma_sum_grains := 200L * length(unique(local)), by = year]
+)]
 
+##saving datasets ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
 data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
                    row.names = FALSE
@@ -75,9 +66,21 @@ ddata <- ddata[value != 0L]
 ## meta data ----
 meta <- meta[unique(ddata[,.(dataset_id,regional, local, year)]), on = .(regional, local, year)]
 
-meta[,":="(
-  comment_standardisation ="Many ponds were sampled only once and excluded")][, gamma_sum_grains := 200L * length(unique(local)), by = year]
+meta[,":="(effort = 1L,
+           
+           gamma_sum_grains_unit = "m2",
+           gamma_sum_grains_type = "lake_pond",
+           gamma_sum_grains_comment = "200m2 * number of sampled ponds during that year",
+           
+           gamma_bounding_box = 5.25,
+           gamma_bounding_box_unit = "km2",
+           gamma_bounding_box_type = "functional",
+           gamma_bounding_box_comment = "area of the ESGR according to the authors",
+           
+           comment_standardisation ="Many ponds were sampled only once and excluded"
+)][, gamma_sum_grains := 200L * length(unique(local)), by = year]
 
+##saving datasets ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
 data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "standardised_.csv"),
                    row.names = FALSE

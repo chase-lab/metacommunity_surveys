@@ -23,11 +23,14 @@ ddata[, longitude := mean(longitude), by = .(regional, local)]
 ## community ----
 #many duplicated rows after deletion of columns due to identifiing information in deleted columns
 #in standardized data the sum is build of duplicated rows for summing values for different distance, direction and  detection  method and 
+
 ddata <- ddata[, ":="(
    dataset_id = dataset_id,
    
    metric = "abundance",
    unit = "count",
+   
+   local = paste(local, observer, distance, seen, heard, direction, time_start, time_end, sep = "_"),
    
    survey_id = NULL, 
    survey_date = NULL, 
@@ -50,48 +53,33 @@ ddata <- ddata[, ":="(
 
 
 ## meta ----
-meta <- unique(ddata[, .(dataset_id, year, regional, local)])
+meta <- unique(ddata[, .(dataset_id, year, month, day, regional, local)])
 meta[, ":="(
    taxon = "Birds",
    
    latitude = ddata[,mean(latitude)],
    longitude = ddata[,mean(longitude)], 
+   
    realm = "Terrestrial",
    
    study_type = "ecological_sampling", #two possible values, or NA if not sure
    
    data_pooled_by_authors = FALSE,
    
-   effort = NA,
-   
    alpha_grain = 1L ,
    alpha_grain_unit = "m2",
    alpha_grain_type = "radius",
    alpha_grain_comment = "Open Radius sampling of birds seen or heard",
    
-   gamma_bounding_box_unit = "km2",
-   gamma_bounding_box_type = "box",
-   gamma_bounding_box_comment = "",
-   
-   gamma_sum_grains_unit = "m2",
-   gamma_sum_grains_type = "plot",
-   gamma_sum_grains_comment = "sampled area per year",
-   
-   comment = "",
-   comment_standardisation = ""
+   comment = "Long term bird survey of greater Phoenix metropolitan area. Each bird survey location is visited independently by three birders who count all birds seen or heard within a 15-minute window. The frequency of surveys has varied through the life of the project. The first year of the project (2000) was generally a pilot year in which each site was visited approximately twice by a varying number of birders. The monitoring became more formalized beginning in 2001, and each site was visited in each of four seasons by three birders. The frequency of visits was reduced to three seasons in 2005, and to two season (spring, winter) beginning in 2006.",
+   comment_standardisation = "None"
 )]
 
-meta[, ":="(
-   gamma_sum_grains = sum(alpha_grain),
-   gamma_bounding_box = geosphere::areaPolygon(data.frame(longitude, latitude)[grDevices::chull(longitude, latitude), ]) / 10^6
-),
-by = .(year, regional)
-] 
 
 ## saving data ----
 
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata[,!"observer"], paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
+data.table::fwrite(ddata[,!c("observer", "latitude", "longitude")], paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
                    row.names = FALSE
 )
 data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
@@ -100,8 +88,6 @@ data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_
 
 # Standardised Data ----
 ## effort standardisation ----
-### remove duplicated entries in raw ddata ----
-### ddata <- unique(ddata) # better not rather sum rows of seen, heard, distance
 
 ### selecting one sampling month from one season: 01,12 or 10 per local per year ----
 ddata <- ddata[month %in% c(01,12,10)]
@@ -121,8 +107,17 @@ ddata <- ddata[!duplicated(ddata), ]
 # meta ----
 
 meta <- meta[unique(ddata[,.(dataset_id,regional, local, year)]), on = .(regional, local, year)]
-meta[,":="(
+meta[,":="(   
+   gamma_bounding_box_unit = "km2",
+   gamma_bounding_box_type = "box",
+   gamma_bounding_box_comment = "",
+   
+   gamma_sum_grains_unit = "m2",
+   gamma_sum_grains_type = "plot",
+   gamma_sum_grains_comment = "sampled area per year",
+   
    comment_standardisation = "reducing dataset to one sampling event per year in same season. reducing to one observer per sampling event per year. removing NA in bird_count. Summing bird_counts for different direction, condition and distance to one abundance measure",
+   
    effort = 1L
 )][, ":="(
    gamma_sum_grains = sum(alpha_grain),
@@ -134,7 +129,7 @@ by = .(year, regional)
 
 
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata[,!"observer" ], paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
+data.table::fwrite(ddata[,!c("observer", "month", "day") ], paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
                    row.names = FALSE
 )
 data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised_metadata.csv"),

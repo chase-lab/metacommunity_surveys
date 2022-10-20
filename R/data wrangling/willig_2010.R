@@ -34,9 +34,7 @@ meta[, ":="(
   
   latitude = 18.3333,
   longitude = -65.8167,
-  
-  effort = 1L,
-  
+
   study_type = "ecological_sampling",
   
   data_pooled_by_authors = FALSE,
@@ -46,23 +44,13 @@ meta[, ":="(
   alpha_grain_type = "plot",
   alpha_grain_comment = "circular quadrats",
   
-  gamma_sum_grains_unit = "m2",
-  gamma_sum_grains_type = "sample",
-  gamma_sum_grains_comment = "sum of the areas of quadrats sampled each year",
-  
-  gamma_bounding_box = 16L,
-  gamma_bounding_box_unit = "ha",
-  gamma_bounding_box_type = "functional",
-  gamma_bounding_box_comment = "area of the LFDP given by the authors",
-  
-  
   comment = "Extracted fron: https://doi.org/10.6073/pasta/45e3a90ed462f66acdde83636746f87f . 'One hundred sixty points were selected on the Hurricane Recovery Plot at El Verde. Circular quadrats (r = 3 m) were established at each point. From June 1991 to present, 40 points were sampled four times seasonally for the presence of Terrestrial snails[...]All surveys occurred between 19:30 and 03:00 hours to coincide with peak snail activity. Population densities were estimated as Minimum Number Known Alive (MNKA), the maximum number of individuals of each species recorded for a site in each season'  Standardisation: only the 1 sampling event per season per plot kept.",
   comment_standardisation = "None"
-)][, gamma_sum_grains := sum(alpha_grain), by = year]
+)]
 
 ## saving data tables ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
+data.table::fwrite(ddata[,!c("season", "run", "date")], paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
                    row.names = FALSE
 )
 data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
@@ -70,7 +58,7 @@ data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_
 )
 
 
-# Standardised Dat a----
+# Standardised Data----
 
 ## selecting one sampling event per season, selecting two seasons ----
 
@@ -99,24 +87,10 @@ ddata[, ":="(
 )]
 
 ## metadata ----
-meta <- unique(ddata[, .(dataset_id, regional, local, year)])
+meta <- meta[unique(ddata[,.(dataset_id,regional, local, year)]), on = .(regional, local, year)]
+
 meta[, ":="(
-  taxon = "Invertebrates",
-  realm = "Terrestrial",
-
-  latitude = 18.3333,
-  longitude = -65.8167,
-
   effort = 1L,
-
-  study_type = "ecological_sampling",
-
-  data_pooled_by_authors = FALSE,
-
-  alpha_grain = pi * 3^2,
-  alpha_grain_unit = "m2",
-  alpha_grain_type = "plot",
-  alpha_grain_comment = "circular quadrats",
 
   gamma_sum_grains_unit = "m2",
   gamma_sum_grains_type = "sample",
@@ -127,11 +101,10 @@ meta[, ":="(
   gamma_bounding_box_type = "functional",
   gamma_bounding_box_comment = "area of the LFDP given by the authors",
 
-
-  comment = "Extracted fron: https://doi.org/10.6073/pasta/45e3a90ed462f66acdde83636746f87f . 'One hundred sixty points were selected on the Hurricane Recovery Plot at El Verde. Circular quadrats (r = 3 m) were established at each point. From June 1991 to present, 40 points were sampled four times seasonally for the presence of Terrestrial snails[...]All surveys occurred between 19:30 and 03:00 hours to coincide with peak snail activity. Population densities were estimated as Minimum Number Known Alive (MNKA), the maximum number of individuals of each species recorded for a site in each season'  Standardisation: only the 1 sampling event per season per plot kept.",
   comment_standardisation = "Both seasons kept. For each season, keeping only one sampling event. From the most sampled months: March, or January, and July, June, August or May for the dry and wet seasons respectively. Then pooling both seasons together."
 )][, gamma_sum_grains := sum(alpha_grain), by = year]
 
+##saving data tables ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
 data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised.csv"),
   row.names = FALSE
