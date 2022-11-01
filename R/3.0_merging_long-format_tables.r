@@ -234,6 +234,12 @@ if (any(meta[(data_pooled_by_authors), is.na(data_pooled_by_authors_comment)])) 
 ## checking comment_standardisation ----
 if (anyNA(meta$comment_standardisation)) warning("Missing comment_standardisation value")
 
+## Checking that there is only one alpha_grain value per dataset_id ----
+if (any(meta[, any(length(unique(alpha_grain_m2)) != 1L), by = .(dataset_id, regional)]$V1)) warning(paste(
+   "Inconsistent grain in",
+   meta[, length(unique(alpha_grain_m2)) != 1L, by = .(dataset_id, regional)][, unique(dataset_id)]
+))
+
 ## checking alpha_grain_type ----
 # meta[(!checklist), .(lterm = diff(range(year)), taxon = taxon, realm = realm, alpha_grain_type = alpha_grain_type), by = .(dataset_id, regional)][lterm >= 10L][taxon == "Fish" & realm == "Freshwater" & grep("lake",alpha_grain_type), unique(dataset_id)]
 if (any(!unique(meta$alpha_grain_type) %in% c("island", "plot", "sample", "lake_pond", "trap", "transect", "functional", "box", "quadrat","listening_point"))) warning(paste("Invalid alpha_grain_type value in", paste(unique(meta[!alpha_grain_type %in% c("island", "plot", "sample", "lake_pond", "trap", "transect", "functional", "box", "quadrat", "listening_point"), dataset_id]), collapse = ", ")))
