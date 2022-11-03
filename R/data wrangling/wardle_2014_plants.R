@@ -33,6 +33,7 @@ ddata[, ":="(
    unit = "percent",
    
    site_name = NULL,
+
    month_year = NULL,
    trip_no = NULL,
    avg_of_fl = NULL,

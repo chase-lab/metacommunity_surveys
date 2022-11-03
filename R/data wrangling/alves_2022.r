@@ -20,7 +20,6 @@ ddata[, ":="(
    value = 1L,
    metric = "pa",
    unit = "pa",
-
    transect = NULL
 )]
 
