@@ -35,6 +35,7 @@ ddata[, ":="(
    
    site_name = NULL,
    site_code = NULL,
+   site_name = NULL,
    trip_no = NULL,
    nights = NULL,
    no_traps = NULL,

@@ -1,28 +1,37 @@
 # magnuson_2020
 dataset_id <- "magnuson_2020"
 
-
-
 ## loading data ----
-
 ddata <- base::readRDS(paste0("./data/raw data/", dataset_id, "/rdata.rds"))
-data.table::setnames(ddata, c("lakeid", "year4", "taxon"), c("local", "year", "species"))
+data.table::setnames(ddata, c("lakeid", "year4", "taxon","number_indiv"), c("local", "year", "species","value"))
 
-ddata[species %in% c("CHAOBORUS PUPAE", "CHAOBORUS LARVAE"), species := "CHAOBORUS"]
+ddata[, species := as.character(species)][species %in% c("CHAOBORUS PUPAE", "CHAOBORUS LARVAE"), species := "CHAOBORUS"]
 ddata[, effort := length(unique(rep)), by = .(local, year)]
-ddata <- unique(ddata[, .(local, year, species, effort)])
+ddata <- ddata[, .(value = sum(value)), by = .(local, year, species, effort)][value != 0L]
+
+## standardisation ----
+### computing min total abundance for the local/year where the effort is the smallest ----
+ddata[, sample_size := sum(value), by = .(year, local)]
+min_sample_size <- ddata[effort == min(effort), min(sample_size)]
+
+### resampling abundances down to the minimal total abundance observed among the surveys with the minimal effort ----
+source("./R/functions/resampling.r")
+set.seed(42)
+ddata[sample_size > min_sample_size, value := resampling(species, value, min_sample_size), by = .(year, local)]
+ddata[sample_size < min_sample_size, value := resampling(species, value, min_sample_size, replace = TRUE), by = .(year, local)]
+ddata <- ddata[!is.na(value)]
 
 
 ## community data ----
-
 ddata[, ":="(
   dataset_id = dataset_id,
   regional = "North Temperate Lakes",
   local = c("Big Muskellunge", "Allequash", "Crystal Bog", "Crystal Lake", "Sparkling", "Trout Bog", "Trout")[match(local, c("BM", "AL", "CB", "CR", "SP", "TB", "TR"))],
 
-  value = 1L,
-  metric = "pa",
-  unit = "pa"
+  metric = "abundance",
+  unit = "count",
+
+  sample_size = NULL
 )]
 
 ## coordinates ----
@@ -64,11 +73,15 @@ coords[, c("border", "coordinate") := data.table::tstrsplit(coords, " bounding c
   local = c("Big Muskellunge", "Allequash", "Crystal Bog", "Crystal Lake", "Sparkling", "Trout Bog", "Trout")[match(local, c("BM", "AL", "CB", "CR", "SP", "TB", "TR"))],
   coords = NULL
 )]
-gamma_bounding_box <- geosphere::areaPolygon(data.frame(longitude = coords[border == "longitude", coordinate], latitude = coords[border == "latitude", coordinate])[grDevices::chull(coords[border == "longitude", coordinate], coords[border == "latitude", coordinate]), ]) / 1000000
+gamma_bounding_box <- geosphere::areaPolygon(
+   x = data.frame(longitude = coords[border == "longitude", coordinate], latitude = coords[border == "latitude", coordinate])[grDevices::chull(
+      coords[border == "longitude", coordinate], coords[border == "latitude", coordinate]
+      ), ]
+   ) / 10^6
 
 
 ## metadata ----
-meta <- unique(ddata[, .(dataset_id, regional, local, year, effort)])
+meta <- unique(ddata[, .(dataset_id, regional, local, year, effort = min(effort))])
 
 meta[, ":="(
   realm = "Freshwater",
@@ -81,12 +94,12 @@ meta[, ":="(
   latitude = coords[border == "latitude", coordinate][match(local, coords[border == "latitude", local])],
   longitude = coords[border == "longitude", coordinate][match(local, coords[border == "longitude", local])],
 
-  alpha_grain = c(396.3, 168.4, 0.5, 36.7, 64, 1.1, 1607.9)[match(local, c("Big Muskellunge", "Allequash", "Crystal Bog", "Crystal Lake", "Sparkling", "Trout Bog", "Trout"))],
+  # alpha_grain = c(396.3, 168.4, 0.5, 36.7, 64, 1.1, 1607.9)[match(local, c("Big Muskellunge", "Allequash", "Crystal Bog", "Crystal Lake", "Sparkling", "Trout Bog", "Trout"))],
+  alpha_grain = 36.7,
   alpha_grain_unit = "ha",
   alpha_grain_type = "lake_pond",
-  alpha_grain_comment = "area of the lake given by the authors",
+  alpha_grain_comment = "area of lake Sparkling given by the authors",
 
-  gamma_sum_grains = sum(c(396.3, 168.4, 0.5, 36.7, 64, 1.1, 1607.9)),
   gamma_sum_grains_unit = "ha",
   gamma_sum_grains_type = "functional",
   gamma_sum_grains_comment = "sum of the areas of the lakes.",
@@ -96,9 +109,9 @@ meta[, ":="(
   gamma_bounding_box_type = "convex-hull",
   gamma_bounding_box_comment = "coordinates extracted fromm the data set metadata",
 
-  comment = "Extracted from EDI data repository knb-lter-ntl.13.32 by John Magnuson et al. The authors sampled macroinvertebrates of 7 lakes every year between 1983 and 2020. Effort is the number of replicates per year per lake (1 to 5)",
-  comment_standardisation = "abundances were turned into presence/absence. Chaoborus pupae and larvae were counted with the adults. Replicate samples were pooled together"
-)]
+  comment = "Extracted from EDI data repository knb-lter-ntl.13.32 by John Magnuson et al. The authors sampled macroinvertebrates of 7 lakes every year between 1983 and 2020. Effort is the smallest number of replicates per year per lake (1 to 5)",
+  comment_standardisation = "Chaoborus pupae and larvae were counted with the adults. 1 to 5 replicate samples per lake per year were pooled together and abundances were resampled based on the smallest observed total abundance (73 individuals) in Sparkling Lake which was sampled only once in 2014."
+)][, gamma_sum_grains := sum(alpha_grain), by = year]
 
 ddata[, effort := NULL]
 

@@ -128,6 +128,8 @@ by = .(year, regional)
 
 
 
+ddata[, c("longitude","latitude") := NULL]
+
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
 data.table::fwrite(ddata[,!c("observer", "month", "day") ], paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
                    row.names = FALSE

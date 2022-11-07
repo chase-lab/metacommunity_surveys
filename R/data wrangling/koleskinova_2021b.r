@@ -32,7 +32,7 @@ ddata[, ":="(
 
    metric = "abundance",
    unit = "count"
-)]
+)][, c("taxonRank","effort","sample_size") := NULL]
 
 # Metadata ----
 meta <- unique(ddata[, .(dataset_id, regional, local, latitude, longitude, year)])
@@ -65,6 +65,8 @@ meta[, ":="(
    comment = "Extracted from GBIF.org (17 May 2022) GBIF Occurrence Download  https://doi.org/10.15468/dl.uefcy6 described in data paper https://doi.org/10.3897/BDJ.9.e75586. Authors sampled colembola with soil cores along a pollution gradient close to a paper pulp factory in Russia. The local/alpha scale is a single core sample and region is a site. 2 sampling cores were used and accounted for, see comment_standardisation section.",
    comment_standardisation = "Abundances from large samples (0.01m2) were resampled down to the minimal abundance found in one of the smaller samples: 23 individuals."
 )][, gamma_sum_grains := sum(alpha_grain), by = .(regional, year)]
+
+ddata[, c("latitude","longitude") := NULL]
 
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
 data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, ".csv"),

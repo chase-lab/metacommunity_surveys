@@ -61,10 +61,10 @@ meta[, ":="(
   data_pooled_by_authors = FALSE,
   sampling_years = NA,
 
-  alpha_grain = effort,
+  alpha_grain = 0.053,
   alpha_grain_unit = "m2",
   alpha_grain_type = "sample",
-  alpha_grain_comment = "area of sediment sampler * number of samples",
+  alpha_grain_comment = "minimal area of sediment sampler",
 
   gamma_sum_grains_unit = "m2",
   gamma_sum_grains_type = "sample",
