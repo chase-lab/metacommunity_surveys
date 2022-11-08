@@ -75,8 +75,9 @@ meta[, ":="(
    comment_standardisation = "None"
 )]
 
+ddata[, c("longitude","latitude") := NULL]
 
-## saving data ----
+## save data sets----
 
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
 data.table::fwrite(ddata[,!c("observer", "latitude", "longitude")], paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
@@ -126,10 +127,7 @@ meta[,":="(
 by = .(year, regional)
 ] 
 
-
-
-ddata[, c("longitude","latitude") := NULL]
-
+##save data sets ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
 data.table::fwrite(ddata[,!c("observer", "month", "day") ], paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
                    row.names = FALSE
