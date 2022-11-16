@@ -13,9 +13,8 @@ ddata <- data.table::melt(ddata,
                           variable.name = "species",
                           na.rm = TRUE
 )
-##transforming average abundance levels to presence absence data 
+##excluding absence data ----
 ddata <- ddata[value > 0]
-ddata[value > 0, value := 1]
 
 ##GIS ----
 coords <- base::readRDS(file = paste("data/raw data", dataset_id, "coords.rds", sep = "/"))
@@ -27,8 +26,8 @@ ddata[, ":="(
   dataset_id = dataset_id,
   regional = "Barkley Sound",
   
-  metric = "pa",
-  unit = "pa"
+  metric = "coverage",
+  unit = "levels"
   
 )]
 
@@ -64,6 +63,14 @@ data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_
 )
 
 #Standardized Data ----
+##transforming average abundance levels to presence absence data ----
+ddata[value > 0, value := 1]
+
+ddata[, ":="(
+  metric = "pa", 
+  unit = "pa"
+)]
+
 ##meta data ----
 meta <- meta[unique(ddata[, .(dataset_id, local, regional, year)]),
              on = .(local, regional, year)]
@@ -78,7 +85,7 @@ meta[,":="(
   gamma_bounding_box = geosphere::areaPolygon(vertices) / 10^6,
   gamma_bounding_box_unit = "km2",
   gamma_bounding_box_type = "convex-hull",
-  gamma_bounding_box_comment = "convex-hull area of the sampling points given in journal.pone.0213191.s001.csv",
+  gamma_bounding_box_comment = "Extracted from Starko et al 2019 Supplementary. Authors resurveyed kelp from the intertidal zone of rocky shores of 4 islands. Effort and methodology is comparable between historical and recent surveys. 'Surveys were conducted following the methods of the original surveyors and were mostly restricted to species in the order Laminariales'. Regional is the Barkley Sound study area west Vancouver Island, local are beaches. Sampling was made along 20 to 50 m long transects considered to be 2 m wide hence the estimated minimal grain of 40 m2. Presence and absence of all kelp species were determined for the entire survey area by carefully identifying all kelp species present by morphology. Kelps are large, seasonally persistent and are easy to distinguish based on conspicuous morphological features [39]. Thus, both our surveys and those done by the original surveyors were likely to result in unbiased, reproducible data. In order to quantify abundance, the intertidal was blocked into four zones: high intertidal (approx. > 2.5 m), mid intertidal (approx. 1.2–2.5 m), low intertidal (approx. 0.2–1.2 m) and shallow subtidal (0–0.2 m). Abundance of each species, in each zone, was then quantified based on visual estimation of percentage cover categories:  rare (≤ 5%) = 1, common (6–20%) = 2and (21–100%) = 3. A species’ assigned abundance was then taken from the zone of its greatest abundance.",
   
   comment_standardisation = "none needed"
 )][, gamma_sum_grains := 40L * length(unique(local)), by = year]
