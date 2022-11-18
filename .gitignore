@@ -2,8 +2,11 @@
 .Rproj.user/**
 .Rhistory
 
+
+backup/**
 data/communities.csv
 data/metadata.csv
+
 data/wrangled data/**
 data/cache/**
 data/requests to taxonomy databases/**
@@ -75,4 +78,3 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,windows
-.Rproj.user
