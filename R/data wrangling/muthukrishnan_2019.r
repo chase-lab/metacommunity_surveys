@@ -63,7 +63,7 @@ meta[, ":="(
 
   data_pooled_by_authors = FALSE,
 
-  alpha_grain = NA,
+  alpha_grain = .7,
   alpha_grain_unit = "m2",
   alpha_grain_type = "sample",
   alpha_grain_comment = "area of one rake sample",

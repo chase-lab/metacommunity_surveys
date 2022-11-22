@@ -20,7 +20,7 @@ data.table::setnames(ddata, c("lake","lat","long"), c("local","latitude","longit
 ddata[, value := value * 0.01824]
 
 ## selecting comparable samples ----
-min_sample_number <- 5L
+min_sample_number <- 6L
 ddata <- ddata[gear == "OC", effort := length(unique(sector)), by = .(local, year)][effort >= min_sample_number]
 set.seed(42)
 ddata <- ddata[ddata[, .(sector = sample(sector, min_sample_number, replace = FALSE)), by = .(local, year)], on = .(local, year, sector)]
