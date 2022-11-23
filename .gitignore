@@ -1,8 +1,10 @@
 .Rproj.user/**
 
-backup/
+backup/**
+
 data/communities.csv
 data/metadata.csv
+
 data/wrangled data/**
 data/cache/**
 data/requests to taxonomy databases/**
