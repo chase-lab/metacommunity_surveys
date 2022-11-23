@@ -1,4 +1,3 @@
-
 dataset_id <- "schuch_2011"
 
 
@@ -9,8 +8,12 @@ data.table::setnames(ddata, c("species", paste0("1951_site ", as.roman(c(1:6, 10
 
 ##splitting and melting years and sites ----
 ddata <- data.table::melt(ddata, id.vars = "species", na.rm = TRUE)
+##excluding absences/abnormal values
 ddata <- ddata[value > 0]
 ddata[, c("year", "local") := data.table::tstrsplit(variable, "_")]
+
+##cleaning ----
+ddata <- ddata[!(grepl("[0-9]|Auchenorrhyncha|Heteroptera|Orthoptera|Ecological charactistics|Ecological characteristics", species) | is.na(species))]
 
 
 ##community data ----
@@ -43,7 +46,7 @@ meta[, ":="(
   alpha_grain_comment = "estimated area",
   
   comment = 'Data was extracted from the supplementary file 1 https://doi.org/10.1111/j.1439-0418.2011.01645.x . "We sampled eight times at each site beginning in May and ending in September 2009, trying to match sampling dates of Marchand as closely as possible (Appendix S1). Marchand sampled with a sweep net (Ø 30 cm; 100 beats per sampling); we used the same method and assume that comparisons between years are justified". Based on the number of beats, alpha grain is estimated at 100 square meters. ',
-  comment_standardisation = "None"
+  comment_standardisation = "In the supplementary file, two abnormal values were excluded: site IV 1951 Orthops kalmii = 0 AND site V 1951 Forcipata forcipata = 0."
 )]
 
 ##save data -----
@@ -56,8 +59,6 @@ data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_
 )
 
 #Standardized Data ----
-##cleaning ----
-ddata <- ddata[!(grepl("[0-9]|Auchenorrhyncha|Heteroptera|Orthoptera|Ecological charactistics|Ecological characteristics", species) | is.na(species))]
 
 ##meta data ----
 meta <- meta[unique(ddata[, .(dataset_id, local, regional, year)]),
@@ -75,9 +76,7 @@ meta[, ":="(
   gamma_bounding_box_unit = "km2",
   gamma_bounding_box_type = "box",
   gamma_bounding_box_comment = "bounding box around the sites found in Marchand 1953",
-  
-  comment_standardisation = "In the supplementary file, two abnormal values were excluded: site IV 1951 Orthops kalmii = 0 AND site V 1951 Forcipata forcipata = 0."
-)]
+  )]
 
 
 ##save data -----
