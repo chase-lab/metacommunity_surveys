@@ -81,12 +81,6 @@ meta[, ":="(
    comment_standardisation = "percent_coverage, WM_GM2, DM_GM2, SFDM, AFDM and density pooled together and translated to presence absence data. dataset split in different scripts by fish, invertebrate and macroalgae. Macroalgae defined as members of taxon_kingdom = plantae"
 )]
 
-meta[, ":="(
-   gamma_sum_grains = sum(alpha_grain),
-   gamma_bounding_box = geosphere::areaPolygon(data.frame(parzer::parse_lon(longitude), latitude)[grDevices::chull(longitude, latitude), ]) / 10^6
-),
-by = year]
-
 ddata[, c("longitude","latitude") := NULL]
 
 ## save data ----
@@ -107,10 +101,17 @@ meta[, ":="(
    gamma_sum_grains_comment = "sampled area per year",
    
    effort = 1L
-)]
+)][, ":="(
+   gamma_sum_grains = sum(alpha_grain),
+   gamma_bounding_box = geosphere::areaPolygon(data.frame(parzer::parse_lon(longitude), latitude)[grDevices::chull(longitude, latitude), ]) / 10^6
+),
+by = year]
+
+
 ##save data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
 data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
                    row.names = FALSE)
 data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
                    row.names = FALSE)
+
