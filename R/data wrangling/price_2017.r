@@ -15,6 +15,8 @@ ddata <- data.table::melt(ddata,
   measure.vars = 4:ncol(ddata),
   measure.name = "value"
 )
+
+#Raw Data ----
 ddata <- ddata[, .(local, year, species, value)]
 
 ddata[, ":="(
@@ -26,8 +28,10 @@ ddata[, ":="(
   unit = "percent cover"
 )]
 
+##exclude na and 0 values ----
 ddata <- ddata[!is.na(value) & value > 0]
 
+##meta data ----
 meta <- unique(ddata[, .(dataset_id, regional, local, year)])
 meta[, ":="(
   realm = "Terrestrial",
@@ -36,7 +40,6 @@ meta[, ":="(
   latitude = "39.00 N",
   longitude = "89.00 W",
 
-  effort = 1L,
   study_type = "ecological_sampling",
 
   data_pooled_by_authors = TRUE,
@@ -48,25 +51,43 @@ meta[, ":="(
   alpha_grain_type = "sample",
   alpha_grain_comment = "20 0.5m2 quadrats per wetland per survey",
 
+  comment = "Extracted from Price et al 2017 Supplementary (https://doi.org/10.13012/B2IDB-0478588_V2 manual download only(?)). Data was produced as part of a Critical Trends Assessment Program and wetlands were sampled every 5 years since 1997. The sampling periods used in this study are as follows: 1997–2000, 2002–2005, 2007–2010 and 2012–2015. Effort is consistent over time: vegetation sampled in standard quadrats.",
+  comment_standardisation = "excluding 0 and na values"
+
+)]
+
+##save data ----
+dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
+data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
+  row.names = FALSE
+)
+data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
+  row.names = FALSE
+)
+
+#Standardized data ----
+##meta data ----
+meta <- meta[unique(ddata[, .(dataset_id, local, regional, year)]),
+             on = .(local, regional, year)]
+meta[,":="(
+  effort = 1L,
+  
   gamma_sum_grains_unit = "m2",
   gamma_sum_grains_type = "sample",
   gamma_sum_grains_comment = "sum of sampled stream stretch areas per region and per year",
-
+  
   gamma_bounding_box = 149997L,
   gamma_bounding_box_unit = "km2",
   gamma_bounding_box_type = "administrative",
-  gamma_bounding_box_comment = "area of the state of Illinois considered as gamma scale extent by the authors.",
-
-  comment = "Extracted from Price et al 2017 Supplementary (https://doi.org/10.13012/B2IDB-0478588_V2 manual download only(?)). Data was produced as part of a Critical Trends Assessment Program and wetlands were sampled every 5 years since 1997. The sampling periods used in this study are as follows: 1997–2000, 2002–2005, 2007–2010 and 2012–2015. Effort is consistent over time: vegetation sampled in standard quadrats.",
-  comment_standardisation = "none needed"
-
+  gamma_bounding_box_comment = "area of the state of Illinois considered as gamma scale extent by the authors."
 )][, gamma_sum_grains := 200L * length(unique(local)), by = .(regional, year)]
 
-
+##save data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, ".csv"),
-  row.names = FALSE
+data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
+                   row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_metadata.csv"),
-  row.names = FALSE
+data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
+                   row.names = FALSE
 )
+
