@@ -8,7 +8,7 @@ if (!file.exists(paste("data/raw data", dataset_id, "ddata.rds", sep = "/"))) {
    )
    data.table::setDT(ddata)
 
-   ddata[, c(2:3, 5:15, 22) := NULL]
+   ddata[, c(2:3, 5:15) := NULL]
 
    dir.create(paste0("./data/raw data/", dataset_id), showWarnings = FALSE)
    base::saveRDS(ddata, file = paste("data/raw data", dataset_id, "ddata.rds", sep = "/"))

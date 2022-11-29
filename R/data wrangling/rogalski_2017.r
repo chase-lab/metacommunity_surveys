@@ -20,7 +20,7 @@ ddata[, ":="(
   dataset_id = dataset_id,
   regional = "Connecticut",
   year = trunc(year),
-  
+
   value = 1L,
   metric = "pa",
   unit = "pa"
@@ -37,19 +37,19 @@ meta <- unique(ddata[, .(dataset_id, regional, local, year)])
 meta[, ":="(
   taxon = "Invertebrates",
   realm = "Freshwater",
-  
+
   latitude = coords$latitude[match(local, c("Black", "Alexander", "Roseland", "Cedar"))],
   longitude = coords$longitude[match(local, c("Black", "Alexander", "Roseland", "Cedar"))],
-  
+
   study_type = "ecological_sampling",
-  
+
   data_pooled_by_authors = FALSE,
-  
+
   alpha_grain = pi * (0.125^2),
   alpha_grain_unit = "m2",
   alpha_grain_type = "sample",
   alpha_grain_comment = "sample/alpha_grain is one single sediment core per lake (local).",
-  
+
   comment = "Data were extracted from the Dryad repository https://doi.org/10.5061/dryad.2vh5c. Authors made sediment samples in 3 lakes and counted Daphnia eggs at different depths to reconstruct past communities.  The authors consider the Ceriodaphnia_eggs_dryg-1 morphospecies as a species (not a group of species that they cannot differentiate). Lake areas were extracted from supp1 associated to the article https://dx.doi.org/10.6084/m9. Coordinates were looked for on various local (Connecticut) websites.",
   comment_standardisation = "Absence values excluded"
 )]
@@ -64,22 +64,23 @@ data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_
 )
 
 #Standardized Data ----
+ddata <- ddata[species != "Unknown_eggs_dryg-1"]
 
 ##meta data ----
 meta <- meta[unique(ddata[, .(dataset_id, local, regional, year)]),
              on = .(local, regional, year)]
 meta[,":="(
   effort = 1L,
-  
+
   gamma_sum_grains_unit = "m2",
   gamma_sum_grains_type = "sample",
   gamma_sum_grains_comment = "sample/alpha_grain is one single sediment core per lake (local). gamma_sum_grains is the sum of sediment core 'slices' per year",
-  
+
   gamma_bounding_box = geosphere::areaPolygon(coords[grDevices::chull(coords$longitude, coords$latitude), c("longitude", "latitude")]) / 1000000,
   gamma_bounding_box_unit = "km2",
   gamma_bounding_box_type = "convex-hull",
   gamma_bounding_box_comment = "area covering the 4 lakes",
-  
+
   comment_standardisation = "Taxa that were not identified (ie 'unknown') were excluded."
 )][, gamma_sum_grains := pi * (0.125^2) * length(unique(local)), by = .(regional, year)]
 
