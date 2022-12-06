@@ -17,7 +17,7 @@ ddata <- ddata[species != "No Vegetation Present" &
                  sample_point_surveyed == "yes"]
 
 
-##Community data ----
+##community data ----
 ddata[, ":="(
   dataset_id = dataset_id,
   
@@ -26,7 +26,7 @@ ddata[, ":="(
   unit = "pa"
 )]
 
-# Metadata ----
+##meta data ----
 meta <- unique(ddata[, .(dataset_id, regional, local, year)])
 meta[, ":="(
   realm = "Freshwater",
@@ -83,7 +83,7 @@ ddata <- unique(ddata[ # data.table style join
   .(regional, local, year, species, dataset_id, value, metric, unit)]
 )
 
-#meta data ----
+##meta data ----
 meta <- meta[unique(ddata[, .(dataset_id, local, regional, year)]),
              on = .(local, regional, year)]
 
