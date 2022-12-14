@@ -47,7 +47,7 @@ ddata[, ":="(
 )]
 
 # Metadata ----
-meta <- unique(ddata[, .(dataset_id, regional, local, year, latitude = mean(latitude), longitude = mean(longitude))])
+meta <- unique(ddata[, .(latitude = mean(latitude), longitude = mean(longitude)), by = .(dataset_id, regional, year, local)])
 meta[, ":="(
    taxon = "Invertebrates",
    realm = "Freshwater",
@@ -72,7 +72,7 @@ meta[, ":="(
    gamma_bounding_box_type = "convex-hull",
 
    comment = "Extracted from EDI repository - Aquatic snail and macrophyte abundance and richness data for ten lakes in Vilas County, WI, USA, 1987-2020 - https://doi.org/10.6073/pasta/29733b5269efe990c3d2d916453fe4dd and associated article . Authors sampled snails from the bottom substrate using different samplers following the lakes invasion by a crayfish. Sampling happened in 1987, 2002, 2011 and 2020. ",
-   comment_standardisation = "All abundances per m2 were back-transformed into integers using the Open Core sample area. To obtain a representative and standardised communities, we focused on years where sampling gear is known (2011 and 2020) and used only Open Cores. To get a comparable effort between years and lakes, we randomly selected 5 sectors (ie samples) from each lake/year. The number of 5 samples is a trade-off between excluding the fewest lakes with insufficient effort and getting as many individuals as possible."
+   comment_standardisation = "All abundances per m2 were back-transformed into integers using the Open Core sample area. To obtain a representative and standardised communities, we focused on years where sampling gear is known (2011 and 2020) and used only Open Cores. To get a comparable effort between years and lakes, we randomly selected 6 sectors (ie samples) from each lake/year. The number of 6 samples is a trade-off between excluding the fewest lakes with insufficient effort and getting as many individuals as possible."
 )][, gamma_sum_grains := sum(alpha_grain), by = year]
 
 ddata[, c("latitude", "longitude") := NULL]

@@ -32,14 +32,14 @@ meta[, ":="(
 
    gamma_sum_grains_unit = "m2",
    gamma_sum_grains_type = "sample",
-   gamma_sum_grains_comment = "sum of the sampled areas from all lakes on a given year",
+   gamma_sum_grains_comment = "sum of the sampled areas from all sites on a given year",
 
    gamma_bounding_box = pi * (326 / 2)^2,
    gamma_bounding_box_unit = "m2",
    gamma_bounding_box_type = "box",
    gamma_bounding_box_comment = "area of circle covering all quadrats",
 
-   comment = "Extracted from figshare repository - Aquatic snail and macrophyte abundance and richness data for ten lakes in Vilas County, WI, USA, 1987-2020 - https://doi.org/10.6073/pasta/29733b5269efe990c3d2d916453fe4dd and associated article . Authors sampled snails from the bottom substrate using different samplers following the lakes invasion by a crayfish. Sampling happened in 1987, 2002, 2011 and 2020. Ideally alpha_grain would be the size of the lakes but that information was not found.",
+   comment = "Extracted from figshare repository Tanner, Jason E.; Connell, Joseph H. (2022): Heron Island exposed (north) crest coral community data. figshare. Dataset. https://doi.org/10.6084/m9.figshare.21114061.v1 . Coral communities in fixed quadrats followed over years.",
    comment_standardisation = "none needed"
 )][, gamma_sum_grains := sum(alpha_grain), by = year]
 meta[local == "NCNR", ":="(latitude = -23.43453, longitude = 151.92436)]
