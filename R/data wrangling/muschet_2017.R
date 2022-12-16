@@ -47,8 +47,7 @@ ddata[, ":="(
   species = tax$long_names[match(species, tax$codes)],
   
   metric = "abundance",
-  unit = "count",
-  VEGZONE = NULL
+  unit = "count"
 )]
 
 ##meta data ----
@@ -70,12 +69,12 @@ meta[, ":="(
   alpha_grain_comment = "wetland area unknown",
   
   comment = "Extracted from Mushet, D.M., Euliss, N.H., Jr., and Solensky, M.J. 2017, Cottonwood Lake Study Area - Invertebrate Counts, U.S. Geological Survey data release, https://doi.org/10.5066/F7BK1B77. Authors provide data sampled in the Cottonwood Lake Study Area from 1992 to 2015. Methods: 'Aquatic macroinvertebrates were collected each month (April-September) from all wetlands at Cottonwood Lake Study Area containing water using vertically oriented funnel traps (Swanson 1978). Sampling was stratified to provide separate estimates of invertebrate biomass and abundance in all major vegetative zones of each wetland. Samples were collected at random locations along the 3 established transects in each wetland that were established earlier and used to collect other biotic and abiotic data (LaBaugh et al. 1987). The length of each vegetation zone as bisected by transects was measured and a computer-generated set of random numbers used to identify sample points for the collection of invertebrate samples in each vegetative zone. One sample was collected from each major vegetative zone from each transect. Data consist of counts by taxa.'  Taxonomic names were extracted from metadata file https://www.sciencebase.gov/catalog/item/get/599d9555e4b012c075b964a6",
-  comment_standardisation = "values of D, 0 and NA  were excluded because no sampling event happend"
+  comment_standardisation = "values of D, 0 and NA were excluded because no sampling event happend"
 )]
 
 ##save data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata[,!c("TRANSECT")], paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
+data.table::fwrite(ddata[,!c("TRANSECT","VEGZONE")], paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
                    row.names = FALSE
 )
 data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),

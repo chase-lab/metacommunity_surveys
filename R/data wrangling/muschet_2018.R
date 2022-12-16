@@ -11,8 +11,13 @@ ddata <- data.table::fread("./data/raw data/muschet_2018/muschet_2018-CLSAamphib
 data.table::setnames(ddata, tolower(colnames(ddata)))
 data.table::setnames(ddata, "wetland", "local")
 
+##pooling all development stages and sex together ----
+ddata <- unique(ddata[, .(value = sum(as.numeric(count))), by = .(local, year, species, transect, month, day)])
+
+
 ##delete unknown species and absence values ----
 ddata <- ddata[species != "NONE" & value > 0L]
+
 
 ##community data ----
 ddata[, ":="(
@@ -23,7 +28,7 @@ ddata[, ":="(
     "Ambystoma mavortium", "Chrysemys picta", "Lithobates tadpole",
     "Pseudacris maculata", "Lithobates pipiens", "Lithobates sylvaticus",
     "Thamnophis radix"
-  )[match(species, c("AMMA", "CHPI", "FROTAD", "PSMA", "RAPI", "RASY", "THRA"))],
+  )[data.table::chmatch(species, c("AMMA", "CHPI", "FROTAD", "PSMA", "RAPI", "RASY", "THRA"))],
   
   metric = "abundance",
   unit = "count"
@@ -73,15 +78,15 @@ ddata <- ddata[full_sample_month == 3L]
 ## selecting two out of the three most common months for each local//YEAR ----
 seldata <- unique(ddata[, .(local, transect, year, month)])
 seldata <- seldata[month %in% 5:7]
-## excluding locals / transects / years with only 2 month sampled ----
+## excluding locals / transects / years with less than 2 months sampled ----
 seldata <- seldata[seldata[, .N, by = .(local, transect, year)][N >= 2L], on = c("local", "transect", "year")]
 seldata[, month_priority_order := c(3L, 2L, 1L)[match(month, c(5L, 6L, 7L))]]
 data.table::setorder(seldata, local, transect, year, month_priority_order)
 seldata <- seldata[, .SD[1:2, ], by = .(local, transect, year)]
 # subsetting by using a data.table join
 ddata <- ddata[seldata, on = c("local", "transect", "year", "month")]
-##pooling all days, MONTHs, TRANSECTs, development stages and sex together ----
-ddata <- unique(ddata[, .(value = sum(as.numeric(count))), by = .(local, year, species)])
+##pooling all days, months and transects together ----
+ddata <- unique(ddata[, .(value = sum(value)), by = .(local, year, species)])
 # selecting only 2 surveys per transect per local per month per year
 # selsample <- unique(ddata[, .(local, transect, year, month, day)])
 # # excluding locals / transects / years / months with only 1 day sampled
