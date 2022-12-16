@@ -234,6 +234,7 @@ if (any(meta[(data_pooled_by_authors), is.na(sampling_years)])) warning(
 if (any(meta[(data_pooled_by_authors), is.na(data_pooled_by_authors_comment)])) warning(paste("Missing data_pooled_by_authors_comment values in", meta[(data_pooled_by_authors) & is.na(data_pooled_by_authors_comment), paste(unique(dataset_id), collapse = ", ")]))
 
 ## checking comment ----
+if (anyNA(meta$comment)) warning("Missing comment value")
 if (length(unique(meta$comment)) != length(unique(meta$dataset_id))) warning("Redundant comment values")
 
 ## checking comment_standardisation ----
