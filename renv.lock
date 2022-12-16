@@ -221,10 +221,10 @@
     },
     "data.table": {
       "Package": "data.table",
-      "Version": "1.14.2",
+      "Version": "1.14.7",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "36b67b5adf57b292923f5659f5f0c853",
+      "Hash": "cb60d18c7f089774810fecec26b32292",
       "Requirements": []
     },
     "digest": {
@@ -730,10 +730,10 @@
     },
     "renv": {
       "Package": "renv",
-      "Version": "0.15.5",
+      "Version": "0.16.0",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "6a38294e7d12f5d8e656b08c5bd8ae34",
+      "Hash": "c9e8442ab69bc21c9697ecf856c1e6c7",
       "Requirements": []
     },
     "rgdal": {
@@ -1030,16 +1030,6 @@
       "Repository": "CRAN",
       "Hash": "a7e91189fa51d9029a30eba3831ce53f",
       "Requirements": []
-    },
-    "zoo": {
-      "Package": "zoo",
-      "Version": "1.8-10",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "277b8b4c5b7b47e664aebfe024a2092e",
-      "Requirements": [
-        "lattice"
-      ]
     }
   }
 }
