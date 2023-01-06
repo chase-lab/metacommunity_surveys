@@ -7,10 +7,7 @@ data.table::setnames(ddata, c("ntransect", "location"), c("local", "regional"))
 # "transect_ids 2019_86 and 2019_91 were excluded over uncertainty whether data are duplicated or not."
 ddata <- ddata[!transect_id %in% c("2019_86", "2019_91")]
 # regions with less than 4 sampled locations per year are excluded (Campeche island2013 and 2017)
-ddata <- ddata[
-   ddata[, length(unique(local)), by = .(regional, year)][V1 >= 4L][, V1 := NULL],
-   on = .(regional, year)
-   ]
+ddata <- ddata[ddata[, length(unique(local)), by = regional][V1 >= 4L][, V1 := NULL], on = .(regional)]
 
 ## community data ----
 
@@ -53,8 +50,9 @@ meta[, ":="(
    comment = "Extracted from supplementary material associated to data paper https://doi.org/10.1002/ecy.3966. TimeFISH is a database of reef fish communities in Southwest Atlantic. Methods: 'A total of 202,965 individuals belonging to 163 reef fish species and 53 families were recorded across 1,857 [Under Water Visual Censuses]'. One 40m2 standard sample per year. Both 'scuba' and 'snorkel' samples were included. Authors provided three scales: location, site and transect ; here, location is regional, transect number is local and the site scale is ignored.",
    comment_standardisation = "transect_ids 2019_86 and 2019_91 were excluded over uncertainty whether data are duplicated or not."
 )
-][, gamma_bounding_box := geosphere::areaPolygon(data.frame(longitude, latitude)[grDevices::chull(longitude, latitude), ]) / 10^6, by = regional
-  ][, gamma_sum_grains := sum(alpha_grain), by = .(regional, year)]
+][, ":="(gamma_bounding_box = geosphere::areaPolygon(data.frame(longitude, latitude)[grDevices::chull(longitude, latitude), ]) / 10^6,
+         gamma_sum_grains = sum(alpha_grain)),
+  by = .(regional, year)]
 
 ddata[, c("latitude", "longitude") := NULL]
 
