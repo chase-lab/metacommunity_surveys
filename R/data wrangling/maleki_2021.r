@@ -7,6 +7,12 @@ ddata <- base::readRDS(file = paste0("./data/raw data/", dataset_id, "/ddata.rds
 ddata <- ddata[, .(value = .N, lat = lat[1], long = long[1]), by = .(plot_id, year, species_name, status_id)]
 data.table::setnames(ddata, c("plot_id", "species_name", "lat", "long"), c("local", "species", "latitude", "longitude"))
 
+##make copy for standardization including life stage info, status_id: ----
+ddatax <- data.table::copy(ddata)
+
+##pooling life stages aka status_id:  ----
+ddata <- ddata[,status_id := NULL][, lapply(.SD, sum), by = .(year, local, species)]
+
 ##community data ----
 ddata[, ":="(
   dataset_id = dataset_id,
@@ -42,7 +48,7 @@ ddata[, ":="(
 
 ##save data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata[,!"status_id"], paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
+data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
                    row.names = FALSE
 )
 
@@ -52,7 +58,7 @@ data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_
 
 #Standardized Data ----
 ##alive trees only ----
-ddata <- ddata[!grepl(pattern = "A", x = status_id, fixed = TRUE)]
+ddata <- ddatax[!grepl(pattern = "A", x = status_id, fixed = TRUE)]
 
 ##meta dara ----
 meta <- meta[unique(ddata[, .(dataset_id, local, regional, year)]),
@@ -83,3 +89,4 @@ data.table::fwrite(ddata[,!"status_id"], paste0("data/wrangled data/", dataset_i
 data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
                    row.names = FALSE
 )
+
