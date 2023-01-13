@@ -33,7 +33,7 @@ ddata <- data.table::melt(ddata,
                           na.rm = TRUE
 )
 
-# when value is D, the pond was not sampled because it was dry
+##exclude empty values ----
 ddata <- ddata[!value %in% c("0", "D", "")]
 
 
@@ -69,7 +69,7 @@ meta[, ":="(
   alpha_grain_comment = "wetland area unknown",
   
   comment = "Extracted from Mushet, D.M., Euliss, N.H., Jr., and Solensky, M.J. 2017, Cottonwood Lake Study Area - Invertebrate Counts, U.S. Geological Survey data release, https://doi.org/10.5066/F7BK1B77. Authors provide data sampled in the Cottonwood Lake Study Area from 1992 to 2015. Methods: 'Aquatic macroinvertebrates were collected each month (April-September) from all wetlands at Cottonwood Lake Study Area containing water using vertically oriented funnel traps (Swanson 1978). Sampling was stratified to provide separate estimates of invertebrate biomass and abundance in all major vegetative zones of each wetland. Samples were collected at random locations along the 3 established transects in each wetland that were established earlier and used to collect other biotic and abiotic data (LaBaugh et al. 1987). The length of each vegetation zone as bisected by transects was measured and a computer-generated set of random numbers used to identify sample points for the collection of invertebrate samples in each vegetative zone. One sample was collected from each major vegetative zone from each transect. Data consist of counts by taxa.'  Taxonomic names were extracted from metadata file https://www.sciencebase.gov/catalog/item/get/599d9555e4b012c075b964a6",
-  comment_standardisation = "values of D, 0 and NA were excluded because no sampling event happend"
+  comment_standardisation = "empty values: 0 and NA were excluded"
 )]
 
 ##save data ----
@@ -103,6 +103,9 @@ ddata <- ddata[nmonth == 6L]
 ## pooling all months, TRANSECTs and VEGZONEs together
 ddata <- unique(ddata[, .(value = sum(as.numeric(value))), by = .(local, year, species)])
 
+##exclude dry pond samples: value == D ----
+ddata <- ddata[!value %in% c("D")]
+
 ##meta data ----
 
 meta <- meta[unique(ddata[, .(dataset_id, local, regional, year)]),
@@ -121,7 +124,7 @@ meta[,":="(
   gamma_bounding_box_type = "convex-hull",
   gamma_bounding_box_comment = "area of the region computed as the convexhull covering the centres of all ponds",
   
-  comment_standardisation = "To ensure standard effort, we kept only wetlands and years that were sampled in all 3 transects in each of the 6 months. Then, samples from all transects and vegetative zones of a site, of all months of a year were pooled together."
+  comment_standardisation = "To ensure standard effort, we kept only wetlands and years that were sampled in all 3 transects in each of the 6 months. Then, samples from all transects and vegetative zones of a site, of all months of a year were pooled together.Empty values: 0 and NA and values of D resembling dry ponds were excluded"
   
 )]
 
@@ -133,3 +136,4 @@ data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset
 data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
                    row.names = FALSE
 )
+
