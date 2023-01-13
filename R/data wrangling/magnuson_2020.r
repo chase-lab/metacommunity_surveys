@@ -128,7 +128,7 @@ meta[,":="(
   gamma_bounding_box_type = "convex-hull",
   gamma_bounding_box_comment = "coordinates extracted fromm the data set metadata",
   
-  comment_standardisation =  "1 to 5 replicate samples per lake per year were pooled together and abundances were resampled based on the smallest observed total abundance (73 individuals) in Sparkling Lake which was sampled only once in 2014."
+  comment_standardisation =  "Chaoborus pupae and larvae were counted with the adults. 1 to 5 replicate samples per lake per year were pooled together and abundances were resampled based on the smallest observed total abundance (73 individuals) in Sparkling Lake which was sampled only once in 2014."
 )][, gamma_sum_grains := sum(alpha_grain), by = year]
 
 ##save data ----

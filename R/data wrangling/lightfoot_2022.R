@@ -80,8 +80,6 @@ ddata <- ddata[!(site == 'SAND' & plot == 'C') & !(site == 'RABB' & plot == 'C')
 ## resample individuals, based on the total abundance in the smallest sampling effort ----
 ### computing effort ----
 ddata[, pit_ID := .GRP, by = .(local, pit)][, effort := length(unique(date)), by = .(year, local, pit_ID)][, effort := sum(effort), by = .(year, local)] # Effort is the minimal number of sampling operations ie the number of pitfall traps * the number of dates per local per year.
-
-
 ### pooling pits and dates ----
 ddata <- ddata[, .(value = .N, effort = unique(effort)), by = .(year, local, species)]
 ### computing min total abundance for the local/year where the effort is the smallest ----
