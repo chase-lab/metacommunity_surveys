@@ -44,7 +44,7 @@ ddata[, c("latitude","longitude") := NULL]
 
 ##save data----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
+data.table::fwrite(ddata[,!"effort"], paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
                    row.names = FALSE
 )
 data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
@@ -97,3 +97,4 @@ data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset
 data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
                    row.names = FALSE
 )
+

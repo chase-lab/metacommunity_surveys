@@ -58,7 +58,7 @@ meta[, ":="(
 
 ## Save raw data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
+data.table::fwrite(ddata[,!"transect"], paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
                    row.names = FALSE
 )
 data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),

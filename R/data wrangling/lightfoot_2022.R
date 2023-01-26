@@ -63,7 +63,7 @@ meta[, ":="(
 
 ##save data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata[,!c("site", "plot", "pit", "sex","rcap","toe_num","SV_length","total_length","weight","tail","pc")], paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
+data.table::fwrite(ddata[,!c("date","site", "plot", "pit", "sex","rcap","toe_num","SV_length","total_length","weight","tail","pc")], paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
                    row.names = FALSE
 )
 data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
