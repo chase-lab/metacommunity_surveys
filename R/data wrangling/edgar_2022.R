@@ -1,6 +1,7 @@
 # edgar_2022 ----
 dataset_id <- "edgar_2022"
 # reading the data ----
+## Data were downloaded by hand from the online repository
 ddata <- data.table::fread(
    file = "data/cache/edgar_2022/IMOS_-_National_Reef_Monitoring_Network_Sub-Facility_-_Global_reef_fish_abundance_and_biomass.csv",
    skip = 69, header = TRUE, sep = ",",
