@@ -5,21 +5,24 @@ dataset_id <- "sorte_2018a"
 ddata <- base::readRDS(file = "data/raw data/sorte_2018/ddata.rds")[taxon == "Fixed algae and invertebrates"]
 
 Not_accepted_species_names <- c(
-  "Notes",
-  "Diatoms",
-  "Cyanobacteria",
-  "Green crust",
-  "Brown crust",
-  "Fleshy crust (Petrocelis cruenta,Ralfsia fungiformis)",
-  "Sponge",
-  "Colonial tunicate",
-  "Percent in pool",
-  grep("egg", unique(ddata$species), value = TRUE)
+   "Notes",
+   "Diatoms",
+   "Cyanobacteria",
+   "Green crust",
+   "Brown crust",
+   "Fleshy crust (Petrocelis cruenta,Ralfsia fungiformis)",
+   "Sponge",
+   "Colonial tunicate",
+   grep("egg", unique(ddata$species), value = TRUE)
 )
 
+labs <- levels(ddata$species)
+labs[grepl('%|percent', labs, fixed = FALSE, ignore.case = TRUE)] <- 'delete_me'
+labs[labs %in% Not_accepted_species_names] <- 'delete_me'
+labs <- gsub(" egg capsules| egg masses|\\.+[0-9]+$", "", labs, fixed = FALSE)
+data.table::setattr(ddata$species, 'levels', labs)
 
-ddata <- ddata[!species %in% Not_accepted_species_names]
-ddata[species == "Mytilus edulis (percent cover)", species := "Mytilus edulis"]
+if (any(ddata$species == 'delete_me')) ddata <- ddata[!species %in% 'delete_me']
 
 ddata[, ":="(
   dataset_id = dataset_id,

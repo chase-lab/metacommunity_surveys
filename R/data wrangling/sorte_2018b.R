@@ -5,9 +5,11 @@ ddata <- base::readRDS(file = "data/raw data/sorte_2018/ddata.rds")[taxon == "in
 
 # removing cover and fixing typos in species names
 labs <- levels(ddata$species)
-labs[grepl('%|percent', labs, fixed = FALSE, ignore.case = TRUE)] <- NA_character_
-labs <- gsub(" egg capsules| egg masses|\\.*[0-9]*$", "", labs, fixed = FALSE)
+labs[grepl('%|percent', labs, fixed = FALSE, ignore.case = TRUE)] <- 'delete_me'
+labs <- gsub(" egg capsules| egg masses|\\.+[0-9]+$", "", labs, fixed = FALSE)
 data.table::setattr(ddata$species, 'levels', labs)
+
+if (any(ddata$species == 'delete_me')) ddata <- ddata[!species %in% 'delete_me']
 
 # Communities ----
 ddata <- ddata[, .(value = sum(value)), by = .(local, period, year, species, taxon)]
