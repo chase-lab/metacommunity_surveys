@@ -78,10 +78,13 @@ if (dt[unit == "count", any(!is.integer(value))]) warning(paste("Non integer val
 ## checking species names ----
 for (i in seq_along(lst)) if (is.character(lst[[i]]$species)) if (any(!unique(Encoding(lst[[i]]$species)) %in% c("UTF-8", "unknown"))) warning(paste0("Encoding issue in ", listfiles[i]))
 ### adding GBIF matched names by Dr. Wubing Xu ----
-load("./data/requests to taxonomy databases/bhsplist_gbif.RDATA")
-data.table::setDT(bh_species)
+corrected_species_names <- data.table::fread(
+   file = "data/requests to taxonomy databases/manual_community_species_filled_20221003.csv",
+   select = c("dataset_id","species","species.new")
+)
 
-dt <- merge(dt, bh_species[, .(dataset_id, species, species.new, gbif_specieskey)], by = c("dataset_id", "species"), all.x = TRUE)
+# data.table join with update by reference
+dt[corrected_species_names, on = .(dataset_id, species), species.new := i.species.new]
 data.table::setnames(dt, c("species", "species.new"), c("species_original", "species"))
 dt[is.na(species), species := species_original]
 # unique(dt[grepl("[^a-zA-Z\\._ ]", species) & nchar(species) < 10L, .(dataset_id)])
