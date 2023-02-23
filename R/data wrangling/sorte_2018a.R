@@ -13,6 +13,7 @@ Not_accepted_species_names <- c(
   "Fleshy crust (Petrocelis cruenta,Ralfsia fungiformis)",
   "Sponge",
   "Colonial tunicate",
+  "Percent in pool",
   grep("egg", unique(ddata$species), value = TRUE)
 )
 

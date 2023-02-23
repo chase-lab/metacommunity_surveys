@@ -83,7 +83,8 @@ corrected_species_names <- data.table::fread(
    select = c("dataset_id","species","species.new")
 )
 
-dt <- merge(dt, corrected_species_names, by = c("dataset_id", "species"), all.x = TRUE)
+# data.table join with update by reference
+dt[corrected_species_names, on = .(dataset_id, species), species.new := i.species.new]
 data.table::setnames(dt, c("species", "species.new"), c("species_original", "species"))
 dt[is.na(species), species := species_original]
 # unique(dt[grepl("[^a-zA-Z\\._ ]", species) & nchar(species) < 10L, .(dataset_id)])

@@ -3,11 +3,17 @@
 dataset_id <- "sorte_2018b"
 ddata <- base::readRDS(file = "data/raw data/sorte_2018/ddata.rds")[taxon == "invertebrates"]
 
+# removing cover and fixing typos in species names
+labs <- levels(ddata$species)
+labs[grepl('%|percent', labs, fixed = FALSE, ignore.case = TRUE)] <- NA_character_
+labs <- gsub(" egg capsules| egg masses|\\.*[0-9]*$", "", labs, fixed = FALSE)
+data.table::setattr(ddata$species, 'levels', labs)
+
+# Communities ----
 ddata <- ddata[, .(value = sum(value)), by = .(local, period, year, species, taxon)]
 ddata[, ":="(
   dataset_id = dataset_id,
   regional = "Gulf of Maine",
-
 
   metric = "abundance",
   unit = "count",

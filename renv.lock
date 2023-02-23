@@ -221,10 +221,10 @@
     },
     "data.table": {
       "Package": "data.table",
-      "Version": "1.14.7",
+      "Version": "1.14.9",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "cb60d18c7f089774810fecec26b32292",
+      "Hash": "b11433606c156cc08a797faffd9c65f1",
       "Requirements": []
     },
     "digest": {
