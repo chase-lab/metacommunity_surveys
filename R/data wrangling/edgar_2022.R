@@ -41,7 +41,10 @@ ddata <- ddata[
 ddata <- ddata[, .(value = sum(total)), by = .(regional = location, local = site_code, year, latitude, longitude, species = species_name)]
 
 ## ddata format ----
-ddata[, dataset_id := dataset_id]
+ddata[, ':='(
+   dataset_id = dataset_id,
+   metric = 'abundance',
+   unit = 'count')]
 
 
 # Metadata ----
