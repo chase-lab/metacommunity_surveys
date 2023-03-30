@@ -101,7 +101,7 @@ meta[, ":="(
   alpha_grain_comment = "area of lake Sparkling given by the authors",
 
   gamma_sum_grains_unit = "ha",
-  gamma_sum_grains_type = "functional",
+  gamma_sum_grains_type = "ecosystem",
   gamma_sum_grains_comment = "sum of the areas of the lakes.",
 
   gamma_bounding_box = gamma_bounding_box,

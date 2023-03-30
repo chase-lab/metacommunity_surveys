@@ -1,4 +1,4 @@
-
+.Rproj.user
 .Rproj.user/**
 .Rhistory
 
@@ -78,4 +78,3 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,windows
-.Rproj.user

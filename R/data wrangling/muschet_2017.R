@@ -86,7 +86,7 @@ meta[, ":="(
 
   alpha_grain = NA,
   alpha_grain_unit = NA,
-  alpha_grain_type = "functional",
+  alpha_grain_type = "ecosystem",
   alpha_grain_comment = "wetland area unknown",
 
   gamma_bounding_box = geosphere::areaPolygon(coords[grDevices::chull(coords$Longitude, coords$Latitude), c("Longitude", "Latitude")]) / 1000000,

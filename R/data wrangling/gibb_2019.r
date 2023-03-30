@@ -61,7 +61,7 @@ meta[, ":="(
 
   gamma_bounding_box = pi * (10^2),
   gamma_bounding_box_unit = "km2",
-  gamma_bounding_box_type = "functional",
+  gamma_bounding_box_type = "ecosystem",
   gamma_bounding_box_comment = "'five sites within 10 km of 'Main Camp'",
 
 

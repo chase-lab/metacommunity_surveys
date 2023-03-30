@@ -68,7 +68,7 @@ meta[, ":="(
 
   gamma_bounding_box = 50L,
   gamma_bounding_box_unit = "km2",
-  gamma_bounding_box_type = "functional",
+  gamma_bounding_box_type = "ecosystem",
   gamma_bounding_box_comment = "area of the Bonanza Creek Experimental Forest",
 
 
