@@ -1,6 +1,6 @@
 ## werner_2014
 
-
+# Raw Data ----
 dataset_id <- "werner_2014"
 ddata <- base::readRDS(file = paste0("data/raw data/", dataset_id, "/ddata.rds"))
 
@@ -12,8 +12,14 @@ ddata <- data.table::melt(ddata,
   measure.name = "value",
   na.rm = TRUE
 )
+
+## excluding  empty rows ----
 ddata[, which(!colnames(ddata) %in% c("local", "year", "species", "value")) := NULL]
 
+ddata <- ddata[value != 0L]
+
+
+## community ----
 ddata[, ":="(
   dataset_id = dataset_id,
   regional = "ES George Reserve",
@@ -23,8 +29,7 @@ ddata[, ":="(
   unit = "pa"
 )]
 
-ddata <- ddata[value != 0L]
-
+##meta ----
 meta <- unique(ddata[, .(dataset_id, regional, local, year)])
 meta[, ":="(
   realm = "Freshwater",
@@ -57,9 +62,9 @@ meta[, ":="(
 )][, gamma_sum_grains := 200L * length(unique(local)), by = year]
 
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, ".csv"),
+data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
   row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_metadata.csv"),
+data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
   row.names = FALSE
 )

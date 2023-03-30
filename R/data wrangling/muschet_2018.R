@@ -5,7 +5,7 @@ coords <- read.csv("./data/raw data/muschet_2017/site locations.csv", skip = 1)
 coords$Plot_name <- ifelse(nchar(coords$Plot_name) == 2, paste0(substr(coords$Plot_name, 1, 1), "0", substr(coords$Plot_name, 2, 2)), coords$Plot_name)
 
 
-ddata <- data.table::fread("./data/raw data/muschet_2018/muschet_2018-CLSAamphibiansCounts.csv")
+ddata <- data.table::fread("./data/raw data/muschet_2018/muschet_2018-CLSAamphibiansCounts_v2.csv")
 data.table::setnames(ddata, tolower(colnames(ddata)))
 data.table::setnames(ddata, "wetland", "local")
 
@@ -88,8 +88,8 @@ meta[, ":="(
   gamma_bounding_box_type = "convex-hull",
   gamma_bounding_box_comment = "area of the region computed as the convexhull covering the centres of all ponds",
 
-  comment = "Extracted from Mushet, D.M., and Solensky, M.J., 2018, Cottonwood Lake Study Area - Amphibians, U.S. Geological Survey data release, https://doi.org/10.5066/F7X9297Q. Authors provide data sampled in the Cottonwood Lake Study Area from 1992 to 2017. METHODS: 'Amphibians and reptiles were captured over one week in May-September from 1992-2017 using amphibian funnel traps (Mushet et al. 1997). Traps were placed along three existing transects within the central vegetation zone of each CLSA wetland. Funnel traps were constructed of 1/8 inch galvanized hardware cloth and had a 5-cm aperture at the funnel opening. The funnel traps designed for use in this study have been shown to minimize injury rates (Mushet et al. 1997) and provide captured animals access to the surface. Additionally, traps were checked daily to minimize the time captured animals spent in traps. Funnel traps were set on the morning of day one and checked each morning over four subsequent days. Adult amphibians and reptiles were identified to species, and tadpoles were identified to genus.'  Taxonomic names were extracted from metadata file https://www.sciencebase.gov/catalog/item/get/599d9555e4b012c075b964a6",
-  comment_standardisation = "To ensure standard effort, we kept only wetlands and years that were sampled in all 3 transects during 2 months in May, June or July. Then, samples from all transects and vegetative zones of a site, of all months of a year were pooled together."
+  comment = "Extracted from Mushet, D.M., and Solensky, M.J., 2022, Cottonwood Lake Study Area - Amphibians (ver. 2.0): U.S. Geological Survey data release, https://doi.org/10.5066/P9G8TM2S. Authors provide data sampled in the Cottonwood Lake Study Area from 1992 to 2021. METHODS: 'Amphibians and reptiles were captured over one week in May-September from 1992-2017 using amphibian funnel traps (Mushet et al. 1997). Traps were placed along three existing transects within the central vegetation zone of each CLSA wetland. Funnel traps were constructed of 1/8 inch galvanized hardware cloth and had a 5-cm aperture at the funnel opening. The funnel traps designed for use in this study have been shown to minimize injury rates (Mushet et al. 1997) and provide captured animals access to the surface. Additionally, traps were checked daily to minimize the time captured animals spent in traps. Funnel traps were set on the morning of day one and checked each morning over four subsequent days. Adult amphibians and reptiles were identified to species, and tadpoles were identified to genus.'  Taxonomic names were extracted from metadata file https://www.sciencebase.gov/catalog/item/get/599d9555e4b012c075b964a6",
+  comment_standardisation = "To ensure standard effort, we kept only wetlands and years that were sampled in all 3 transects during 2 months in May, June or July. Then, samples from all transects and vegetative zones of a site, of all selected months of a year were pooled together."
 )]
 
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)

@@ -1,8 +1,6 @@
 ## closset-kopp_2018
 dataset_id <- "closset-kopp_2018"
 
-
-
 ddata <- base::readRDS(file = paste0("data/raw data/", dataset_id, "/ddata.rds"))
 
 ddata[, c(1, 3:7, 9:10, 12, 14, 16) := NULL]
@@ -89,12 +87,14 @@ meta[, ":="(
 
   gamma_bounding_box = 14414L,
   gamma_bounding_box_unit = "ha",
-  gamma_bounding_box_type = "ecosystem",
+  gamma_bounding_box_type = "functional",
+  gamma_bounding_box_comment = "area provided by the authors",
 
-  comment = "Extracted from Closset et al 2018 10.1111/1365-2745.13118 supplementary material. Effort is comparable between the original survey and the re-sampling. 11 to 23 800m2 plots per soil type. 'In 1970, a vegetation survey of the Compiègne forest was carried out by a senior botanist [...]. Relevés were done in temporary plots of 800 m2. For each relevé, he exhaustively recorded all vascular plant species within each vegetation layer (tree: >7 m, shrub: 1–7 m, herb <1 m) [...]. Two of us (DCK and GD) implemented a resurvey in 2015, using the same method (plot size, season) as Tombal in order to maximize reliability of the comparison between the two surveys.'",
+
+  comment = "Extracted from Closset et al 2018 10.1111/1365-2745.13118 supplementary material. Effort is comparable between the original survey and the re-sampling. 11 to 23 800m2 plots per soil type. 'In 1970, a vegetation survey of the Compiègne forest was carried out by a senior botanist [...]. Relevés were done in temporary plots of 800 m2. For each relevé, the exhaustively recorded all vascular plant species within each vegetation layer (tree: >7 m, shrub: 1–7 m, herb <1 m) [...]. Two of us (DCK and GD) implemented a resurvey in 2015, using the same method (plot size, season) as Tombal in order to maximize reliability of the comparison between the two surveys.'",
   comment_standardisation = "none needed"
 
-)][, gamma_sum_grains := effort * 0.8]
+)][, gamma_sum_grains := effort * 0.0008]
 
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
 data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, ".csv"),

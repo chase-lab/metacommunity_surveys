@@ -11,10 +11,9 @@ ddata <- data.table::melt(ddata,
 )
 ddata[, c("period", "local") := data.table::tstrsplit(variable, " ")]
 
-ddata[, value := as.integer(data.table::fifelse(value == "." | is.na(value), 0L, 1L))]
+ddata[, value := data.table::fifelse(value == "." | is.na(value), 0L, 1L)]
 ddata <- ddata[, .(value = sum(value)), by = .(local, period, species, section)]
 ddata <- ddata[value != 0]
-
 
 ddata[, ":="(
   dataset_id = dataset_id,
@@ -56,7 +55,8 @@ meta[, ":="(
 
   gamma_bounding_box = 1000L,
   gamma_bounding_box_unit = "ha",
-  gamma_bounding_box_type = "ecosystem",
+  gamma_bounding_box_type = "functional",
+  gamma_bounding_box_comment = "area provided by the authors",
 
   comment = "Extracted from supplementary material Table 1 in Vojik and Boublik 2018 (https://doi.org/10.1007/s11258-018-0831-5). Historical vegetation records of the Klinec forest, Czech Republic, were made in 1957. In 2015, M Vojik resampled the same 29 plots of 500m2 each using the same methodology.",
   comment_standardisation = "tree, shrub and herb layers pooled together"

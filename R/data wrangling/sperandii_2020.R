@@ -44,8 +44,8 @@ meta[, ":="(
   data_pooled_by_authors_comment = "one sampling per site per sampling period",
   sampling_years = c("2002, 2005, 2007", "2017")[match(year, c(2007L, 2017L))],
 
-  latitude = 13.48,
-  longitude = 42.01,
+  latitude = 42.01,
+  longitude = 13.48,
 
   alpha_grain = 4L,
   alpha_grain_unit = "m2",
