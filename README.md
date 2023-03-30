@@ -1,8 +1,20 @@
+
+
+[![DOI](https://zenodo.org/badge/454080355.svg)](https://zenodo.org/badge/latestdoi/454080355)
+
 # metacommunity surveys
 
 ## Description
 
 This research compendium regroups scripts used to download, re-structure and aggregate data sets to constitute a large meta-analysis of communities sampled at least twice, 10 years apart or more. This is a child project of chase-lab/homogenisation and brother project to chase-lab/checklist-change
+
+## Availability
+### Release v1.0.0
+
+ - Code archived on Zenodo: https://doi.org/10.5281/zenodo.7785287
+ - Used by Dr Wubing Xu in his manuscript 'Regional occupancy increases for widespread species but decreases for narrowly distributed species in metacommunity time series' published in Nature Communication in March 2023: https://doi.org/10.1038/s41467-023-37127-2
+ - Data archived on iDiv Data Portal: https://doi.org/10.25829/idiv.3503-jevu6s
+
 
 ## Reproducibility and R environment
 ### Installation
