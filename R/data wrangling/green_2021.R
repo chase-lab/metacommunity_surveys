@@ -30,7 +30,7 @@ meta[, ":="(
   latitude = "48.737685°",
   longitude = "-125.118645°",
   
-  alpha_grain = 3.71,
+  #alpha_grain list
   alpha_grain_unit = "m2",
   alpha_grain_type = "lake_pond",
   
@@ -68,6 +68,8 @@ meta <- meta[unique(ddata[, .(dataset_id, local, regional, year)]),
 
 meta[,":="(
   effort = 1L,
+  
+  alpha_grain = 3.71,
   
   gamma_bounding_box = 1200L,
   gamma_bounding_box_unit = "m2",

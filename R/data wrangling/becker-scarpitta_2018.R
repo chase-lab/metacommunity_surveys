@@ -4,6 +4,8 @@ dataset_id <- "becker-scarpitta_2018"
 ddata <- base::readRDS(file = paste0("data/raw data/", dataset_id, "/ddata_historical.rds"))
 data.table::setnames(x = ddata, "Species", "species")
 
+#Raw Data ----
+
 ddata <- data.table::melt(
    data = ddata,
    id.vars = c("species"),
@@ -18,10 +20,10 @@ ddata <- data.table::melt(
    variable.name = "local",
    value.name = "value"
 )
-
+##exclude absences
 ddata <- ddata[, value := as.integer(value)][!is.na(value) & value > 0L]
 
-# Communities ----
+##community data ----
 ddata[, ":="(
    dataset_id = dataset_id,
    regional = "Quebec",
@@ -37,7 +39,7 @@ ddata[, ":="(
    period = NULL
 )]
 
-# Metadata ----
+##meta data ----
 meta <- unique(ddata[, .(dataset_id, regional, local, year)])
 latitudes <- parzer::parse_lat(c("48°54`N", "45°27`N", "45°35`N"))
 longitudes <- parzer::parse_lon(c("64°21`W", "71°9`W", "76°00`W"))
@@ -77,7 +79,7 @@ meta[, ":="(
    comment_standardisation = "none needed"
 )]
 
-# saving raw data ----
+# save raw data ----
 drop_cols <- c("effort",
                "gamma_sum_grains", "gamma_sum_grains_unit", "gamma_sum_grains_type", "gamma_sum_grains_comment",
                "gamma_bounding_box", "gamma_bounding_box_unit", "gamma_bounding_box_type", "gamma_bounding_box_comment"
@@ -92,10 +94,10 @@ data.table::fwrite(x = meta[, !..drop_cols], file = paste0("data/wrangled data/"
 
 # saving standardised data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(x = ddata, file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised.csv"),
+data.table::fwrite(x = ddata, file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
                    row.names = FALSE
 )
-data.table::fwrite(x = meta,  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised_metadata.csv"),
+data.table::fwrite(x = meta,  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
                    row.names = FALSE
 )
 

@@ -4,7 +4,9 @@ dataset_id <- "dugan_2021b"
 ddata <- base::readRDS("./data/raw data/dugan_2021/rdata.rds")
 
 data.table::setnames(ddata, c("MONTH", "YEAR", "SITE", "TOTAL"), c("month", "year", "local", "value"))
-ddata <- unique(ddata)
+
+##delete absences for removing unneccessary duplicates ---- 
+ddata <- ddata[value != 0,]
 
 ## community data ----
 
