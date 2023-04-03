@@ -15,8 +15,9 @@ ddata <- data.table::melt(ddata,
 
 ## excluding  empty rows ----
 ddata[, which(!colnames(ddata) %in% c("local", "year", "species", "value")) := NULL]
-
 ddata <- ddata[value != 0L]
+
+ddata <- ddata[ddata[, diff(range(year)), by = local][V1 >= 10L][,V1 := NULL], on = 'local']
 
 
 ## community ----
