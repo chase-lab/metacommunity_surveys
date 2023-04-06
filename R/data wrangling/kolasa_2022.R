@@ -42,11 +42,11 @@ meta[, ':='(
 
    alpha_grain = pi * (47 / 2)^2,
    alpha_grain_unit = "cm2",
-   alpha_grain_type = "pool",
+   alpha_grain_type = "lake_pond",
    alpha_grain_comment = "mean area of the pools, mean diameter given by the authors",
 
    gamma_sum_grains_unit = "cm2",
-   gamma_sum_grains_type = "pool",
+   gamma_sum_grains_type = "lake_pond",
    gamma_sum_grains_comment = "sum of the sampled areas from all pools on a given year",
 
    gamma_bounding_box = 73L * 47L,
