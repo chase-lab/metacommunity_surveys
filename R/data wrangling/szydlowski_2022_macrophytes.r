@@ -81,7 +81,8 @@ meta[, ":="(
    gamma_bounding_box_comment = "area of Vilas County, Wisconsin",
 
    comment = "Extracted from EDI repository - Aquatic snail and macrophyte abundance and richness data for ten lakes in Vilas County, WI, USA, 1987-2020 - https://doi.org/10.6073/pasta/29733b5269efe990c3d2d916453fe4dd and associated article . Authors sampled counted macrophytes intersecting 10cm wide panes going from the substrate to the surface (75cm in most cases) every meter of a 25m long transect, 6 to 14 transects per lake per year. Sampling happened in 1987, 2002, 2011 and 2020 following the lakes invasion by a crayfish. Ideally alpha_grain would be the size of the lakes but that information was not found.",
-   comment_standardisation = "Abundances were resampled based on the minimal abundance found in lakes with only 6 transects."
+   comment_standardisation = "Abundances were resampled based on the minimal abundance found in lakes with only 6 transects.",
+   doi = 'https://doi.org/10.6073/pasta/29733b5269efe990c3d2d916453fe4dd'
 )][, gamma_sum_grains := sum(alpha_grain), by = year]
 
 ddata[, c("latitude","longitude") := NULL]

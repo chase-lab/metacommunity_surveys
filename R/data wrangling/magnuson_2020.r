@@ -109,7 +109,8 @@ meta[, ":="(
   gamma_bounding_box_comment = "coordinates extracted fromm the data set metadata",
 
   comment = "Extracted from EDI data repository knb-lter-ntl.13.34 by John Magnuson et al. The authors sampled macroinvertebrates of 7 lakes every year between 1983 and 2021. Effort is the smallest number of replicates per year per lake (1 to 5) and alpha_grain is the size of the lake with the smallest effort.",
-  comment_standardisation = "Chaoborus pupae and larvae were pooled with the adults. 1 to 5 replicate samples per lake per year were pooled together and abundances were resampled based on the smallest observed total abundance (73 individuals) in Sparkling Lake which was sampled only once in 2014."
+  comment_standardisation = "Chaoborus pupae and larvae were pooled with the adults. 1 to 5 replicate samples per lake per year were pooled together and abundances were resampled based on the smallest observed total abundance (73 individuals) in Sparkling Lake which was sampled only once in 2014.",
+  doi = 'https://doi.org/10.6073/pasta/40229f97abd97f274bc2a8c1e3ef4ab7'
 )][, gamma_sum_grains := sum(alpha_grain), by = year]
 
 ddata[, effort := NULL]

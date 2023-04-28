@@ -56,7 +56,8 @@ meta[, ":="(
   gamma_bounding_box_comment = "450 km length of shore of the Gulf of Maine covered by the sampling sites, estimated 1/10km wide",
 
   comment = "Extracted from Sorte et al 2018 Supplementary (https://onlinelibrary.wiley.com/doi/full/10.1111/gcb.13425). Mobile invertebrates data. Authors compiled historical records from the 1970s in 4 beaches and sampled algae and both fixed and mobile invertebrates in quadrats along horizontal transects (parallel to the shore) in the tidal zone. In sorte_2018a, we included observations of fixed organisms. Methodology and effort from historical and recent records are comparable. Regional is the Gulf of Maine, local a beach",
-  comment_standardisation = "Two dates from the 2 most sampled months per year were pooled together. There are only 3 transects in some historical samples so only transects 1, 3 and 5 of all sites and years are kept and they were pooled together. Only tide heights of Low, Mid and High (historical) or 0m, 1m, and 2m (modern) were kept and they were pooled together."
+  comment_standardisation = "Two dates from the 2 most sampled months per year were pooled together. There are only 3 transects in some historical samples so only transects 1, 3 and 5 of all sites and years are kept and they were pooled together. Only tide heights of Low, Mid and High (historical) or 0m, 1m, and 2m (modern) were kept and they were pooled together.",
+  doi = 'https://doi.org/10.1111/gcb.13425'
 )]
 
 

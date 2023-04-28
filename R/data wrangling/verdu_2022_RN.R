@@ -17,3 +17,5 @@
 #    ddata[, length(unique(local)), by = regional)[V1 >= 4L][, V1 := NULL],
 #    on = `regional`
 # ]
+
+# doi = 'https://doi.org/10.1002/ecy.3923 | https://doi.org/10.5281/zenodo.6567608'

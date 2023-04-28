@@ -58,7 +58,8 @@ meta[, ":="(
   gamma_bounding_box_comment = "ecological zone area is unknown so gamma has been set to the country",
 
   comment = "Extracted from 2 published Environmental Information Data Centre data sets, DOIs https://doi.org/10.5285/e0b638d5-8271-4442-97ef-cf46ea220f5d and https://doi.org/10.5285/249a90ec-238b-4038-a706-6633c3690d20. Authors sampled macrophytes in 1 100m long stream reaches per 1km2 grid cells in England, Scotland and Wales.",
-  comment_standardisation = "none needed"
+  comment_standardisation = "none needed",
+  doi = 'https://doi.org/10.5285/249a90ec-238b-4038-a706-6633c3690d20 | https://doi.org/10.5285/e0b638d5-8271-4442-97ef-cf46ea220f5d'
 )][, gamma_sum_grains := length(unique(local)), by = .(regional, year)]
 
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)

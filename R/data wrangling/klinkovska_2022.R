@@ -65,7 +65,8 @@ meta[, ':='(
    gamma_bounding_box_comment = "coordinates provided by the authors",
 
    comment = "Extracted from Zenodo respository https://doi.org/10.5281/zenodo.7338814 . 'The data contain plant species composition from vegetation plots repeatedly surveyed in the Hrubý Jeseník Mountains (Eastern Sudetes, Czech Republic). Vegetation plots surveyed by Leoš Bureš and Zuzana Burešová in 1973–1978 were resurveyed in 2004–2010 by Martin Kočí and Leo Bureš and resurveyed again in 2021 by the authors of this dataset. Several new plots were also surveyed in 2004–2010 and resurveyed in 2021'. METHOD: 'Plot size and shape varied by vegetation type. Repeated sampling always used the same plot size as the previous sampling. Most plots were squares of 100 m2 in woodlands and 16 m2 in grasslands or rectangles of 10 m2 in springs. All species of vascular plants were recorded in each plot'. ",
-   comment_standardisation = "Only plots of 16, 25 and 100 square meters were kept. The data set was split between these three plot sizes in three regions: Jeseniky, CZ, 16 ; Jeseniky, CZ, 25 and Jeseniky, CZ, 100. Only sites sampled at least 10 years apart were kept. Percentage cover was converted into presence absence."
+   comment_standardisation = "Only plots of 16, 25 and 100 square meters were kept. The data set was split between these three plot sizes in three regions: Jeseniky, CZ, 16 ; Jeseniky, CZ, 25 and Jeseniky, CZ, 100. Only sites sampled at least 10 years apart were kept. Percentage cover was converted into presence absence.",
+   doi = 'https://doi.org/10.1111/avsc.12711'
 )][, ":="(gamma_bounding_box = geosphere::areaPolygon(data.frame(longitude, latitude)[grDevices::chull(longitude, latitude), ]) / 10^6,
           gamma_sum_grains = sum(alpha_grain)),
    by = .(regional, year)]

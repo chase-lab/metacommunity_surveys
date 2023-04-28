@@ -55,7 +55,8 @@ meta[, ':='(
    gamma_bounding_box_comment = "box encompassing all pools, given by the authors",
 
    comment = 'Data extracted from:  Schenk, Siobhan, Lavender, Thomas Michael, and Kolasa, Jurek. 2023. "Long-Term Supratidal Rockpool Invertebrate Community, Discovery Bay, Jamaica." Ecology e4013. https://doi.org/10.1002/ecy.4013 . METHOD: "A sample of rockpool invertebrates is a collection of individuals of all species extracted from 500 mL of homogenized rockpool contents" Macro- and microinvertebrates were then counted in the lab.',
-   comment_standardisation = 'Redundant rows were deleted. June samples were excluded. When a pool was sampled twice during a year (January and December), only January was kept.'
+   comment_standardisation = 'Redundant rows were deleted. June samples were excluded. When a pool was sampled twice during a year (January and December), only January was kept.',
+   doi = 'https://doi.org/10.1002/ecy.4013 | https://doi.org/10.5683/SP3/FNAU9L | https://esajournals.onlinelibrary.wiley.com/doi/full/10.1002/ecs2.3078'
 )][, gamma_sum_grains := sum(alpha_grain), by = year]
 
 # Saving ----

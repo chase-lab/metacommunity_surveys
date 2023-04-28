@@ -60,7 +60,8 @@ meta[, ":="(
   gamma_bounding_box_comment = "convex-hull area of the sampling points given in journal.pone.0213191.s001.csv",
 
   comment = "Extracted from Starko et al 2019 Supplementary. Authors resurveyed kelp from the intertidal zone of rocky shores of 4 islands. Effort and methodology is comparable between historical and recent surveys. 'Surveys were conducted following the methods of the original surveyors and were mostly restricted to species in the order Laminariales'. Regional is the Barkley Sound study area west Vancouver Island, local are beaches. Sampling was made along 20 to 50 m long transects considered to be 2 m wide hence the estimated minimal grain of 40 m2.",
-  comment_standardisation = "none needed"
+  comment_standardisation = "none needed",
+  doi = 'https://doi.org/10.1371/journal.pone.0213191'
 )][, gamma_sum_grains := 40L * length(unique(local)), by = year]
 
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)

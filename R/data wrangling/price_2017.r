@@ -58,8 +58,8 @@ meta[, ":="(
   gamma_bounding_box_comment = "area of the state of Illinois considered as gamma scale extent by the authors.",
 
   comment = "Extracted from Price et al 2017 Supplementary (https://doi.org/10.13012/B2IDB-0478588_V2 manual download only(?)). Data was produced as part of a Critical Trends Assessment Program and wetlands were sampled every 5 years since 1997. The sampling periods used in this study are as follows: 1997–2000, 2002–2005, 2007–2010 and 2012–2015. Effort is consistent over time: vegetation sampled in standard quadrats.",
-  comment_standardisation = "none needed"
-
+  comment_standardisation = "none needed",
+doi = 'https://doi.org/10.13012/B2IDB-0478588_V2 | https://doi.org/10.1111/1365-2745.12883'
 )][, gamma_sum_grains := 200L * length(unique(local)), by = .(regional, year)]
 
 

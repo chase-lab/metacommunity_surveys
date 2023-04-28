@@ -73,7 +73,8 @@ meta[, ":="(
    gamma_bounding_box_comment = "coordinates provided by the authors",
 
    comment = "Methods: 'This dataset contains records of bony fishes and elasmobranchs collected by Reef Life Survey (RLS) and Australian Temperate Reef Collaboration (ATRC) divers and partners along 50m transects on shallow rocky and coral reefs using standard methods. Abundance information is available for all species recorded within quantitative survey limits (50 x 5 m swathes either side of the transect line, each distinguished as a 'Block'), with size and biomass data also included when available. These observations form the Method 1 component of the surveys' ",
-   comment_standardisation = "Only fish (Bony + cartilagenous), only method 1, only regions with at least 4 sites, when there are several samplings a year, only the first sample from the most frequently sampled month."
+   comment_standardisation = "Only fish (Bony + cartilagenous), only method 1, only regions with at least 4 sites, when there are several samplings a year, only the first sample from the most frequently sampled month.",
+   doi = 'https://doi.org/10.1016/j.biocon.2020.108855 | https://doi.org/10.1017/S0376892912000185| https://doi.org/10.1038/sdata.2014.6'
 )
 ][, ":="(gamma_bounding_box = geosphere::areaPolygon(data.frame(longitude, latitude)[grDevices::chull(longitude, latitude), ]) / 10^6,
          gamma_sum_grains = sum(alpha_grain)),

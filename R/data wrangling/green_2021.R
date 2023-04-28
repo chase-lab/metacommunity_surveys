@@ -62,7 +62,8 @@ meta[, ":="(
   gamma_sum_grains_comment = "sum of the areas of the sampled pounds",
 
   comment = "Extracted from Green and al. supplementary docx file table S5 (https://doi.org/10.1111/ddi.13387). Methods: 'Fish sampling was conducted on 13 occasions between 1966 and 2016[...]Sampling captured all fish in each pool and consisted of dispersing rotenone into a pool when it was isolated at low tide followed by a thorough search of the pool during which all fish were recovered with small dip nets (Gibson, 1999; Green, 1971). This approach is unique in collecting rare and cryptic species (the full species list for the study period is reported in Table S1). Tidepools were sampled on the same low tide on each sampling date, led by the first author (JMG).'",
-  comment_standardisation = "individual based standardisation: all abundances were resampled down to the smallest abundance from the smallest pond: 22 individuals."
+  comment_standardisation = "individual based standardisation: all abundances were resampled down to the smallest abundance from the smallest pond: 22 individuals.",
+  doi = 'https://doi.org/10.1111/ddi.13387'
 )][, gamma_sum_grains := sum(alpha_grain), by = year]
 
 

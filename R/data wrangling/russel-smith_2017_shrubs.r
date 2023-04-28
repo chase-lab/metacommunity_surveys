@@ -134,7 +134,8 @@ meta[, ":="(
    gamma_bounding_box_comment = "convex-hull over the coordinates of sample points",
 
    comment = "Data manually downloaded via https://datacommons.anu.edu.au/DataCommons/rest/records/anudc:5836/data/ with login for national university of australia website. Authors sampled shrubs from the inner 40m*10m plot of their fixed 40m*20m plots once a year. They measured the height of all shrubs and we kept only abundances.",
-   comment_standardisation = "some visit numbers (T1, T2, ...) had no match (year) in the dates table so they were excluded. Authors sampled shrubs from the smallest size class in subplots but since the size of subplot is constant, no standardisation is needed. Some rows were duplicated so all results from these 5 problematic plot/year subsets were excluded. Sites sampled only one year were excluded."
+   comment_standardisation = "some visit numbers (T1, T2, ...) had no match (year) in the dates table so they were excluded. Authors sampled shrubs from the smallest size class in subplots but since the size of subplot is constant, no standardisation is needed. Some rows were duplicated so all results from these 5 problematic plot/year subsets were excluded. Sites sampled only one year were excluded.",
+   doi = 'https://doi.org/10.25911/5c3d75bbca1c0'
 )]
 
 meta[, ":="(

@@ -54,7 +54,8 @@ meta[, ":="(
 
 
   comment = "Extracted from EDI repository knb-lter-sbc.51.10 https://pasta.lternet.edu/package/eml/knb-lter-sbc/51/10 . Authors counted birds, marine mammals, dogs and humans on 1km transects of 6 coastal sites of the Santa Barbara Coastal LTER. Only living mammals were included in this data set. Coordinates are from the Santa Barbara Coastal LTER website https://sbclter.msi.ucsb.edu/data/catalog/package/?package=knb-lter-sbc.51",
-  comment_standardisation = "Only sites actually sampled 12 times every year were included"
+  comment_standardisation = "Only sites actually sampled 12 times every year were included",
+  doi = 'https://doi.org/10.6073/pasta/06c6b9983a5f0a44349e027a002f5040'
 )][, gamma_sum_grains := length(unique(local)) * 10000L, by = year]
 
 

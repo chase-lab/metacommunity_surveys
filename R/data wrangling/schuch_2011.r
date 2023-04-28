@@ -57,7 +57,8 @@ meta[, ":="(
 
 
   comment = 'Data was extracted from the supplementary file 1 https://doi.org/10.1111/j.1439-0418.2011.01645.x . "We sampled eight times at each site beginning in May and ending in September 2009, trying to match sampling dates of Marchand as closely as possible (Appendix S1). Marchand sampled with a sweep net (Ø 30 cm; 100 beats per sampling); we used the same method and assume that comparisons between years are justified". Based on the number of beats, alpha grain is estimated at 100 square meters. ',
-  comment_standardisation = "In the supplementary file, two abnormal values were excluded: site IV 1951 Orthops kalmii = 0 AND site V 1951 Forcipata forcipata = 0."
+  comment_standardisation = "In the supplementary file, two abnormal values were excluded: site IV 1951 Orthops kalmii = 0 AND site V 1951 Forcipata forcipata = 0.",
+  doi = 'https://doi.org/10.3897/zookeys.257.4156'
 )]
 
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)

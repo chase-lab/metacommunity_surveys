@@ -48,7 +48,8 @@ meta[, ":="(
    gamma_bounding_box_comment = "coordinates provided by the authors",
 
    comment = "Extracted from supplementary material associated to data paper https://doi.org/10.1002/ecy.3966. TimeFISH is a database of reef fish communities in Southwest Atlantic. Methods: 'A total of 202,965 individuals belonging to 163 reef fish species and 53 families were recorded across 1,857 [Under Water Visual Censuses]'. One 40m2 standard sample per year. Both 'scuba' and 'snorkel' samples were included. Authors provided three scales: location, site and transect ; here, location is regional, transect number is local and the site scale is ignored.",
-   comment_standardisation = "transect_ids 2019_86 and 2019_91 were excluded over uncertainty whether data are duplicated or not."
+   comment_standardisation = "transect_ids 2019_86 and 2019_91 were excluded over uncertainty whether data are duplicated or not.",
+   doi = 'https://doi.org/10.1002/ecy.3966'
 )
 ][, ":="(gamma_bounding_box = geosphere::areaPolygon(data.frame(longitude, latitude)[grDevices::chull(longitude, latitude), ]) / 10^6,
          gamma_sum_grains = sum(alpha_grain)),

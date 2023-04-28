@@ -73,7 +73,8 @@ meta[, ":="(
   gamma_bounding_box_comment = "area of Illinois/4 because sites are located in 'north-eastern Illinois'",
 
   comment = "Extracted from Larkin et al 2015 Dryad repo (https://datadryad.org/stash/dataset/doi:10.5061/dryad.763v6). Resurvey of plant communities of 41 sites in Illinois originally sampled in 1976 and resampled in 2001. Coordinates of the centre of Nort East Illinois.",
-  comment_standardisation = "Original sampling was standardised: 20 to 30 0.25m2 circular quadrats along a transect, per site BUT We keep only the first 19 plots of each site (19 is the minimal number of plots across sites). Then we pooled together species detected in the 19 quadrats of a site in a given year."
+  comment_standardisation = "Original sampling was standardised: 20 to 30 0.25m2 circular quadrats along a transect, per site BUT We keep only the first 19 plots of each site (19 is the minimal number of plots across sites). Then we pooled together species detected in the 19 quadrats of a site in a given year.",
+  doi = 'https://doi.org/10.5061/dryad.763v6 | https://doi.org/10.1111/1365-2664.12516'
 )]
 
 

@@ -24,7 +24,7 @@ ddata[, ":="(
   regional = "Main Camp area of the Ethabuka Reserve",
   local = paste(site, position, sep = "_"),
 
-  
+
 
   metric = "abundance",
   unit = "count",
@@ -44,7 +44,7 @@ meta[, ":="(
   longitude = "138°28'E",
 
   effort = 1L,
-  
+
   study_type = "ecological_sampling",
 
   data_pooled_by_authors = FALSE,
@@ -66,7 +66,8 @@ meta[, ":="(
 
 
   comment = "Data extracted fro dryad repo 10.5061/dryad.vc80r13. On each 1ha site, 2 invertebrate trap grids with 6 pitfall traps were set, one at the top and one at the bottom of the dune. In some site-year, two samplings occurred each year, one in spring, one in winter. Only spring samples were kept. In some cases pitfall traps were lost. Only site-year surveys where all pitfall traps were recovered were kept. The authors do not make clear that pitfall grids are accurately placed at the same spot over the years and sampling was annual or seasonal hence the 'ecological_sampling' categorisation. IMPORTANT in each 1ha site, each grid is considered separately: each local value is a grid meaning that independence between grids belonging to the same site should be taken into account.",
-  comment_standardisation = "1) deleting winter samples and 2) selecting only surveys where all pitfall traps were recovered."
+  comment_standardisation = "1) deleting winter samples and 2) selecting only surveys where all pitfall traps were recovered.",
+  doi = 'https://doi.org/10.5061/dryad.vc80r13 | https://doi.org/10.1111/1365-2656.13052'
 )]
 
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)

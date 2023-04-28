@@ -19,3 +19,4 @@
 # ]
 
 # "METHODS: 'The paired Canopy-Open (pCO) protocol (26 networks) consists in locating a potential canopy individual and identifying individual plants recruiting beneath it and in a nearby open space of the same area (see for example Rey et al. 2016). Here, each sampled pair is a replicate of the possible links involving a given canopy species or the open node, so all potential canopy plants in the plot must be sampled in order to obtain the full network of the studied community. This protocol is typically used in studies specifically designed to determine the importance of facilitation for recruitment, when canopy species are previously identified (Navarro-Cano et al., 2019)'"
+# doi = 'https://doi.org/10.1002/ecy.3923 | https://doi.org/10.5281/zenodo.6567608'

@@ -61,7 +61,8 @@ meta[, ":="(
   gamma_bounding_box_comment = "Coordinates are approximate locations estimated from map",
 
   comment = "Extracted from Matthews & Marsh-Matthews supplementary material (https://doi.org/10.1890/14-2179.1)(DataS1 excel table. Piney Ck 12-site data). Authors sampled fish in streams belonging to the Piney Creek watershed. effort, location and methodology were comparable throughout the period. Coordinates are approximate locations estimated from map. More accurate coordinates can be extracted from appendix S2. The average sampled area is considered to be 250m long and 10 meter wide.",
-  comment_standardisation = "Only Summer samples were included"
+  comment_standardisation = "Only Summer samples were included",
+  doi = 'https://doi.org/10.1890/14-2179.1'
 )]
 
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)

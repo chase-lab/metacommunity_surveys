@@ -64,7 +64,8 @@ meta[, ":="(
    gamma_bounding_box_comment = "coordinates provided by the authors",
 
    comment = "Extracted from Perry, S.E., T. Brown, and V. Klotz. 2023. Interagency Ecological Program: Phytoplankton monitoring in the Sacramento-San Joaquin Bay-Delta, collected by the Environmental Monitoring Program, 2008-2021 ver 1. Environmental Data Initiative. https://doi.org/10.6073/pasta/389ea091f8af4597e365d8b8a4ff2a5a (Accessed 2023-02-23). METHODS: 'Phytoplankton samples are collected with a submersible pump or a Van Dorn sampler from a water depth of one meter (approximately three feet) below the water surface.' density vlues were retrieved from column 'organisms_per_mL' LOCAL is a stationcode and REGIONAL is the whole Sacramento-San Joaquin Bay-Delta with a split depending on the lab in charge of identifying algae organisms.",
-   comment_standardisation = "Only samples rated as 'Good' are kept. Only sites/years with at least 10 months sampled are kept. When more than 10 months are sampled, the 10 most frequently sampled months (overall) are kept."
+   comment_standardisation = "Only samples rated as 'Good' are kept. Only sites/years with at least 10 months sampled are kept. When more than 10 months are sampled, the 10 most frequently sampled months (overall) are kept.",
+   doi = 'https://doi.org/10.6073/pasta/389ea091f8af4597e365d8b8a4ff2a5a'
 )][, ":="(
    gamma_sum_grains = sum(alpha_grain),
    gamma_bounding_box = geosphere::areaPolygon(data.frame(longitude, latitude)[grDevices::chull(longitude, latitude), ]) / 10^6
