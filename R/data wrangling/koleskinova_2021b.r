@@ -5,7 +5,7 @@ ddata <- readRDS("./data/raw data/koleskinova_2021b/rdata.rds")
 
 # standardising data ----
 ## selecting sites sampled at least twice with at least 10 years in between using a data.table style joint ----
-ddata <- ddata[ddata[, diff(range(unique(year))), by = local][V1 >= 10L, local], on = "local"]
+ddata <- ddata[ddata[, diff(range(unique(year))), by = local][V1 >= 9L, local], on = "local"]
 
 data.table::setnames(
    ddata,

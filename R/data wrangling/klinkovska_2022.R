@@ -24,7 +24,7 @@ ddata <- ddata[alpha_grain %in% c(16, 25, 100)]
 
 ## focusing on sites resurveyed at least 10 years apart ----
 ddata[, regional := factor(paste('Jeseniky, CZ,', alpha_grain)),][, year := as.integer(date / 10 ^ 4)]
-ddata <- ddata[ddata[, diff(range(year)), by = .(regional, local)][V1 >= 10L][, V1 := NULL], on = .(regional, local)]
+ddata <- ddata[ddata[, diff(range(year)), by = .(regional, local)][V1 >= 9L][, V1 := NULL], on = .(regional, local)]
 
 
 # Communities ----

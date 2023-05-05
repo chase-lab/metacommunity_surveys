@@ -6,7 +6,7 @@ ddata <- base::readRDS(file = 'data/raw data/cumming_2023/rdata.rds')
 ddata[, local := .GRP, by = .(decimalLatitude, decimalLongitude)]
 
 ## Keeping only sites sampled at twice least 10 years apart ----
-ddata <- ddata[ddata[, diff(range(year)), by = local][V1 >= 10L][, V1 := NULL], on = 'local']
+ddata <- ddata[ddata[, diff(range(year)), by = local][V1 >= 9L][, V1 := NULL], on = 'local']
 
 ## When a site is sampled twice a year, selecting the most frequently sampled month ----
 ddata[, order_month := order(table(month), decreasing = TRUE)[match(month, 1:12)]]

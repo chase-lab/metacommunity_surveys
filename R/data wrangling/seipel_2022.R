@@ -10,7 +10,7 @@ data.table::setnames(ddata,
 # data subsetting ----
 ## subsetting plots where samples are at least 10 years apart ----
 ddata <- ddata[
-   ddata[, diff(range(year)), by = local][V1 >= 10L][, V1 := NULL],
+   ddata[, diff(range(year)), by = local][V1 >= 9L][, V1 := NULL],
    on = 'local'
 ]
 
