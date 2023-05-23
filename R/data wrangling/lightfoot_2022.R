@@ -1,14 +1,14 @@
 ## lightfoot_2022
 dataset_id <- "lightfoot_2022"
 
-ddata <- base::readRDS("data/raw data/lightfoot_2022/lizard_pitfall_data_89-06.rds")
+ddata <- base::readRDS("data/raw data/lightfoot_2022/rdata.rds")
 #data extraction
 # Fix any interval or ratio columns mistakenly read in as nominal and nominal columns read as numeric or dates read as strings
 # attempting to convert ddata$date dateTime string to R date structure (date or POSIXct)
 tmpDateFormat <- "%Y-%m-%d"
 tmp1date <- as.Date(ddata$date,format = tmpDateFormat)
 # Keep the new dates only if they all converted correctly
-if (length(tmp1date) == length(tmp1date[!is.na(tmp1date)])){ddata$date <- tmp1date } else {print("Date conversion failed for ddata$date. Please inspect the data and do the date conversion yourself.")}
+if (length(tmp1date) == length(tmp1date[!is.na(tmp1date)])) {ddata$date <- tmp1date } else {print("Date conversion failed for ddata$date. Please inspect the data and do the date conversion yourself.")}
 rm(tmpDateFormat,tmp1date)
 if (class(ddata$zone) != "factor") ddata$zone <- as.factor(ddata$zone)
 if (class(ddata$site) != "factor") ddata$site <- as.factor(ddata$site)
@@ -107,9 +107,11 @@ meta[, ":="(
 )][, gamma_sum_grains := alpha_grain * effort]
 
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, ".csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, ".csv"),
+   row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_metadata.csv"),
+   row.names = FALSE
 )
