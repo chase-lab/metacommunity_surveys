@@ -31,10 +31,7 @@ ddata[, ":="(
    dataset_id = dataset_id,
 
    metric = "abundance",
-   unit = 'count',
-
-   `Q-1989` = NULL,
-   `Q-2010` = NULL
+   unit = 'count'
 )]
 
 # metadata ----
@@ -49,7 +46,6 @@ meta[, ":="(
    study_type = "ecological_sampling",
 
    data_pooled_by_authors = FALSE,
-   sampling_years = NA,
 
    alpha_grain = 5L * 5L,
    alpha_grain_unit = "m2",
