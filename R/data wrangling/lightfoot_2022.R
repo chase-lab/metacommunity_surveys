@@ -1,14 +1,14 @@
 ## lightfoot_2022
 dataset_id <- "lightfoot_2022"
 
-ddata <- base::readRDS("data/raw data/lightfoot_2022/lizard_pitfall_data_89-06.rds")
+ddata <- base::readRDS("data/raw data/lightfoot_2022/rdata.rds")
 #data extraction
 # Fix any interval or ratio columns mistakenly read in as nominal and nominal columns read as numeric or dates read as strings
 # attempting to convert ddata$date dateTime string to R date structure (date or POSIXct)
 tmpDateFormat <- "%Y-%m-%d"
 tmp1date <- as.Date(ddata$date,format = tmpDateFormat)
 # Keep the new dates only if they all converted correctly
-if (length(tmp1date) == length(tmp1date[!is.na(tmp1date)])){ddata$date <- tmp1date } else {print("Date conversion failed for ddata$date. Please inspect the data and do the date conversion yourself.")}
+if (length(tmp1date) == length(tmp1date[!is.na(tmp1date)])) {ddata$date <- tmp1date } else {print("Date conversion failed for ddata$date. Please inspect the data and do the date conversion yourself.")}
 rm(tmpDateFormat,tmp1date)
 if (class(ddata$zone) != "factor") ddata$zone <- as.factor(ddata$zone)
 if (class(ddata$site) != "factor") ddata$site <- as.factor(ddata$site)
@@ -102,13 +102,16 @@ meta[, ":="(
    gamma_sum_grains_comment = "Each grid consisted of 4 x 4 rows of traps spaced at 15 meter intervals",
 
    comment = "Data extracted from EDI repository https://portal.edirepository.org/nis/mapbrowse?scope=knb-lter-jrn&identifier=210007001&revision=38 . The authors captured, marked and recaptured lizards in 4 zones, 2 to 3 plots per zone and a 4*4 grid of pitfal traps. Data is provided at the individual level per pitfall trap and we applied standardisation(described in comment_standardisation). Effort is the minimal number of sampling operations ie the number of pitfall traps * the number of dates per local per year.",
-   comment_standardisation = "data from 2005 and 2006 are excluded because empty pits are underestimated. only sites resampled in the 2000s are included. because effort varies: varying number of traps and varying number of sampling events per year, individuals are resampled down to the minimal number of captured individuals among the least intensively sampled years i.e. 12 individuals."
+   comment_standardisation = "data from 2005 and 2006 are excluded because empty pits are underestimated. only sites resampled in the 2000s are included. because effort varies: varying number of traps and varying number of sampling events per year, individuals are resampled down to the minimal number of captured individuals among the least intensively sampled years i.e. 12 individuals.",
+   doi = 'https://doi.org/10.6073/pasta/51814fa39f87aea44629a5be8602ec49'
 )][, gamma_sum_grains := alpha_grain * effort]
 
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, ".csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, ".csv"),
+   row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_metadata.csv"),
+   row.names = FALSE
 )

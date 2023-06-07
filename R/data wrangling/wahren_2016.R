@@ -66,7 +66,8 @@ meta[, ":="(
    gamma_bounding_box_comment = "area provided by the authors",
 
    comment = "Extracted from: https://datacommons.anu.edu.au/DataCommons/rest/display/anudc:5886?layout=def:display, data saved at raw data/wahren_2016, data download only possible with login, download not scripted",
-   comment_standardisation = "Only transects sampled in each year at each site were included, unidentified species and rock covers were excluded"
+   comment_standardisation = "Only transects sampled in each year at each site were included, unidentified species and rock covers were excluded",
+   doi = 'https://doi.org/10.25911/5c3ff778936da'
 )]
 
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)

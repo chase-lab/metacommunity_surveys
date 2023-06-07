@@ -77,7 +77,8 @@ meta[, ":="(
   gamma_bounding_box_comment = "ecological zone area is unknown so gamma has been set to the country",
 
   comment = "Extracted from 4 published Environmental Information Data Centre data sets, DOIs  https://doi.org/10.5285/67bbfabb-d981-4ced-b7e7-225205de9c96, https://doi.org/10.5285/26e79792-5ffc-4116-9ac7-72193dd7f191, https://doi.org/10.5285/07896bb2-7078-468c-b56d-fb8b41d47065, https://doi.org/10.5285/57f97915-8ff1-473b-8c77-2564cbd747bc . Authors sampled plants in plots located inside 1km2 grid cells in England, Scotland and Wales. ",
-  comment_standardisation = "sample based rarefaction: To standardise effort through time and space, we selected sites/years where at least 9 plots were sampled and when more than 9 plots were sampled, 9 were randomly selected among them. Then these 9 plots were pooled together and cover was turned into presence absence."
+  comment_standardisation = "sample based rarefaction: To standardise effort through time and space, we selected sites/years where at least 9 plots were sampled and when more than 9 plots were sampled, 9 were randomly selected among them. Then these 9 plots were pooled together and cover was turned into presence absence.",
+  doi = 'https://doi.org/10.5194/essd-9-445-2017'
 )][, gamma_sum_grains := length(unique(local)), by = .(regional, year)]
 
 ddata[, effort := NULL]

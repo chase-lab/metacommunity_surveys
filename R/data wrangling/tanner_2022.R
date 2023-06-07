@@ -40,7 +40,8 @@ meta[, ":="(
    gamma_bounding_box_comment = "area of circle covering all quadrats",
 
    comment = "Extracted from figshare repository Tanner, Jason E.; Connell, Joseph H. (2022): Heron Island exposed (north) crest coral community data. figshare. Dataset. https://doi.org/10.6084/m9.figshare.21114061.v1 . Coral communities in fixed quadrats followed over years.",
-   comment_standardisation = "none needed"
+   comment_standardisation = "none needed",
+   doi = 'https://doi.org/10.6084/m9.figshare.21114061.v1'
 )][, gamma_sum_grains := sum(alpha_grain), by = year]
 meta[local == "NCNR", ":="(latitude = -23.43453, longitude = 151.92436)]
 

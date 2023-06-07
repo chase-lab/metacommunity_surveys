@@ -85,13 +85,14 @@ meta[, ":="(
    gamma_sum_grains_type = "plot",
    gamma_sum_grains_comment = "sampled area per year",
 
-   comment = "Data downloaded from https://portal.edirepository.org/nis/mapbrowse?scope=knb-lter-sbc&identifier=50&revision=11. Invertebrate data. These data are part of a larger collection of ongoing data sets that describe the temporal and spatial dynamics of kelp forest communities in the Santa Barbara Channel. Data on the abundance (density or percent cover) and size of ~250 species of reef associated macroalgae, invertebrates and fishes, substrate type and bottom topography are collected annually (one visit per year per transect between July and October) by divers in the summer within fixed plots (i.e. 40 m x 2 m transects) at 11 sites (n = 2 to 8 transects per site) that have historically supported giant kelp (Macrocystis pyrifera). Species-specific relationships between size (or percent cover) and mass developed for the region are used to covert abundance data to common metrics of mass (e.g., wet, dry, de-calcified dry) to facilitate analyses of community dynamics involving all species. Data collection began in 2000 and is ongoing.",
-   comment_standardisation = "percent_coverage, WM_GM2, DM_GM2, SFDM, AFDM and density pooled together and translated to presence absence data. dataset split in different scripts by fish, invertebrate and macroalgae. Invertebrate defined as members of taxon_kingdom = Animalia and taxon_phylum != Chordata"
+   comment = "Data downloaded from https://portal.edirepository.org/nis/mapbrowse?scope=knb-lter-sbc&identifier=50&revision=13. INVERTEBRATE data. These data are part of a larger collection of ongoing data sets that describe the temporal and spatial dynamics of kelp forest communities in the Santa Barbara Channel. Data on the abundance (density or percent cover) and size of ~250 species of reef associated macroalgae, invertebrates and fishes, substrate type and bottom topography are collected annually (one visit per year per transect between July and October) by divers in the summer within fixed plots (i.e. 40 m x 2 m transects) at 11 sites (n = 2 to 8 transects per site) that have historically supported giant kelp (Macrocystis pyrifera). Species-specific relationships between size (or percent cover) and mass developed for the region are used to covert abundance data to common metrics of mass (e.g., wet, dry, de-calcified dry) to facilitate analyses of community dynamics involving all species. Data collection began in 2000 and is ongoing.",
+   comment_standardisation = "percent_coverage, WM_GM2, DM_GM2, SFDM, AFDM and density pooled together and translated to presence absence data. dataset split in different scripts by fish, invertebrate and macroalgae. Invertebrate defined as members of taxon_kingdom = Animalia and taxon_phylum != Chordata",
+   doi = 'https://doi.org/10.6073/pasta/f2d0beb83ce7ed6949364ac28df790ea'
 )]
 
 meta[, ":="(
    gamma_sum_grains = sum(alpha_grain),
-   gamma_bounding_box = geosphere::areaPolygon(data.frame(parzer::parse_lon(longitude), latitude)[grDevices::chull(longitude, latitude), ]) / 10^6
+   gamma_bounding_box = geosphere::areaPolygon(data.frame(longitude, latitude)[grDevices::chull(longitude, latitude), ]) / 10^6
 ),
 by = year]
 

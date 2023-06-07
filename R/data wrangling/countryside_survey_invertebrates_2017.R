@@ -69,7 +69,8 @@ meta[, ":="(
   gamma_bounding_box_comment = "ecological zone area is unknown so gamma has been set to the country",
 
   comment = "Extracted from 3 published Environmental Information Data Centre data sets, DOIs https://doi.org/10.5285/18849325-358b-4af1-b20d-d750b1c723a3 ,  https://doi.org/10.5285/fd0ce233-3b4d-4a5e-abcb-c0a26dd71c95 , https://doi.org/10.5285/b4c17f35-1b50-4ed7-87d2-b63004a96ca2 . Authors sampled invertebrates in streams located in 1km2 grid cells in England, Scotland and Wales. Effort: Each square was sampled only once a year. Each Square was sampled in only one site_id. Effort could be more accurately measured by using the sampling time given in the environment table. alpha grain could be more precisely computed by multiplying river width in the environment table by 5-15m, the length of stream typically sampled.",
-  comment_standardisation = "Abundances from 2007 were turned into presence absence. Family level taxa were excluded."
+  comment_standardisation = "Abundances from 2007 were turned into presence absence. Family level taxa were excluded.",
+  doi = 'https://doi.org/10.5285/18849325-358b-4af1-b20d-d750b1c723a3 | https://doi.org/10.5285/b4c17f35-1b50-4ed7-87d2-b63004a96ca2 | https://doi.org/10.5285/fd0ce233-3b4d-4a5e-abcb-c0a26dd71c95'
 )][, gamma_sum_grains := length(unique(local)), by = .(regional, year)]
 
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)

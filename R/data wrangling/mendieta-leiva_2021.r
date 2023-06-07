@@ -50,7 +50,8 @@ meta[, ":="(
    gamma_sum_grains_comment = "sum of the sampled areas of 13 pools",
 
    comment = "Extracted from Zenodo repository from mendieta-leiva_2021. They sampled epiphytes on 200+ trees of the San Lorenzo crane plot in 1998-2000 and again in 2010-2012. We kept ony the trees that were actually sampled twice. Trees are considered local scale and the regional scale is the San Lorenzo crane plot which is a 140*140m plot inside the San Lorenzo National Park, Panama. Average crown area/ alpha grain was computed from Martinez Cano, Isabel et al. (2019), Data from: Tropical tree height and crown allometries for the Barro Colorado Nature Monument, Panama: a comparison of alternative hierarchical models incorporating interspecific variation in relation to life history traits, Dryad, Dataset, https://doi.org/10.5061/dryad.85k53v8",
-   comment_standardisation = "none needed"
+   comment_standardisation = "none needed",
+   doi = 'https://doi.org/10.5281/zenodo.5645774 | https://doi.org/10.1111/1365-2745.13817'
 )][,
    gamma_sum_grains := sum(alpha_grain), by = year
 ]

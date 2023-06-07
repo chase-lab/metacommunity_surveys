@@ -5,7 +5,7 @@ ddata <- readRDS("./data/raw data/koleskinova_2021b/rdata.rds")
 
 # standardising data ----
 ## selecting sites sampled at least twice with at least 10 years in between using a data.table style joint ----
-ddata <- ddata[ddata[, diff(range(unique(year))), by = local][V1 >= 10L, local], on = "local"]
+ddata <- ddata[ddata[, diff(range(unique(year))), by = local][V1 >= 9L, local], on = "local"]
 
 data.table::setnames(
    ddata,
@@ -63,7 +63,8 @@ meta[, ":="(
    gamma_bounding_box_comment = "area of a circle of 14km radius around the factory",
 
    comment = "Extracted from GBIF.org (17 May 2022) GBIF Occurrence Download  https://doi.org/10.15468/dl.uefcy6 described in data paper https://doi.org/10.3897/BDJ.9.e75586. Authors sampled colembola with soil cores along a pollution gradient close to a paper pulp factory in Russia. The local/alpha scale is a single core sample and region is a site. 2 sampling cores were used and accounted for, see comment_standardisation section.",
-   comment_standardisation = "Abundances from large samples (0.01m2) were resampled down to the minimal abundance found in one of the smaller samples: 23 individuals."
+   comment_standardisation = "Abundances from large samples (0.01m2) were resampled down to the minimal abundance found in one of the smaller samples: 23 individuals.",
+   doi = 'https://doi.org/10.15468/dl.uefcy6 | https://doi.org/10.3897/BDJ.9.e75586'
 )][, gamma_sum_grains := sum(alpha_grain), by = .(regional, year)]
 
 ddata[, c("latitude","longitude") := NULL]

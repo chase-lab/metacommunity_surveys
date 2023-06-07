@@ -15,8 +15,9 @@ ddata <- data.table::melt(ddata,
 
 ## excluding  empty rows ----
 ddata[, which(!colnames(ddata) %in% c("local", "year", "species", "value")) := NULL]
-
 ddata <- ddata[value != 0L]
+
+ddata <- ddata[ddata[, diff(range(year)), by = local][V1 >= 9L][,V1 := NULL], on = 'local']
 
 
 ## community ----
@@ -58,7 +59,8 @@ meta[, ":="(
   gamma_bounding_box_comment = "area of the ESGR according to the authors",
 
   comment = "Extracted from werner et al 2015 Dryad repo (https://datadryad.org/stash/dataset/doi:10.5061/dryad.js47k). Authors repeatedly sampled amphibian larvae. 'We estimated larval densities of 14 species of amphibians in 37 ponds on the University of Michigan’s E. S. George Reserve (hereafter ESGR) over 15 yrs (1996 to 2010).' Effort is constant.",
-  comment_standardisation = "Many ponds were sampled only once and excluded"
+  comment_standardisation = "Many ponds were sampled only once and excluded",
+  doi = 'https://doi.org/10.5061/dryad.js47k | https://doi.org/10.1371/journal.pone.0097387'
 )][, gamma_sum_grains := 200L * length(unique(local)), by = year]
 
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)

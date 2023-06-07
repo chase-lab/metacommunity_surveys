@@ -83,6 +83,7 @@ corrected_species_names <- data.table::fread(
    select = c("dataset_id","species","species.new")
 )
 
+# data.table join with update by reference
 dt[corrected_species_names, on = .(dataset_id, species), species.new := i.species.new]
 data.table::setnames(dt, c("species", "species.new"), c("species_original", "species"))
 dt[is.na(species), species := species_original]

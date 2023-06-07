@@ -59,7 +59,8 @@ meta[, ":="(
   gamma_bounding_box_comment = "area provided by the authors",
 
   comment = "Extracted from supplementary material Table 1 in Vojik and Boublik 2018 (https://doi.org/10.1007/s11258-018-0831-5). Historical vegetation records of the Klinec forest, Czech Republic, were made in 1957. In 2015, M Vojik resampled the same 29 plots of 500m2 each using the same methodology.",
-  comment_standardisation = "tree, shrub and herb layers pooled together"
+  comment_standardisation = "tree, shrub and herb layers pooled together",
+  doi = 'https://doi.org/10.1007/s11258-018-0831-5'
 )]
 
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)

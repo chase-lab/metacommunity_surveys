@@ -85,7 +85,8 @@ meta[, ":="(
    gamma_bounding_box_comment = "coordinates provided by the authors",
 
    comment = "Extracted from supplementary 2 associated to article Christensen, E., James, D., Maxwell, C., Slaughter, A., Adler, P.B., Havstad, K. and Bestelmeyer, B. (2021), Quadrat-based monitoring of desert grassland vegetation at the Jornada Experimental Range, New Mexico, 1915–2016. Ecology. Accepted Author Manuscript e03530. https://doi.org/10.1002/ecy.3530 . Methods: 'The data set includes 122 1 m by 1 m permanent quadrats, although not all quadrats were sampled in each year of the study and there is a gap in monitoring from 1980–1995'. Data from annual species counts and perennial species counts were included. Exact locations and gamma_bounding_box are unknown.",
-   comment_standardisation = "keeping only stations sampled more than 1 year. When sampled several times a year, sample from the generally most sampled month kept"
+   comment_standardisation = "keeping only stations sampled more than 1 year. When sampled several times a year, sample from the generally most sampled month kept",
+   doi = 'https://doi.org/10.1002/ecy.3530'
 )][, gamma_sum_grains := sum(alpha_grain), by = year]
 
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)

@@ -1,6 +1,4 @@
 # matthews_2016
-
-
 dataset_id <- "matthews_2016"
 
 ddata <- data.table::fread(
@@ -15,8 +13,10 @@ ddata <- data.table::melt(ddata,
   variable.name = "species"
 )
 
+# Data selection ----x
 ddata <- ddata[Season == "sum" & value > 0] # summer only
 
+# Communities ----
 ddata[, ":="(
   dataset_id = dataset_id,
   regional = "Piney Creek",
@@ -27,18 +27,18 @@ ddata[, ":="(
   Season = NULL
 )]
 
-# coordinates
-coords <- rgdal::readOGR("./data/GIS data/matthews_2016_site_coordinates.kml", pointDropZ = TRUE, verbose = FALSE)
-coords <- data.frame(local = coords$Name, sp::coordinates(coords))
+# Coordinates ----
+coords <- sf::st_read("./data/GIS data/matthews_2016_site_coordinates.kml")
+coords <- data.table::data.table(local = coords$Name, sf::st_coordinates(coords))
 
+# Metadata ----
 meta <- unique(ddata[, .(dataset_id, regional, local, year)])
+meta <- meta[coords[, .(local, latitude = Y, longitude = X)], on = 'local']
+
 meta[, ":="(
 
   realm = "Freshwater",
   taxon = "Fish",
-
-  latitude = coords$coords.x2[match(local, coords$local)],
-  longitude = coords$coords.x1[match(local, coords$local)],
 
   effort = 1L,
   study_type = "ecological_sampling",
@@ -55,13 +55,14 @@ meta[, ":="(
   gamma_sum_grains_type = "sample",
   gamma_sum_grains_comment = "sum of the area of the 12 sampled creek stretches",
 
-  gamma_bounding_box = geosphere::areaPolygon(coords[grDevices::chull(coords$coords.x1, coords$coords.x2), c("coords.x1", "coords.x2")]) / 1000000,
+  gamma_bounding_box = geosphere::areaPolygon(coords[grDevices::chull(coords$X, coords$Y), c("X", "Y")]) / 10^6,
   gamma_bounding_box_unit = "km2",
   gamma_bounding_box_type = "convex-hull",
   gamma_bounding_box_comment = "Coordinates are approximate locations estimated from map",
 
   comment = "Extracted from Matthews & Marsh-Matthews supplementary material (https://doi.org/10.1890/14-2179.1)(DataS1 excel table. Piney Ck 12-site data). Authors sampled fish in streams belonging to the Piney Creek watershed. effort, location and methodology were comparable throughout the period. Coordinates are approximate locations estimated from map. More accurate coordinates can be extracted from appendix S2. The average sampled area is considered to be 250m long and 10 meter wide.",
-  comment_standardisation = "Only Summer samples were included"
+  comment_standardisation = "Only Summer samples were included",
+  doi = 'https://doi.org/10.1890/14-2179.1'
 )]
 
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)

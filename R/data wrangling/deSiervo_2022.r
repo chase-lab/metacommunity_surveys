@@ -65,7 +65,8 @@ meta[, ":="(
   gamma_sum_grains_comment = "sampled area per year",
 
   comment = "Data manually downloaded via https://datadryad.org/stash/dataset/doi:10.5061%2Fdryad.9s4mw6mj7. The authors estimated percent coverage in 16m radius circular plots. The authors surveyed this area once in 2014 and compare this data to historical data of the same plots in 1969.  Regional in this dataset is the russian wilderness area in klamath mountains, local is defined as plot. Sum of percent coverage of seedlings, saplings and canope of species.",
-  comment_standardisation = "all life stages included, cover turned into presence absence"
+  comment_standardisation = "all life stages included, cover turned into presence absence",
+  doi = 'https://doi.org/10.5061/dryad.9s4mw6mj7'
 )]
 
 meta[, ":="(

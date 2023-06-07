@@ -59,7 +59,8 @@ meta[, ":="(
    gamma_sum_grains_comment = "sampled area per year",
 
    comment = "The authors sampled vegetation in 40 randomly selected wetlands on commercial cattle ranch with over 6000 isolated seasonal wetlands. THey sampled wetland vegetation at the end of the wet season during October–November. They counted species occurence in 1 m2 circular quadrats at 15 random points per wetlandstratified into five zones: the wetland centre, and its north-east, north-west, south-east and south-west quadrants.",
-   comment_standardisation = "Unidentified species were excluded."
+   comment_standardisation = "Unidentified species were excluded.",
+   doi = 'https://doi.org/10.6073/pasta/f20622c01b40e1e08e72f01e29f59302'
 )]
 
 meta[, ":="(

@@ -55,7 +55,8 @@ meta[, ":="(
   gamma_sum_grains_comment = "area of the sampled plots per year multiplied by amount of plots per region",
 
   comment = "Data manually downloaded via https://datacommons.anu.edu.au/DataCommons/rest/display/anudc:5778 with login for national university of australia website. The authors sampled plants from fixed quadrats in the Royal National Park, Australia. Plots are organised along 8 transects, 7 plots per transect. Plot is the alpha scale and the park is gamma scale.",
-  comment_standardisation = "none needed"
+  comment_standardisation = "none needed",
+  doi = 'https://doi.org/10.25911/5c130ca59c5a8'
 )][,
    gamma_sum_grains := sum(alpha_grain), by = year
 ]

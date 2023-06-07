@@ -61,7 +61,8 @@ meta[, ":="(
 
 
   comment = "Data were extracted from the Dryad repository https://doi.org/10.5061/dryad.2vh5c. Authors made sediment samples in 3 lakes and counted Daphnia eggs at different depths to reconstruct past communities.  The authors consider the Ceriodaphnia_eggs_dryg-1 morphospecies as a species (not a group of species that they cannot differentiate). Lake areas were extracted from supp1 associated to the article https://dx.doi.org/10.6084/m9. Coordinates were looked for on various local (Connecticut) websites.",
-  comment_standardisation = "Taxa that were not identified (ie 'unknown') were excluded."
+  comment_standardisation = "Taxa that were not identified (ie 'unknown') were excluded.",
+  doi = 'https://doi.org/10.5061/dryad.2vh5c | https://doi.org/10.1098/rspb.2017.0865'
 )][, gamma_sum_grains := pi * (0.125^2) * length(unique(local)), by = .(regional, year)]
 
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)

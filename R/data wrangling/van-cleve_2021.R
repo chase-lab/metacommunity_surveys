@@ -73,7 +73,8 @@ meta[, ":="(
 
 
   comment = "Extracted from EDI repository knb-lter-bnz.320.23 https://doi.org/10.6073/pasta/93067176968c707ac8491ce98b3c9dca . Authors publish forest past and ongoing results from forest community samplings and individual tree DBH measures. Authors provided species codes only and Species scientific names were assumed.",
-  comment_standardisation = "Standardisation: number of sampling events per year per plot reduced to 1 and number of plots per site per year reduced to 12 then all plots from a year and site were pooled together and abundances summed"
+  comment_standardisation = "Standardisation: number of sampling events per year per plot reduced to 1 and number of plots per site per year reduced to 12 then all plots from a year and site were pooled together and abundances summed",
+  doi = 'https://doi.org/10.6073/pasta/93067176968c707ac8491ce98b3c9dca | https://doi.org/10.1002/hyp.14251'
 )][, gamma_sum_grains := length(unique(local)) * 1200L, by = year]
 
 

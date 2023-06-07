@@ -71,7 +71,8 @@ meta[, ":="(
 
 
   comment = "Extracted fron: https://doi.org/10.6073/pasta/45e3a90ed462f66acdde83636746f87f . 'One hundred sixty points were selected on the Hurricane Recovery Plot at El Verde. Circular quadrats (r = 3 m) were established at each point. From June 1991 to present, 40 points were sampled four times seasonally for the presence of Terrestrial snails[...]All surveys occurred between 19:30 and 03:00 hours to coincide with peak snail activity. Population densities were estimated as Minimum Number Known Alive (MNKA), the maximum number of individuals of each species recorded for a site in each season'  Standardisation: only the 1 sampling event per season per plot kept.",
-  comment_standardisation = "Both seasons kept. For each season, keeping only one sampling event. From the most sampled months: March, or January, and July, June, August or May for the dry and wet seasons respectively. Then pooling both seasons together."
+  comment_standardisation = "Both seasons kept. For each season, keeping only one sampling event. From the most sampled months: March, or January, and July, June, August or May for the dry and wet seasons respectively. Then pooling both seasons together.",
+  doi = 'https://doi.org/10.6073/pasta/45e3a90ed462f66acdde83636746f87f'
 )][, gamma_sum_grains := sum(alpha_grain), by = year]
 
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)

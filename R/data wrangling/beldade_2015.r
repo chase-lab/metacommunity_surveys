@@ -65,7 +65,8 @@ meta[, ":="(
   gamma_sum_grains_comment = "sum of the sampled areas of 13 pools",
 
   comment = "Extracted from supp material from beldade_2015. 'This small atoll (10 km × 5 km) has an unusual morphology with a reticulated lagoon divided into approximately 70 pools (average depth: 8 m), separated by a network of slightly submerged coral reef partitions [...]. In February 2012, we reassessed coral cover and fish assemblages in the same 13 pools as those surveyed in 1981 by Bell&Galzin (1984).' and 'To estimate fish diversity and density, we faithfully replicated the method of Bell & Galzin (1984). At each site, along one of the transects laid for coral assessment, we recorded the number of each species of reef fish within 2.5 m on either side of the transect line. Data were collected once by each of two observers at a 5 min interval.'",
-  comment_standardisation = "none needed"
+  comment_standardisation = "none needed",
+  doi = 'https://doi.org/10.7717/peerj.745'
 )]
 
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)

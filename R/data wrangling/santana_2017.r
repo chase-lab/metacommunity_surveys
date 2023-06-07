@@ -61,7 +61,8 @@ meta[, ":="(
   gamma_bounding_box_comment = "areas of the high and low intensity areas estimated from figure 1",
 
   comment = "Extracted from Santana et al 2017 Dryad repo (https://datadryad.org/stash/dataset/doi:10.5061/dryad.kp3fv). Authors sampled birds in two rural areas of Portugal. Both areas differ by the agriculture intensity. No standardization needed, one sampling per year during 6 years, values are numbers of individual per transect. Each local is a buffer of 250 m along a transect (71 transects).",
-  comment_standardisation = "none needed"
+  comment_standardisation = "none needed",
+  doi = 'https://doi.org/10.5061/dryad.kp3fv | https://doi.org/10.1111/1365-2664.12898'
 )][, gamma_sum_grains := 32.12 * length(unique(local)), by = .(regional, year)]
 
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)

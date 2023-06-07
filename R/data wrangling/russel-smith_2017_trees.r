@@ -119,7 +119,8 @@ gamma_bounding_box_type = "convex-hull",
 gamma_bounding_box_comment = "convex-hull over the coordinates of sample points",
 
 comment = "Data manually downloaded via https://datacommons.anu.edu.au/DataCommons/rest/records/anudc:5836/data/ with login for national university of australia webpage. Authors sampled trees with DBH (diameter at breast hight) > 5cm in fixed 40m*20m plots once a year.",
-comment_standardisation = "some visit numbers (T1, T2,...) have no match (year) in the dates table so they were excluded. Sites sampled only one year were excluded."
+comment_standardisation = "some visit numbers (T1, T2,...) have no match (year) in the dates table so they were excluded. Sites sampled only one year were excluded.",
+doi = 'https://doi.org/10.25911/5c3d75bbca1c0'
 )]
 
 
