@@ -16,13 +16,13 @@ listfiles_metadata <- list.files(path = "data/wrangled data",
 template <- utils::read.csv("data/template_communities.txt", header = TRUE, sep = "\t")
 column_names_template <- template[, 1]
 
-lst <- lapply(listfiles, data.table::fread, integer64 = "character", encoding = "UTF-8")
+lst <- lapply(listfiles, data.table::fread, integer64 = "character", encoding = "UTF-8", sep = ',', header = TRUE, stringsAsFactors = TRUE)
 dt <- data.table::rbindlist(lst, fill = TRUE)
 
 template_metadata <- utils::read.csv("data/template_metadata.txt", header = TRUE, sep = "\t")
 column_names_template_metadata <- template_metadata[, 1L]
 
-lst_metadata <- lapply(listfiles_metadata, data.table::fread, integer64 = "character", encoding = "UTF-8")
+lst_metadata <- lapply(listfiles_metadata, data.table::fread, integer64 = "character", encoding = "UTF-8", sep = ',', header = TRUE, stringsAsFactors = TRUE)
 meta <- data.table::rbindlist(lst_metadata, fill = TRUE)
 
 # Checking data ----
@@ -184,7 +184,7 @@ meta[is.na(alpha_grain_m2), unique(dataset_id)]
 meta[is.na(gamma_sum_grains_km2) & is.na(gamma_bounding_box_km2), unique(dataset_id)]
 
 # Converting coordinates into a common format with parzer ----
-unique_coordinates <- unique(meta[, .(latitude, longitude)])
+unique_coordinates <- unique(meta[, .(latitude = as.character(latitude), longitude = as.character(longitude))])
 unique_coordinates[, ":="(
    lat = parzer::parse_lat(latitude),
    lon = parzer::parse_lon(longitude)

@@ -28,7 +28,8 @@ ddata <- ddata[unique(ddata[, .(regional, local, year, month)])[, .SD[1L:6L], by
 ddata <- ddata[unique(ddata[, .(local, year, month, sampleid)])[, .SD[1L], by = .(local, year, month)], on = .(local, year, month, sampleid)][, month := NULL][, sampleid := NULL]
 
 ## Pooling all samples from a year together ----
-ddata <- ddata[, .(value = sum(cpue), effort = sum(volume), latitude = mean(latitude), longitude = mean(longitude)), by = .(regional, local, year, species = taxname)]
+ddata[, ':='(effort = sum(volume), latitude = mean(latitude), longitude = mean(longitude)), by = .(regional, local, year)]
+ddata <- ddata[, .(value = sum(cpue)), by = .(regional, local, year, effort, latitude, longitude, species = taxname)]
 
 # Community data ----
 ddata[, ":="(
@@ -61,28 +62,22 @@ meta[, ":="(
    gamma_bounding_box_type = "convex-hull",
    gamma_bounding_box_comment = "coordinates provided by the authors",
 
-
    comment = "Extracted from the EDI repository Bashevkin, S.M., R. Hartman, M. Thomas, A. Barros, C.E. Burdi, A. Hennessy, T. Tempel, K. Kayfetz, K. Alstad, and C. Pien. 2023. Interagency Ecological Program: Zooplankton abundance in the Upper San Francisco Estuary from 1972-2021, an integration of 7 long-term monitoring programs ver 4. Environmental Data Initiative. https://doi.org/10.6073/pasta/8b646dfbeb625e308212a39f1e46f69b ",
-   comment_standardisation = "Keeping only sites that were not undersampled
-Keeping only sites sampled at twice least 10 years apart
-When a site is sampled several times a year, selecting the 6 most frequently sampled months from the 8 most sampled months
-When a site is sampled twice a month, selecting the first visit
-Pooling all samples from a year together",
-doi = 'https://doi.org/10.6073/pasta/8b646dfbeb625e308212a39f1e46f69b'
+   comment_standardisation = 'Keeping only sites that were not undersampled. Keeping only sites sampled at twice least 10 years apart.  When a site is sampled several times a year, selecting the 6 most frequently sampled months from the 8 most sampled months.  When a site is sampled twice a month, selecting the first visit. Pooling all samples from a year together',
+   doi = 'https://doi.org/10.6073/pasta/8b646dfbeb625e308212a39f1e46f69b'
 )][, ":="(
    gamma_bounding_box = geosphere::areaPolygon(data.frame(na.omit(longitude), na.omit(latitude))[grDevices::chull(na.omit(longitude), na.omit(latitude)), ]) / 10^6,
    gamma_sum_grains = sum(alpha_grain)
-),
-by = .(regional, year)
+), by = .(regional, year)
 ]
 
 ddata[, c('longitude','latitude','effort') := NULL]
 
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised.csv"),
+data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, ".csv"),
                    row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised_metadata.csv"),
+data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_metadata.csv"),
                    row.names = FALSE
 )
 

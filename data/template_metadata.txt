@@ -26,4 +26,4 @@ realm	TRUE
 taxon	TRUE
 comment	TRUE
 comment_standardisation	TRUE
-doi   TRUE
+doi	TRUE

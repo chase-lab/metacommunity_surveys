@@ -20,7 +20,7 @@ ddata[, ':='(
 coords <- data.frame(longitude = c(-105.5828, -105.5828, -105.5835, -105.5835), latitude = c(40.0528, 40.05336, 40.05336, 40.0528))
 
 # Metadata ----
-meta <- unique(ddata[, .(regional, local, year)])
+meta <- unique(ddata[, .(dataset_id, regional, local, year)])
 meta[, ':='(
    taxon = "Plants",
    realm = "Terrestrial",

@@ -61,6 +61,8 @@ meta[, ':='(
    gamma_sum_grains = sum(alpha_grain)
 ), by = .(regional, year)]
 
+dt[, c('alpha_grain','coordinates') := NULL]
+
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
 data.table::fwrite(
    x = ddata,

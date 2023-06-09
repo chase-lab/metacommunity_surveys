@@ -78,7 +78,7 @@ meta[, ':='(
 
    comment = 'Data extracted from  Larson, Danelle M., Carhart, Alicia M., and Lund, Eric M.. 2023. " Aquatic Vegetation Types Identified during Early and Late Phases of Vegetation Recovery in the Upper Mississippi River." Ecosphere 14( 3): e4468. https://doi.org/10.1002/ecs2.4468 . REGIONAL corresponds to the field station number: FLDNUM, LOCAL corresponds to POOL, SITECD and RIVMILE concatanated together. METHOD:"Species occurrence data were summarized at the ~44-m2 plot scale to represent a relative abundance index as follows. Any species that occurred and were detected visually anywhere within the plot were given a score of "1." Then, any species that occurred at a subplot was given a score of "1" for each subplot. Finally, we summed the occurrence data from each of the six subplots and the visual detection within the entire plot for each species". Only data from project M-98A were included here.',
    comment_standardisation = 'Relative abundance index turned into presence absence.',
-   soi = 'https://doi.org/10.1002/ecs2.4468'
+   doi = 'https://doi.org/10.1002/ecs2.4468'
 )][, ":="(
    gamma_bounding_box = geosphere::areaPolygon(data.frame(na.omit(longitude), na.omit(latitude))[grDevices::chull(na.omit(longitude), na.omit(latitude)), ]) / 10^6,
    gamma_sum_grains = sum(alpha_grain)
