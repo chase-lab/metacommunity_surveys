@@ -32,7 +32,7 @@ check_indispensable_variables <- function(dt, indispensable_variables) {
       na_variables_names <- indispensable_variables[na_variables]
 
       for (na_variable in na_variables_names) {
-         warning(paste0("The variable -", na_variable, "- has missing values in the following datasets: ", paste(unique(dt[c(is.na(dt[, ..na_variable])), "dataset_id"]), collapse = ", ")))
+         warning(paste0("The variable -", na_variable, "- has missing values in the following datasets: ", paste(as.character(unique(dt[c(is.na(dt[, ..na_variable])), "dataset_id"])), collapse = ", ")))
       }
    }
 }

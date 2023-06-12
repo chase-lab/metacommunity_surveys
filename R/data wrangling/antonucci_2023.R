@@ -60,10 +60,10 @@ coords <- data.frame(matrix(byrow = TRUE, ncol = 3L,
 
 # metadata ----
 meta <- unique(ddata[, .(dataset_id, regional, local, year)])
-meta <- meta[coords, on = 'local']
+meta <- meta[coords, on = 'local', nomatch = NULL]
 
 meta[, ":="(
-   taxon = "Marine Plants",
+   taxon = "Marine plants",
    realm = "Marine",
 
    study_type = "ecological_sampling",
@@ -92,8 +92,7 @@ meta[, ":="(
 )][, ":="(
    gamma_bounding_box = geosphere::areaPolygon(data.frame(na.omit(longitude), na.omit(latitude))[grDevices::chull(na.omit(longitude), na.omit(latitude)), ]) / 10^6,
    gamma_sum_grains = sum(alpha_grain)
-), by = .(regional, year)
-]
+), by = .(regional, year)]
 
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
 data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, ".csv"),
