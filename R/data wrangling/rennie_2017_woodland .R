@@ -2,6 +2,11 @@ dataset_id <- 'rennie_2017_woodland'
 
 ddata <- base::readRDS(file = "data/raw data/rennie_2017_woodland/rdata.rds")
 
+# Standardisation ----
+ddata <- ddata[
+   ddata[, diff(range(year)) >= 9L, by = .(regional, plot, local)][(V1)][, V1 := NULL],
+   on = .(regional, plot, local)]
+
 # Community data ----
 ddata[, ':='(
    dataset_id = dataset_id,

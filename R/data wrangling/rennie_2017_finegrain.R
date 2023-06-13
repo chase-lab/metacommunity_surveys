@@ -3,6 +3,13 @@ dataset_id <- 'rennie_2017_finegrain'
 ddata <- base::readRDS(file = "data/raw data/rennie_2017_finegrain/rdata.rds")
 data.table::setnames(ddata, c('regional','year','plot','local','species'))
 
+# Standardisation ----
+ddata <- ddata[species != 'Litter']
+ddata <- ddata[
+   ddata[, diff(range(year)) >= 9L, by = .(regional, plot, local)][(V1)][, V1 := NULL],
+   on = .(regional, plot, local)]
+
+
 # Community data ----
 ddata[, ':='(
    dataset_id = dataset_id,
@@ -13,7 +20,6 @@ ddata[, ':='(
    metric = 'pa',
    unit = 'pa'
 )]
-ddata <- ddata[species != 'Litter']
 
 # Coordinates ----
 coords <- data.table::as.data.table(matrix(

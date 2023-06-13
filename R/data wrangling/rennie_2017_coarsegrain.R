@@ -3,6 +3,12 @@ dataset_id <- 'rennie_2017_coarsegrain'
 ddata <- base::readRDS(file = "data/raw data/rennie_2017_coarsegrain/rdata.rds")
 data.table::setnames(ddata, c('regional','year','plot','local','species'))
 
+# Standardisation ----
+ddata <- ddata[species != 'Litter']
+ddata <- ddata[
+   ddata[, diff(range(year)) >= 9L, by = .(regional, plot, local)][(V1)][, V1 := NULL],
+   on = .(regional, plot, local)]
+
 # Community data ----
 ddata[, ':='(
    dataset_id = dataset_id,
@@ -13,7 +19,6 @@ ddata[, ':='(
    metric = 'pa',
    unit = 'pa'
 )]
-ddata <- ddata[species != 'Litter']
 
 # Coordinates ----
 coords <- data.table::as.data.table(matrix(
@@ -61,7 +66,7 @@ meta[, ":="(
    gamma_bounding_box_comment = "sum of the area of the plot of a site on a given year",
 
    comment = "Data were downloaded from https://doi.org/10.5285/d349babc-329a-4d6e-9eca-92e630e1be3f. Authors measured plant species presence in 12 sites, each sampled 50 2*2m plots, each sampled in at least 2 40*40cm cells. The local scale is the cell and its name is constituted as plot_cell. Site coordinates were extracted from VC_DATA_STRUCTURE.rtf found in the Supporting documentation.",
-   comment_standardisation = "Records for `Litter` were removed",
+   comment_standardisation = "Records for `Litter` were removed. Cells/local samples that were not sampled at least 10 years appart were removed.",
    doi = 'https://doi.org/10.5285/d349babc-329a-4d6e-9eca-92e630e1be3f'
 )][, ":="(
    gamma_sum_grains = sum(alpha_grain),
