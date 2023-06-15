@@ -51,7 +51,7 @@ if (any(dt[, .(is.na(metric) | metric == "")])) warning(paste("missing _metric_ 
 if (any(dt[, .(is.na(unit) | unit == "")])) warning(paste("missing _unit_  value in ", unique(dt[is.na(unit) | unit == "", dataset_id]), collapse = ", "))
 
 ## Counting the study cases ----
-dt[, .(nsites = length(unique(local))), by = dataset_id][order(nsites, decreasing = TRUE)]
+dt[, .(nsites = data.table::uniqueN(.SD)), .SDcols = c('regional', 'local'), by = .(dataset_id)][order(nsites, decreasing = TRUE)]
 
 # Ordering ----
 # data.table::setcolorder(dt, intersect(column_names_template, colnames(dt)))
@@ -96,15 +96,6 @@ dt[is.na(species), species := species_original]
 if (!all(dt[metric == "pa", unit == "pa"]) || !all(dt[unit == "pa", metric == "pa"]) || !all(dt[metric == "pa" | unit == "pa", value == 1])) warning("inconsistent presence absence coding")
 if (any(dt[, length(unique(unit)), by = dataset_id]$V1) != 1L) warning("several units in a single data set")
 
-# Saving dt ----
-data.table::setcolorder(dt, c("dataset_id", "regional", "local", "year", "species", "species_original", "value", "metric", "unit"))
-
-data.table::fwrite(dt, "data/communities.csv", row.names = FALSE, na = "NA")
-
-if (file.exists("./data/references/homogenisation_dropbox_folder_path.rds")) {
-   path_to_homogenisation_dropbox_folder <- base::readRDS(file = "./data/references/homogenisation_dropbox_folder_path.rds")
-   data.table::fwrite(dt, paste0(path_to_homogenisation_dropbox_folder, "/metacommunity-survey-communities.csv"), row.names = FALSE)
-}
 
 
 
@@ -190,6 +181,7 @@ unique_coordinates[, ":="(
    lon = parzer::parse_lon(longitude)
 )]
 unique_coordinates[is.na(lat) | is.na(lon)]
+
 meta <- merge(meta, unique_coordinates, by = c("latitude", "longitude"))
 meta[, c("latitude", "longitude") := NULL]
 data.table::setnames(meta, c("lat", "lon"), c("latitude", "longitude"))
@@ -266,6 +258,16 @@ data.table::setcolorder(meta, base::intersect(column_names_template_metadata, co
 if (length(base::setdiff(unique(dt$dataset_id), unique(meta$dataset_id))) > 0L) warning("Incomplete community or metadata tables")
 if (nrow(meta) != nrow(unique(meta[, .(dataset_id, regional, local, year)]))) warning("Redundant rows in meta")
 if (nrow(meta) != nrow(unique(dt[, .(dataset_id, regional, local, year)]))) warning("Discrepancies between dt and meta")
+
+# Saving dt ----
+data.table::setcolorder(dt, c("dataset_id", "regional", "local", "year", "species", "species_original", "value", "metric", "unit"))
+
+data.table::fwrite(dt, "data/communities.csv", row.names = FALSE, na = "NA")
+
+if (file.exists("./data/references/homogenisation_dropbox_folder_path.rds")) {
+   path_to_homogenisation_dropbox_folder <- base::readRDS(file = "./data/references/homogenisation_dropbox_folder_path.rds")
+   data.table::fwrite(dt, paste0(path_to_homogenisation_dropbox_folder, "/metacommunity-survey-communities.csv"), row.names = FALSE)
+}
 
 
 # Saving meta ----

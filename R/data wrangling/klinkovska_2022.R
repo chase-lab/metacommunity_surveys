@@ -37,7 +37,9 @@ ddata[, ':='(
    unit = 'pa',
    value = 1L,
 
-   species = base::gsub("_[0-9]$", '', species, perl = TRUE)
+   species = base::gsub("_[0-9]$", '', species, perl = TRUE),
+
+   date = NULL
 )]
 
 
