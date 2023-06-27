@@ -6,13 +6,15 @@ ddata <- base::readRDS("./data/raw data/dugan_2021/rdata.rds")
 #Raw Data ----
 
 data.table::setnames(ddata, c("MONTH", "YEAR", "SITE", "TOTAL"), c("month", "year", "local", "value"))
-ddata <- unique(ddata)
+
+##delete absences for removing unneccessary duplicates ---- 
+ddata <- ddata[value != 0,]
 
 ## community data ----
 ddata[, ":="(
   dataset_id = dataset_id,
   regional = "Santa Barbara Coastal LTER",
-
+  
   species = paste(TAXON_GENUS, TAXON_SPECIES),
   
   metric = "abundance",
@@ -34,19 +36,19 @@ meta <- unique(ddata[, .(dataset_id, regional, local, year)])
 meta[, ":="(
   realm = "Terrestrial",
   taxon = "Birds",
-
+  
   study_type = "ecological_sampling",
-
+  
   data_pooled_by_authors = FALSE,
-
+  
   latitude = c(34.40305, mean(34.39452, 34.391151), 34.40928, 34.470467, 34.410767, 34.408533)[match(local, c("ABB", "CSB-CCB", "IVWB", "AQB", "EUCB", "SCLB"))],
   longitude = c(-119.74375, mean(-119.52699, -119.521236), -119.87385, -120.118617, -119.842017, -119.551583)[match(local, c("ABB", "CSB-CCB", "IVWB", "AQB", "EUCB", "SCLB"))],
-
+  
   alpha_grain = 100000L,
   alpha_grain_unit = "m2",
   alpha_grain_type = "transect",
   alpha_grain_comment = "1000m long transect along the beach estimated to be 100m wide",
-
+  
   comment = "Extracted from EDI repository knb-lter-sbc.51.10 https://pasta.lternet.edu/package/eml/knb-lter-sbc/51/10 . Authors counted birds, marine mammals, dogs and humans on 1km transects of 6 coastal sites of the Santa Barbara Coastal LTER. Only birds were included in this data set. Coordinates are from the Santa Barbara Coastal LTER website https://sbclter.msi.ucsb.edu/data/catalog/package/?package=knb-lter-sbc.51"
 )]
 
@@ -54,10 +56,10 @@ meta[, ":="(
 ##save data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
 data.table::fwrite(ddata[,!c("TAXON_CLASS", "DATE")], paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
-  row.names = FALSE
+                   row.names = FALSE
 )
 data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
-  row.names = FALSE
+                   row.names = FALSE
 )
 
 #Standardized Data ----
