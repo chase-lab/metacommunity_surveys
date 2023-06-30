@@ -72,6 +72,12 @@ if (anyDuplicated(dt)) warning(
    )
 )
 
+if (any(dt[, .N, by = .(dataset_id, regional, local, year, species)]$N != 1L))
+   warning(paste(
+      'duplicated species in:',
+      paste(collapse = ', ',
+            dt[, .N, by = .(dataset_id, regional, local, year, species)][N != 1L, unique(dataset_id)])))
+
 ## checking values ----
 if (dt[unit == "count", any(!is.integer(value))]) warning(paste("Non integer values in", paste(dt[unit == "count" & !is.integer(value), unique(dataset_id)], collapse = ", ")))
 
