@@ -18,8 +18,9 @@ ddata <- ddata[
 ddata[, ':='(
    dataset_id = dataset_id,
 
-   metric = 'abundance',
-   unit = 'count',
+   metric = 'pa',
+   unit = 'pa',
+   value = 1L,
 
    road = NULL,
    transect = NULL,
@@ -53,7 +54,7 @@ meta[, ":="(
    gamma_bounding_box_comment = "coordinates provided by the authors",
 
    comment = "Extracted from: https://doi.org/10.5281/zenodo.7495407, data saved at raw data/seipel_2022. Methods: 'The MIREN road survey uses a stratified approach for recording plant species along mountain roads that traverse the major elevation gradient in a mountainous region (Fig. 1). Stratified sampling occurs within a Region along three different Roads. Along each Road there are 20 [Transects] evenly stratified by elevation, and at each [Transect] there are three Plots at different distances from the road'. Here, Region is regional scale and plot is local scale.",
-   comment_standardisation = "Only plots that were sampled over a period of at least 10 years were kept",
+   comment_standardisation = "Only plots that were sampled over a period of at least 10 years were kept. Categorical abundances were transformed into presence absence",
    doi = 'https://doi.org/10.5281/zenodo.7495407'
 )][, ":="(
    gamma_sum_grains = sum(alpha_grain),

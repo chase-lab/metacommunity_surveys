@@ -305,8 +305,7 @@
     "data.table": {
       "Package": "data.table",
       "Version": "1.14.9",
-      "Source": "Repository",
-      "Repository": "CRAN",
+      "Source": "unknown",
       "Requirements": [
         "R",
         "methods"
@@ -912,13 +911,13 @@
     },
     "renv": {
       "Package": "renv",
-      "Version": "0.17.2",
+      "Version": "1.0.0",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
         "utils"
       ],
-      "Hash": "aaf3c7f769695266a2113db67a25148b"
+      "Hash": "c321cd99d56443dbffd1c9e673c0c1a2"
     },
     "rgdal": {
       "Package": "rgdal",
@@ -938,14 +937,14 @@
     },
     "rlang": {
       "Package": "rlang",
-      "Version": "1.0.5",
+      "Version": "1.1.1",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
         "R",
         "utils"
       ],
-      "Hash": "971c3d698fc06dabdac6bc4bcda72dc4"
+      "Hash": "a85c767b55f0bf9b7ad16c6d7baee5bb"
     },
     "s2": {
       "Package": "s2",

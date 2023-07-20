@@ -6,22 +6,21 @@ ddata <- base::readRDS(datapath)
 
 data.table::setnames(
    x = ddata,
-   old = c("wetland_ID", "scientific_name", "incidence"),
-   new = c("local", "species", "value")
+   old = c("wetland_ID", "scientific_name"),
+   new = c("local", "species")
 )
 
 #drop NA for year
-ddata <- na.omit(ddata, cols = c("year", "species"))
-
-ddata <- ddata[!grepl("Unknown", species)]
+ddata <- ddata[!grepl("Unknown", species) & !is.na(year) & !is.na(species)]
 
 ddata[, ":="(
    dataset_id = dataset_id,
 
    regional = "Buck Island Ranch",
 
-   metric = "abundance",
-   unit = "count",
+   metric = "pa",
+   unit = "pa",
+   value = 1L,
 
    species_ID = NULL
 )]
@@ -51,23 +50,17 @@ meta[, ":="(
 
    gamma_bounding_box = 4170L,
    gamma_bounding_box_unit = "ha",
-   gamma_bounding_box_type = "functional",
+   gamma_bounding_box_type = "administrative",
    gamma_bounding_box_comment = "Buck Island Ranch,a 4170-ha commercial cattle ranch with over 600 isolated, seasonal wetlands",
 
    gamma_sum_grains_unit = "ha",
    gamma_sum_grains_type = "plot",
    gamma_sum_grains_comment = "sampled area per year",
 
-   comment = "The authors sampled vegetation in 40 randomly selected wetlands on commercial cattle ranch with over 6000 isolated seasonal wetlands. THey sampled wetland vegetation at the end of the wet season during October–November. They counted species occurence in 1 m2 circular quadrats at 15 random points per wetlandstratified into five zones: the wetland centre, and its north-east, north-west, south-east and south-west quadrants.",
-   comment_standardisation = "Unidentified species were excluded.",
+   comment = "The authors sampled vegetation in 40 randomly selected wetlands on commercial cattle ranch with over 600 isolated seasonal wetlands. They sampled wetland vegetation at the end of the wet season during October–November. They counted species occurence in 1 m2 circular quadrats at 15 random points per wetlands tratified into five zones: the wetland centre, and its north-east, north-west, south-east and south-west quadrants.",
+   comment_standardisation = "Unidentified species were excluded. Incidence (ie nb of quadrats in which a given species is detected) turned into presence-absence",
    doi = 'https://doi.org/10.6073/pasta/f20622c01b40e1e08e72f01e29f59302'
-)]
-
-meta[, ":="(
-   gamma_sum_grains = sum(alpha_grain)
-),
-by = .(regional, year)
-]
+)][, gamma_sum_grains := sum(alpha_grain), by = .(regional, year)]
 
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
 data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, ".csv"),
@@ -76,4 +69,3 @@ data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset
 data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_metadata.csv"),
                    row.names = FALSE
 )
-
