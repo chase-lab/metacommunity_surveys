@@ -5,7 +5,7 @@ ddata <- base::readRDS(datapath)
 
 ##Raw Data ----
 ##pooling life stages: canopy, seedling and sapling
-prefixes =  sub("[CAN|SAP]{3}[1-9]{4}", "", colnames(ddata))[-c(1,37,38,39,40)]
+prefixes =  sub("[CAN|SAP]{3}[1-9]{4}", "", colnames(ddata))[-c(1, 37, 38, 39, 40)]
 
 ddata <- cbind(ddata, sapply(unique(sub("[SEED]{4}[1-9]{4}", "", prefixes)),function(i){
   rowSums(ddata[, grepl(i, colnames(ddata)), with = FALSE])
@@ -53,7 +53,8 @@ meta[, ":="(
   alpha_grain_comment = "16 m radius circular plot (804.25 m 2 ) and used this size and shape for plots. not certain that this was the exact plot size used in 1969, estimates of cover would be robust to slight differences in plot size, especially because the plots were located within larger, compositionally homogenous stands",
   
   comment = "Data manually downloaded via https://datadryad.org/stash/dataset/doi:10.5061%2Fdryad.9s4mw6mj7. The authors estimated percent coverage in 16m radius circular plots. The authors surveyed this area once in 2014 and compare this data to historical data of the same plots in 1969.  Regional in this dataset is the russian wilderness area in klamath mountains, local is defined as plot. Sum of percent coverage of seedlings, saplings and canope of species.",
-  comment_standardisation = "all life stages pooled together, if lifestages are of interest they can be found in the raw raw data on dryad"
+  comment_standardisation = "all life stages pooled together, if lifestages are of interest they can be found in the raw raw data on dryad",
+  doi = 'https://doi.org/10.5061/dryad.9s4mw6mj7'
 )]
 
 ##save data ----
@@ -81,7 +82,7 @@ ddata[, ":="(
 ##meta data ----
 meta <- meta[unique(ddata[, .(dataset_id, local, regional, year)]),
              on = .(local, regional, year)]
-meta[,":="(
+meta[, ":="(
   effort = 1L, #one observation in 1969 and 2015
   
   gamma_bounding_box = 5000L,
@@ -94,8 +95,7 @@ meta[,":="(
   gamma_sum_grains_comment = "sampled area per year",
   
   comment_standardisation = "all life stages pooled together, if lifestages are of interest they can be found in the raw raw data on dryad. Percent cover turned into presence absence"
-)][,gamma_sum_grains := sum(alpha_grain),
-   by = .(regional, year) ]
+)][, gamma_sum_grains := sum(alpha_grain), by = .(regional, year)]
 
 ##save data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)

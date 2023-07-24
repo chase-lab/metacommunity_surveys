@@ -56,10 +56,10 @@ spatial <- data.table::rbindlist(
 #Raw Data ----
 ## cleaning: deleting duplicated rows ----
 duplicated_subsets <- unique(ddata[duplicated(ddata), .(park, plot, visit)])
-ddata <- ddata[!duplicated_subsets, on = c("park","plot","visit")]
+ddata <- ddata[!duplicated_subsets, on = c("park", "plot", "visit")]
 
 ## merging data.table style ----
-ddata <- dates[ddata, on = c("park","plot","visit")]
+ddata <- dates[ddata, on = c("park", "plot", "visit")]
 # unique(ddata[is.na(as.integer(`count_50cm-2m`))]$`count_50cm-2m`)
 # unique(ddata[is.na(as.integer(count_less_than_50cm))]$count_less_than_50cm)
 # unique(ddata[is.na(as.integer(count_greater_than_2m))]$count_greater_than_2m)
@@ -78,7 +78,7 @@ ddata <- ddata[value != 0L]
 data.table::setnames(ddata, c("park", "plot","genus_species"), c("regional","local","species"))
 
 #format spatial data to have common identifier with ddata
-spatial[, regional := c("Kakadu","Litchfield","Nitmiluk")[match(substr(plot, 1, 3), c("KAK","LIT","NIT"))]]
+spatial[, regional := c("Kakadu", "Litchfield", "Nitmiluk")[match(substr(plot, 1, 3), c("KAK", "LIT", "NIT"))]]
 spatial[, local := stringi::stri_extract_all_regex(str = plot, pattern = "[0-9]{2,3}")][, local := as.integer(sub("^0+(?=[1-9])", "", local, perl = TRUE))]
 
 
@@ -122,17 +122,22 @@ meta[, ":="(
    alpha_grain_comment = "all shrubs counted in 40m *10m plots",
    
    comment = "Data manually downloaded via https://datacommons.anu.edu.au/DataCommons/rest/records/anudc:5836/data/ with login for national university of australia website. Authors sampled shrubs from the inner 40m*10m plot of their fixed 40m*20m plots once a year. They measured the height of all shrubs and we kept only abundances.",
-   comment_standardisation = "some visit numbers (T1, T2, ...) had no match (year) in the dates table so they were excluded. Authors sampled shrubs from the smallest size class in subplots but since the size of subplot is constant, no standardisation is needed. Some rows were duplicated so all results from these 5 problematic plot/year subsets were excluded. Sites sampled only one year were excluded."
+   comment_standardisation = "some visit numbers (T1, T2, ...) had no match (year) in the dates table so they were excluded. Authors sampled shrubs from the smallest size class in subplots but since the size of subplot is constant, no standardisation is needed. Some rows were duplicated so all results from these 5 problematic plot/year subsets were excluded. Sites sampled only one year were excluded.",
+   doi = 'https://doi.org/10.25911/5c3d75bbca1c0'
 )]
 
 
 ##save data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   x = ddata,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
+   row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   x = meta,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
+   row.names = FALSE
 )
 
 #Standardization ----
@@ -142,7 +147,7 @@ ddata <- ddata[ ddata[, .(n_years = length(unique(year))), by = .(regional, loca
 ##meta data ----
 meta <- meta[unique(ddata[, .(dataset_id, local, regional, year)]),
              on = .(local, regional, year)]
-meta[,":="(
+meta[, ":="(
    effort = 1L,
    
    gamma_sum_grains_unit = "m2",
@@ -154,20 +159,20 @@ meta[,":="(
    gamma_bounding_box_comment = "convex-hull over the coordinates of sample points",
    
    comment_standardisation = "some visit numbers (T1, T2, ...) had no match (year) in the dates table so they were excluded. Authors sampled shrubs from the smallest size class in subplots but since the size of subplot is constant, no standardisation is needed. Some rows were duplicated so all results from these 5 problematic plot/year subsets were excluded. Sites sampled only one year were excluded."
-)]
-
-meta[, ":="(
+)][, ":="(
    gamma_bounding_box = geosphere::areaPolygon(data.frame(na.omit(longitude), na.omit(latitude))[grDevices::chull(na.omit(longitude), na.omit(latitude)), ]) / 10^6,
    gamma_sum_grains = sum(alpha_grain)
-),
-by = .(regional, year)
-]
+), by = .(regional, year)]
 
 ##save data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   x = ddata,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
+   row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   x = meta,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
+   row.names = FALSE
 )

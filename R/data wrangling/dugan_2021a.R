@@ -7,8 +7,8 @@ ddata <- base::readRDS("./data/raw data/dugan_2021/rdata.rds")
 
 data.table::setnames(ddata, c("MONTH", "YEAR", "SITE", "TOTAL"), c("month", "year", "local", "value"))
 
-##delete absences for removing unneccessary duplicates ---- 
-ddata <- ddata[value != 0,]
+##delete absences for removing unneccessary duplicates ----
+ddata <- ddata[value != 0]
 
 ## community data ----
 ddata[, ":="(
@@ -19,7 +19,7 @@ ddata[, ":="(
   
   metric = "abundance",
   unit = "count",
-  TAXON_FAMILY = NULL, 
+  TAXON_FAMILY = NULL,
   TAXON_GENUS = NULL,
   TAXON_GROUP = NULL,
   TAXON_KINGDOM = NULL,
@@ -82,18 +82,22 @@ meta[,":="(
   
   gamma_bounding_box = 6L,
   gamma_bounding_box_unit = "km2",
-  gamma_bounding_box_type = "functional",
+  gamma_bounding_box_type = "ecosystem",
   gamma_bounding_box_comment = "60km long coastline between the most distant sites (measured on Google Earth) * 100m wide beach (estimated)",
   
-  comment_standardisation = "Only sites actually sampled 12 times every year were included"
+  comment_standardisation = "Only sites actually sampled 12 times every year were included",
+  doi = 'https://doi.org/10.6073/pasta/06c6b9983a5f0a44349e027a002f5040'
 )][, gamma_sum_grains := length(unique(local)) * 10000L, by = year]
 
 ##save data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+  x = ddata,
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
+  row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+  x = meta,
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
+  row.names = FALSE
 )
-

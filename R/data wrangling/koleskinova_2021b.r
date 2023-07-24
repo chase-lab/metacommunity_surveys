@@ -38,22 +38,27 @@ meta[, ":="(
    alpha_grain_comment = "area of sampling core",
    
    comment = "Extracted from GBIF.org (17 May 2022) GBIF Occurrence Download  https://doi.org/10.15468/dl.uefcy6 described in data paper https://doi.org/10.3897/BDJ.9.e75586. Authors sampled colembola with soil cores along a pollution gradient close to a paper pulp factory in Russia. The local/alpha scale is a single core sample and region is a site. 2 sampling cores were used and accounted for, see comment_standardisation section.",
-   comment_standardisation = "None"
+   comment_standardisation = "None needed",
+   doi = 'https://doi.org/10.15468/dl.uefcy6 | https://doi.org/10.3897/BDJ.9.e75586'
 )]
-ddata[, c("latitude","longitude") := NULL]
+ddata[, c("latitude", "longitude") := NULL]
 
 ##save data----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata[,!"effort"], paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   x = ddata[,!"effort"],
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
+   row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   x = meta,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
+   row.names = FALSE
 )
 
 #Standardized Data ----
 ## selecting sites sampled at least twice with at least 10 years in between using a data.table style joint ----
-ddata <- ddata[ddata[, diff(range(unique(year))), by = local][V1 >= 10L, local], on = "local"]
+ddata <- ddata[ddata[, diff(range(unique(year))), by = local][V1 >= 9L, local], on = "local"]
 
 ## resampling ----
 source("./R/functions/resampling.r")
@@ -91,10 +96,13 @@ meta[,":="(
 
 ##save data----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   x = ddata,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
+   row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   x = meta,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
+   row.names = FALSE
 )
-

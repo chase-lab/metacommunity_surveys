@@ -60,7 +60,8 @@ meta[, ":="(
   alpha_grain_comment = "estimated from the article '100-m long transects'",
   
   comment = base::enc2utf8("Extracted from supplementary 1 associated to article Magalhães, A.L.B., Daga, V.S., Bezerra, L.A.V. et al. All the colors of the world: biotic homogenization-differentiation dynamics of freshwater fish communities on demand of the Brazilian aquarium trade. Hydrobiologia 847, 3897–3915 (2020). https://doi.org/10.1007/s10750-020-04307-w. Methods: 'We sampled five headwater creeks (first- order streams, sensu Strahler, 1957), all belonging to the Paraíba do Sul River basin, an important Brazilian freshwater ecoregion.[...]Fish were collected with rectangular hand sieving (95 cm long, 25 cm high, and 0.3 mm mesh), along side the margins and channel beds, every 2 months (January to December), in each of the five headwater creeks located in the immediate vicinity of fish farms:[...], therefore totalizing five sampling units (creeks), in two treatments, five creeks sampled until 2006, and resampled in 2015. Two people sieved 50 times along 100-m long transects during a 2 h in period in daylight in each creek. The dataset was summarized according to the following decades: 2000s (i.e., corresponding to 2003, 2004, 2005 and 2006) and 2010s (i.e., corresponding to 2015).'"),
-  comment_standardisation = "none needed"
+  comment_standardisation = "none needed",
+  doi = 'https://doi.org/10.1007/s10750-020-04307-w'
 )]
 
 ##save data ----

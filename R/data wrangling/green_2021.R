@@ -35,16 +35,21 @@ meta[, ":="(
   alpha_grain_type = "lake_pond",
   
   comment = "Extracted from Green and al. supplementary docx file table S5 (https://doi.org/10.1111/ddi.13387). Methods: 'Fish sampling was conducted on 13 occasions between 1966 and 2016[...]Sampling captured all fish in each pool and consisted of dispersing rotenone into a pool when it was isolated at low tide followed by a thorough search of the pool during which all fish were recovered with small dip nets (Gibson, 1999; Green, 1971). This approach is unique in collecting rare and cryptic species (the full species list for the study period is reported in Table S1). Tidepools were sampled on the same low tide on each sampling date, led by the first author (JMG).'",
-  comment_standardisation = "NA values deleted"
+  comment_standardisation = "NA values deleted",
+  doi = 'https://doi.org/10.1111/ddi.13387'
 )]
 
 ##save data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+  x = ddata,
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
+  row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+  x = meta,
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
+  row.names = FALSE
 )
 
 # Standardisation ----
@@ -85,9 +90,13 @@ meta[,":="(
 
 ##save data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata[,!c("sample_size","alpha_grain")], paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+  x = ddata[,!c("sample_size","alpha_grain")],
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
+  row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+  x = meta,
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
+  row.names = FALSE
 )

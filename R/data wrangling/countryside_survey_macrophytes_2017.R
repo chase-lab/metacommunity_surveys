@@ -48,20 +48,25 @@ meta[, ":="(
   alpha_grain_type = "plot",
   
   comment = "Extracted from 2 published Environmental Information Data Centre data sets, DOIs https://doi.org/10.5285/e0b638d5-8271-4442-97ef-cf46ea220f5d and https://doi.org/10.5285/249a90ec-238b-4038-a706-6633c3690d20. Authors sampled macrophytes in 1 100m long stream reaches per 1km2 grid cells in England, Scotland and Wales.",
-  comment_standardisation = "none needed"
+  comment_standardisation = "none needed",
+  doi = 'https://doi.org/10.5285/249a90ec-238b-4038-a706-6633c3690d20 | https://doi.org/10.5285/e0b638d5-8271-4442-97ef-cf46ea220f5d'
 )]
 
-##save data 
+## save data
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+  x = ddata,
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
+  row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+  x = meta,
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
+  row.names = FALSE
 )
 
 #Standardized data ----
-##meta data ----
+## meta data ----
 meta[,":="(
   effort = 1L,
   
@@ -77,9 +82,13 @@ meta[,":="(
 
 ##save data 
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+  x = ddata,
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
+  row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+  x = meta,
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
+  row.names = FALSE
 )

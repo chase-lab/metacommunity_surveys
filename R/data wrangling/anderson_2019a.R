@@ -3,7 +3,7 @@ dataset_id <- "anderson_2019a"
 
 # no direct download link available, it is only behind a form.
 ddata <- data.table::fread(
-   file = "./data/raw data/anderson_2019/BMSC_Wizard_InvertebrateDensity_SmallQuadrat_2001-2009.tab",
+   file = "data/raw data/anderson_2019/BMSC_Wizard_InvertebrateDensity_SmallQuadrat_2001-2009.tab",
    header = TRUE, sep = "\t"
 )
 
@@ -96,14 +96,19 @@ meta[, ":="(
    gamma_bounding_box_type = "island",
    gamma_bounding_box_comment = "area of the Wizard islet given by the authors",
 
-   comment_standardisation = "Taxon Juvenile limpet (<5mm) as excluded. Only the 5 middle tidal heights kept and only samples with all of these 5 tidal heights sampled kept. Samples from these 5 quadrats were then pooled together"
+   comment_standardisation = "Taxon Juvenile limpet (<5mm) as excluded. Only the 5 middle tidal heights kept and only samples with all of these 5 tidal heights sampled kept. Samples from these 5 quadrats were then pooled together",
+  doi = 'https://doi.org/10.5683/SP2/VBPBFN'
 )][, gamma_sum_grains := sum(alpha_grain) / 10000L, by = .(regional, year)][regional == "Wizard", gamma_bounding_box := 1.73]
 
 ## saving standardised data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   x = ddata,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised.csv"),
+   row.names = FALSE
 )
-data.table::fwrite(meta,  paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised_metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   x = meta,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised_metadata.csv"),
+   row.names = FALSE
 )

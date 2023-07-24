@@ -3,7 +3,7 @@ dataset_id <- "rogalski_2017"
 
 ddata <- base::readRDS(paste0("./data/raw data/", dataset_id, "/ddata.rds"))
 
-data.table::setnames(ddata, 1, "local")
+data.table::setnames(ddata, old = 1L, new = "local")
 
 #Raw Data ----
 ##melting species ----
@@ -38,8 +38,8 @@ meta[, ":="(
   taxon = "Invertebrates",
   realm = "Freshwater",
 
-  latitude = coords$latitude[match(local, c("Black", "Alexander", "Roseland", "Cedar"))],
-  longitude = coords$longitude[match(local, c("Black", "Alexander", "Roseland", "Cedar"))],
+  latitude = coords$latitude[data.table::chmatch(local, c("Black", "Alexander", "Roseland", "Cedar"))],
+  longitude = coords$longitude[data.table::chmatch(local, c("Black", "Alexander", "Roseland", "Cedar"))],
 
   study_type = "ecological_sampling",
 
@@ -51,16 +51,21 @@ meta[, ":="(
   alpha_grain_comment = "sample/alpha_grain is one single sediment core per lake (local).",
 
   comment = "Data were extracted from the Dryad repository https://doi.org/10.5061/dryad.2vh5c. Authors made sediment samples in 3 lakes and counted Daphnia eggs at different depths to reconstruct past communities.  The authors consider the Ceriodaphnia_eggs_dryg-1 morphospecies as a species (not a group of species that they cannot differentiate). Lake areas were extracted from supp1 associated to the article https://dx.doi.org/10.6084/m9. Coordinates were looked for on various local (Connecticut) websites.",
-  comment_standardisation = "Absence values excluded"
+  comment_standardisation = "Absence values excluded",
+  doi = 'https://doi.org/10.5061/dryad.2vh5c | https://doi.org/10.1098/rspb.2017.0865'
 )]
 
 ##save data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+  x = ddata,
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
+  row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+  x = meta,
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
+  row.names = FALSE
 )
 
 #Standardized Data ----
@@ -69,7 +74,7 @@ ddata <- ddata[species != "Unknown_eggs_dryg-1"]
 ##meta data ----
 meta <- meta[unique(ddata[, .(dataset_id, local, regional, year)]),
              on = .(local, regional, year)]
-meta[,":="(
+meta[, ":="(
   effort = 1L,
 
   gamma_sum_grains_unit = "m2",
@@ -87,9 +92,13 @@ meta[,":="(
 
 ##save data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+  x = ddata,
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
+  row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+  x = meta,
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
+  row.names = FALSE
 )

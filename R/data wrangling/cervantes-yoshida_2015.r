@@ -50,7 +50,8 @@ meta[, ":="(
   alpha_grain_comment = "estimated from effort (electrofishing of rivers, minimal length of the sampling reach = 30m. Constant through time for sites.)",
   
   comment = "Extracted from Cervantes-Yoshida et al 2015 Dryad repo. 'Fish distribution and abundance data were collected by the same lead scientist (RAL) in both the 1990s and 2009. Prior to revisiting sites in 2009, we reviewed the associated data sheets from the mid-1990s for details of site descriptions and sampling methodology. Here we were able to reconstruct an approximately identical study design and effort based on these field notes and from input from RAL. Each site was sampled in same location, and there was no difference in site reach length between the two time periods (paired t-test, P = 0.534).' Coordinates of the mouth of the Alameda Creek",
-  comment_standardisation = "none needed"
+  comment_standardisation = "none needed",
+  doi = 'http://dx.doi.org/10.5061/dryad.54hr0 | https://doi.org/10.1371/journal.pone.0141707'
 )]
 
 ##save data ----

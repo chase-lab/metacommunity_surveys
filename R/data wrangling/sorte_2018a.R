@@ -1,21 +1,21 @@
 ## sorte_2018a - fixed algae and invertebrates
-
 dataset_id <- "sorte_2018a"
 
 ddata <- base::readRDS(file = "data/raw data/sorte_2018/ddata.rds")[taxon == "Fixed algae and invertebrates"]
 
-#Raw Data----
-
-ddata[species == "Mytilus edulis (percent cover)", species := "Mytilus edulis"]
+# Raw Data----
+Not_accepted_species_names <- c(
+  "Notes",
+  "percent in pool")
+dddata <- ddata[!species %in% Not_accepted_species_names]
 
 ##community data----
 ddata[, ":="(
   dataset_id = dataset_id,
   regional = "Gulf of Maine",
 
-  value = 1L,
-  metric = "pa",
-  unit = "pa",
+  metric = "multiple",
+  unit = "multiple",
   period = NULL
 )]
 ddata <- unique(ddata)
@@ -41,21 +41,27 @@ meta[, ":="(
   alpha_grain_comment = "Ten 0.25-m2 quadrats per 30m transect",
 
   comment = "Extracted from Sorte et al 2018 Supplementary (https://onlinelibrary.wiley.com/doi/full/10.1111/gcb.13425). Authors compiled historical records from the 1970s in 4 beaches and sampled algae and both fixed and mobile invertebrates in quadrats along horizontal transects (parallel to the shore) in the tidal zone. In sorte_2018a, we included observations of fixed organisms. Methodology and effort from historical and recent records are comparable. Regional is the Gulf of Maine, local a beach",
-  comment_standardisation = "None"
+  comment_standardisation = "Observations for 'Percent in pool' and 'Notes' were excluded. The unit of each measure is in the species column.",
+  doi = 'https://doi.org/10.1111/gcb.13425'
 )]
 
 ##save data----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata[,!c("taxon")], paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+  x = ddata[, !c("taxon")],
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
+  row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+  x = meta,
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
+  row.names = FALSE
 )
 
 
 #Standardized Data ----
 ## removing cover and fixing typos in species names ----
+ddata[species == "Mytilus edulis (percent cover)", species := "Mytilus edulis"]
 Not_accepted_species_names <- c(
   "Notes",
   "Diatoms",
@@ -75,6 +81,14 @@ labs <- gsub(" egg capsules| egg masses|\\.+[0-9]+$", "", labs, fixed = FALSE)
 data.table::setattr(ddata$species, 'levels', labs)
 
 if (any(ddata$species == 'delete_me')) ddata <- ddata[!species %in% 'delete_me']
+
+ddata[, ":="(
+  value = 1L,
+  metric = "pa",
+  unit = "pa"
+)]
+
+ddata <- unique(ddata)
 
 ##meta data -----
 meta <- meta[unique(ddata[, .(dataset_id, local, regional, year)]),
@@ -97,11 +111,14 @@ meta[,":="(
 )]
 
 ##save data----
-dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata[,!c("taxon")], paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
-                   row.names = FALSE
-)
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
-                   row.names = FALSE
-)
 
+data.table::fwrite(
+  x = ddata[, !c("taxon")],
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
+  row.names = FALSE
+)
+data.table::fwrite(
+  x = meta,
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"), 
+  row.names = FALSE
+)

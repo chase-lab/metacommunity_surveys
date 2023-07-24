@@ -6,7 +6,10 @@ datapath <- "data/raw data/wardle_2014_reptile/derg_reptile_data_1990+_p902t1207
 ###Login for national university of australia needed. Data accessible after login without further requests.
 
 # Raw Data ----
-ddata <- unique(data.table::fread(file = datapath))
+ddata <- unique(data.table::fread(file = datapath, sep = ',', header = TRUE,
+   stringsAsFactors = FALSE, drop = c("site_name", "trip_no", "nights",
+   "no_traps", "total_trap_nights", "recap_this_trip", "captures",
+   "family", "month_year")))
 
 
 coords <- data.frame(longitude = c(137.86511, 138.6059, 137.86511, 138.6059),
@@ -15,11 +18,14 @@ coords <- data.frame(longitude = c(137.86511, 138.6059, 137.86511, 138.6059),
 
 data.table::setnames(
    x = ddata,
-   old = c( "site_grid", "captures_100tn"),
+   old = c("site_grid", "captures_100tn"),
    new = c("local", "value"))
 
 #extract month
-ddata[,month := stringi::stri_extract_first_regex(str = month_year, pattern = "[A-Z][a-z]{1,3}")]
+ddata[,month := stringi::stri_extract_first_regex(
+   str = month_year,
+   pattern = "[A-Z][a-z]{1,3}")
+]
 
 
 ## community ----
@@ -29,16 +35,7 @@ ddata[, ":="(
    regional = "Simpson Desert",
    
    metric = "abundance",
-   unit = "count",
-   site_name = NULL,
-   trip_no = NULL,
-   nights = NULL,
-   no_traps = NULL,
-   total_trap_nights = NULL,
-   recap_this_trip = NULL,
-   captures = NULL,
-   family = NULL,
-   month_year = NULL
+   unit = "count"
 )]
 
 ## meta ----
@@ -62,16 +59,21 @@ meta[, ":="(
    alpha_grain_comment = "1 ha trapping grids with 36 traps per grid",
    
    comment = "Data manually downloaded via https://datacommons.anu.edu.au/DataCommons/rest/display/anudc:5753 for national university of australia. The authors estimated percent coverage in an area occupying 2.5 m radius around six traps on each plot and have been aggregated to plot level data. Regional in this dataset is defined as Site, local is defined as Plot ",
-   comment_standardisation = "Standartisation to achieve same Effort was given by the authors, already present in raw data: value =  unitnumbercaptures_100tn. Captures standardised for unequal trapping effort. captures/100 trap nights = captures/(number pitfalls (usually 36)*nights opened (usually 3))*100"
+   comment_standardisation = "Standartisation to achieve same Effort was given by the authors, already present in raw data: value =  unitnumbercaptures_100tn. Captures standardised for unequal trapping effort. captures/100 trap nights = captures/(number pitfalls (usually 36)*nights opened (usually 3))*100",
+   doi = 'http://doi.org/10.25911/5c13171d944fe'
 )]
 
 ## saving raw data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   x = ddata,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
+   row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   x = meta,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
+   row.names = FALSE
 )
 
 # Standardized Data ----
@@ -83,7 +85,7 @@ ddata <- ddata[value != 0]
 
 
 ## meta ----
-meta <- meta[unique(ddata[,.(dataset_id, regional, local, year)]), on = .(regional, local, year)]
+meta <- meta[unique(ddata[,.(dataset_id, regional, local, year, month)]), on = .(regional, local, year, month)]
 meta[, ":="(
    effort = 36*100L, #6 lines of 6 traps per plot open for 100 nights by raw data  standartisation
    
@@ -96,14 +98,17 @@ meta[, ":="(
    gamma_bounding_box_type = "box",
    gamma_bounding_box_comment = "coordinates provided by the authors",
    
-   comment_standardisation = "Duplicated rows in row data were excluded. Standartisation to achieve same Effort was given by the authors, already present in raw data: unitnumbercaptures_100tn. Captures standardised for unequal trapping effort. captures/100 trap nights = captures/(number pitfalls (usually 36)*nights opened (usually 3))*100. Only sample months april and may were kept as there was an uneven sampling effort per year, per site. Months april and may have been sampled every year at every site. "
+   comment_standardisation = "Dulpicated rows in row data were excluded. Standartisation to achieve same Effort was given by the authors, already present in raw data: unitnumbercaptures_100tn. Captures standardised for unequal trapping effort. captures/100 trap nights = captures/(number pitfalls (usually 36)*nights opened (usually 3))*100. Only sample months april and may were kept as there was an uneven sampling effort per year, per site. Months april and may have been sampled every year at every site. "
 )][, gamma_sum_grains := sum(alpha_grain), by = .(regional, year)]
 
 ## saving standardised data ----
-dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standaradised.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   x = ddata,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
+   row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised_metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   x = meta,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
+   row.names = FALSE
 )

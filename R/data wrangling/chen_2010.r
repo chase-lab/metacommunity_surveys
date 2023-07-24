@@ -60,7 +60,8 @@ meta[, ":="(
   alpha_grain_comment = "30m radius sampling area of a light trap",
   
   comment = "chen et al. 2010 resurvey on moths in Malaysia. Data obtained through Roman-Palacios & Wiens 2020 Dryad repository. The authors sampled using light traps at the same locations and season in 1965 and 2007.",
-  comment_standardisation = "none needed"
+  comment_standardisation = "none needed",
+  doi = 'https://doi.org/10.1111/j.1466-8238.2010.00594.x'
 )]
 
 ##save data ----

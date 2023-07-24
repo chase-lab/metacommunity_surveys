@@ -1,14 +1,14 @@
 dataset_id <- "lightfoot_2022"
 
-ddata <- base::readRDS("data/raw data/lightfoot_2022/lizard_pitfall_data_89-06.rds")
+ddata <- base::readRDS("data/raw data/lightfoot_2022/rdata.rds")
 #data extraction
 # Fix any interval or ratio columns mistakenly read in as nominal and nominal columns read as numeric or dates read as strings
 # attempting to convert ddata$date dateTime string to R date structure (date or POSIXct)
 tmpDateFormat <- "%Y-%m-%d"
-tmp1date <- as.Date(ddata$date,format = tmpDateFormat)
+tmp1date <- as.Date(ddata$date, format = tmpDateFormat)
 # Keep the new dates only if they all converted correctly
-if (length(tmp1date) == length(tmp1date[!is.na(tmp1date)])){ddata$date <- tmp1date } else {print("Date conversion failed for ddata$date. Please inspect the data and do the date conversion yourself.")}
-rm(tmpDateFormat,tmp1date)
+if (length(tmp1date) == length(tmp1date[!is.na(tmp1date)])) {ddata$date <- tmp1date } else {print("Date conversion failed for ddata$date. Please inspect the data and do the date conversion yourself.")}
+rm(tmpDateFormat, tmp1date)
 if (class(ddata$zone) != "factor") ddata$zone <- as.factor(ddata$zone)
 if (class(ddata$site) != "factor") ddata$site <- as.factor(ddata$site)
 if (class(ddata$plot) != "factor") ddata$plot <- as.factor(ddata$plot)
@@ -22,8 +22,8 @@ ddata$pit <- ifelse((trimws(as.character(ddata$pit)) == trimws("NA")), NA, ddata
 suppressWarnings(ddata$pit <- ifelse(!is.na(as.numeric("NA")) & (trimws(as.character(ddata$pit)) == as.character(as.numeric("NA"))), NA, ddata$pit))
 
 
-data.table::setnames(ddata, c("zone","spp"), c("local","species"))
-ddata[, local := paste(local, site, plot, sep = "_")][,":="(year = as.factor(format(date, "%Y")), month = as.factor(format(date, "%m")), day = as.factor(format(date, "%d")))]
+data.table::setnames(ddata, c("zone", "spp"), c("local", "species"))
+ddata[, local := paste(local, site, plot, sep = "_")][, ":="(year = as.factor(format(date, "%Y")), month = as.factor(format(date, "%m")), day = as.factor(format(date, "%d")))]
 
 
 ##communitiy data ----
@@ -58,16 +58,21 @@ meta[, ":="(
    alpha_grain_comment = "15 cm2 diameter pitfall traps",
    
    comment = "Data extracted from EDI repository https://portal.edirepository.org/nis/mapbrowse?scope=knb-lter-jrn&identifier=210007001&revision=38 . The authors captured, marked and recaptured lizards in 4 zones, 2 to 3 plots per zone and a 4*4 grid of pitfal traps. Data is provided at the individual level per pitfall trap and we applied standardisation(described in comment_standardisation). Effort is the minimal number of sampling operations ie the number of pitfall traps * the number of dates per local per year.",
-   comment_standardisation = "None"
+   comment_standardisation = "none needed",
+   doi = 'https://doi.org/10.6073/pasta/51814fa39f87aea44629a5be8602ec49'
 )]
 
 ##save data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata[,!c("date","site", "plot", "pit", "sex","rcap","toe_num","SV_length","total_length","weight","tail","pc")], paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   x = ddata[,!c("date","site", "plot", "pit", "sex","rcap","toe_num","SV_length","total_length","weight","tail","pc")],
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
+   row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   x = meta,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
+   row.names = FALSE
 )
 
 #Standardized Data ----
@@ -113,10 +118,13 @@ meta[,":="(
 
 ##save data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata[,!c("sample_size")], paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   x = ddata[,!c("sample_size")],
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
+   row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   x = meta,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
+   row.names = FALSE
 )
-

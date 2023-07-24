@@ -9,15 +9,15 @@ ddata[, (species_list) := lapply(.SD, function(column) replace(as.integer(column
 
 ddata <- data.table::melt(
    data = ddata,
-   id.vars = c("date","site","plot","rebar","latitude","longitude"),
+   id.vars = c("date", "site", "plot", "rebar", "latitude", "longitude"),
    measure.vars = species_list,
    variable.name = "species",
    na.rm = TRUE)
 
 ## communities ----
-data.table::setnames(ddata, c("site", "rebar"), c("regional","local"))
+data.table::setnames(ddata, c("site", "rebar"), c("regional", "local"))
 
-ddata[, c("month","year") := data.table::tstrsplit(date, split = "_")]
+ddata[, c("month", "year") := data.table::tstrsplit(date, split = "_")]
 
 ddata[, ":="(
    dataset_id = dataset_id,
@@ -50,31 +50,24 @@ meta[, ":="(
    alpha_grain_type = "quadrat",
    alpha_grain_comment = "49 quadrats per block, 3 blocks per region",
 
-   gamma_sum_grains_unit = "m2",
-   gamma_sum_grains_type = "sample",
-   gamma_sum_grains_comment = "sum of sampled areas per year",
-
-   gamma_bounding_box_unit = "km2",
-   gamma_bounding_box_type = "convex-hull",
-   gamma_bounding_box_comment = "coordinates provided by the authors",
-
    comment = "Extracted from dryad data set 'Ecological consequences of large herbivore exclusion in an African savanna: 12 years of data from the UHURU experiment' https://doi.org/10.5061/dryad.1g1jwstxw. Tables PLOT_COORDINATES.csv and UNDERSTORY_LGQUAD_2008-2019.csv METHODS: 'Understory Monitoring: Grasses and forbs were surveyed biannually in February/March (dry season) and October (short rains). A 1-m2 quadrat was placed immediately to the north of each of the 49 stakes demarcating the 0.36-ha center grid in each plot, and a 0.25-m2 quadrat was placed within the larger quadrat. Species presence/absence was recorded within both quadrats. A 10-pinpoint frame was then positioned within the smaller quadrat, and the total number of vegetation pin hits was recorded for each species and/or the presence of bare soil. Individuals were identified to species (or to genus and morphospecies) using field guides and published species lists (Bogdan 1976, Blundell 1982, van Oudtshoorn 2009).' (https://www.esapubs.org/archive/ecol/E095/064/metadata.php) ",
-   comment_standardisation = "Cover turned into presence absence"
-)][, ":="(
-   gamma_sum_grains = sum(alpha_grain),
-   gamma_bounding_box = geosphere::areaPolygon(data.frame(longitude, latitude)[grDevices::chull(longitude, latitude), ]) / 10^6
-), by = .(year, regional)
-]
+   comment_standardisation = "Cover turned into presence absence",
+   doi = 'https://doi.org/10.5061/dryad.1g1jwstxw | https://doi.org/10.1002/ecy.3649'
+)]
 
-ddata[, c("latitude","longitude") := NULL]
+ddata[, c("latitude", "longitude") := NULL]
 
 ## saving raw data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   ddata,
+   paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
+   row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   meta,
+   paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
+   row.names = FALSE
 )
 
 # Standardised data ----
@@ -93,21 +86,34 @@ species_list <- grep(x = species_list, pattern = "Acacia|Boscia_angustifolia|Eup
 ddata <- ddata[species %in% species_list]
 
 ## Metadata ----
-meta <- unique(meta[ddata[, .(dataset_id, regional, local, year, month)], on = .(regional, local, year, month)])
+meta <- unique(meta[ddata[, .(dataset_id, regional, local, year)], on = .(regional, local, year)])
 
 meta[, ":="(
    effort = 1L,
+
+   gamma_sum_grains_unit = "m2",
+   gamma_sum_grains_type = "sample",
+   gamma_sum_grains_comment = "sum of sampled areas per year",
+
+   gamma_bounding_box_unit = "km2",
+   gamma_bounding_box_type = "convex-hull",
+   gamma_bounding_box_comment = "coordinates provided by the authors",
+
    comment_standardisation = "only open plots i.e. control treatment are included here. Only spring surveys are included here because 2009 and 2019 have spring in common. Tree species are excluded as recommended by the authors. Cover turned into presence absence"
 )][, ":="(
    gamma_sum_grains = sum(alpha_grain),
    gamma_bounding_box = geosphere::areaPolygon(data.frame(longitude, latitude)[grDevices::chull(longitude, latitude), ]) / 10^6
-   ), by = .(year, month, regional)
+   ), by = .(year, regional)
 ]
 
 ## saving standardised data ----
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   ddata,
+   paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised.csv"),
+   row.names = FALSE
 )
-data.table::fwrite(meta,  paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised_metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   meta,
+   paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised_metadata.csv"),
+   row.names = FALSE
 )

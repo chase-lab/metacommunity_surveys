@@ -1,5 +1,9 @@
+# R generated files
+.Rproj.user
 .Rproj.user/**
-
+.Rhistory
+.Rprofile
+.RData
 backup/**
 
 data/communities.csv

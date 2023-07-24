@@ -47,16 +47,21 @@ meta[, ":="(
   alpha_grain_comment = "area of the sediment sample",
   
   comment = "Data extracted from the dryad repository Ellingsen, Kari E. et al. (2018), Data from: Long-term environmental monitoring for assessment of change: measurement inconsistencies over time and potential solutions, Dryad, Dataset, https://doi.org/10.5061/dryad.2v7m4. The authors sampled benthic invertebrates in 11 stations on an oil field with several platforms every third year since 1996. Method data were also available in the paper https://doi.org/10.1007/s10661-017-6317-4. Coordinates are given in table 1 in the paper.",
-  comment_standardisation = "IMPORTANT: To avoid taxonomical issues, the data set r1bio.new2.n was used ; see /data download/ellingsen_2018.r script or the authors helper MOD-DRYAD.R script for details on taxonomy cleaning."
+  comment_standardisation = "IMPORTANT: To avoid taxonomical issues, the data set r1bio.new2.n was used ; see /data download/ellingsen_2018.r script or the authors helper MOD-DRYAD.R script for details on taxonomy cleaning.",
+  doi = 'https://doi.org/10.5061/dryad.2v7m4 | https://doi.org/10.1007/s10661-017-6317-4'
 )]
 
 ##save data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata[,!"rep"], paste0("data/wrangled data/", dataset_id, "/", dataset_id, "raw.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+  x = ddata[, !"rep"],
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "raw.csv"),
+  row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "raw__metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+  x = meta,
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "raw__metadata.csv"),
+  row.names = FALSE
 )
 
 #Standardized Data ----
@@ -71,19 +76,21 @@ meta[,":="(
   gamma_sum_grains_type = "sample",
   gamma_sum_grains_comment = "sum of sample areas per year",
   
+  gamma_bounding_box = geosphere::areaPolygon(meta[grDevices::chull(meta[, .(longitude, latitude)]), .(longitude, latitude)]) / 10^6
   gamma_bounding_box_unit = "km2",
   gamma_bounding_box_type = "convex-hull",
   gamma_bounding_box_comment = "area of the convex-hull covering the stations",
   
   comment_standardisation = "In each station, each year, all 5 replicates were pooled together and abundances summed. IMPORTANT: To avoid taxonomical issues, the data set r1bio.new2.n was used ; see /data download/ellingsen_2018.r script or the authors helper MOD-DRYAD.R script for details on taxonomy cleaning."
-)][, gamma_bounding_box := geosphere::areaPolygon(meta[grDevices::chull(meta[, .(longitude, latitude)]), .(longitude, latitude)]) / 10^6
-][, gamma_sum_grains := alpha_grain * length(unique(local)), by = year]
+)][, gamma_sum_grains := alpha_grain * length(unique(local)), by = year]
 
 ##save data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "standardized.csv"),
-                   row.names = FALSE
+ddata |> data.table::fwrite(
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "standardized.csv"),
+  row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "standardized__metadata.csv"),
-                   row.names = FALSE
+meta |> data.table::fwrite(
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "standardized__metadata.csv"),
+  row.names = FALSE
 )

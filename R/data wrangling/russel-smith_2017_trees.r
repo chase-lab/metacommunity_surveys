@@ -65,7 +65,7 @@ ddata <- ddata[,.N, by = .(park, plot, visit, genus_species, date)]
 data.table::setnames(ddata, c("park", "plot","genus_species", "N"), c("regional","local","species", "value"))
 
 ##format spatial data to have common identifier with species data ----
-spatial[, regional := c("Kakadu","Litchfield","Nitmiluk")[match(substr(plot, 1, 3), c("KAK","LIT","NIT"))]]
+spatial[, regional := c("Kakadu","Litchfield","Nitmiluk")[data.table::chmatch(substr(plot, 1, 3), c("KAK", "LIT", "NIT"))]]
 spatial[, local := stringi::stri_extract_all_regex(str = plot, pattern = "[0-9]{2,3}")
 ][, local := as.integer(sub("^0+(?=[1-9])", "", local, perl = TRUE))]
 
@@ -101,15 +101,21 @@ meta[, ":="(
    alpha_grain_comment = "all trees defined as wooden species with diameter at breast hight > 5cm are counted in 40*20m plot ",
    
    comment = "Data manually downloaded via https://datacommons.anu.edu.au/DataCommons/rest/records/anudc:5836/data/ with login for national university of australia webpage. Authors sampled trees with DBH (diameter at breast hight) > 5cm in fixed 40m*20m plots once a year.",
-   comment_standardisation = "None")]
+   comment_standardisation = "None needed",
+   doi = 'https://doi.org/10.25911/5c3d75bbca1c0'
+)]
 
 ##save data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   x = ddata,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
+   row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   x = meta,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
+   row.names = FALSE
 )
 
 #Standardized Data -----
@@ -128,7 +134,7 @@ ddata <- ddata[ ddata[, .(n_years = length(unique(year))), by = .(regional, loca
 meta <- meta[unique(ddata[, .(dataset_id, local, regional, year)]),
              on = .(local, regional, year)]
 
-meta[,":="(
+meta[, ":="(
    effort = 1L,
    
    gamma_sum_grains_unit = "m2",
@@ -140,20 +146,20 @@ meta[,":="(
    gamma_bounding_box_comment = "convex-hull over the coordinates of sample points",
    
    comment_standardisation = "some visit numbers (T1, T2,...) have no match (year) in the dates table so they were excluded. Sites sampled only one year were excluded."
-)]
-
-meta[, ":="(
+)][, ":="(
    gamma_bounding_box = geosphere::areaPolygon(data.frame(na.omit(longitude), na.omit(latitude))[grDevices::chull(na.omit(longitude), na.omit(latitude)), ]) / 10^6,
    gamma_sum_grains = sum(alpha_grain)
-),
-by = .(regional, year)
-]
+),by = .(regional, year)]
 
 ##save data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   x = ddata,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
+   row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   x = meta,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
+   row.names = FALSE
 )

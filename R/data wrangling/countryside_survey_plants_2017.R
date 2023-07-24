@@ -58,7 +58,8 @@ meta[, ":="(
   alpha_grain_type = "plot",
   
   comment = "Extracted from 4 published Environmental Information Data Centre data sets, DOIs  https://doi.org/10.5285/67bbfabb-d981-4ced-b7e7-225205de9c96, https://doi.org/10.5285/26e79792-5ffc-4116-9ac7-72193dd7f191, https://doi.org/10.5285/07896bb2-7078-468c-b56d-fb8b41d47065, https://doi.org/10.5285/57f97915-8ff1-473b-8c77-2564cbd747bc . Authors sampled plants in plots located inside 1km2 grid cells in England, Scotland and Wales. ",
-  comment_standardisation = "None"
+  comment_standardisation = "None needed",
+  doi = 'https://doi.org/10.5194/essd-9-445-2017'
 )]
 
 ##save data ----
@@ -111,9 +112,13 @@ ddata[, effort := NULL]
 
 ##save data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+  x = ddata,
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
+  row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+  x = meta,
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
+  row.names = FALSE
 )

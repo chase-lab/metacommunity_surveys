@@ -21,7 +21,7 @@ ddata[, habitat := c("cliff", "cave")[match(habitat, c("par", "cor"))]][, local 
 
 ##community data ----
 ddata[, ":="(
-  local = paste(local, sep ="_", plot),
+  local = paste(local, sep = "_", plot),
   dataset_id = dataset_id,
   regional = "Scandola Nature Reserve, France",
   
@@ -48,16 +48,21 @@ meta[, ":="(
   alpha_grain_comment = "24 25*25cm pictures per site",
   
   comment = "extracted from Dryad repository 10.5061/dryad.69p8cz91g Methods: 'We used coralligenous assemblage data from five sites located within two marine protected areas (MPAs) in the NW Mediterranean Sea: the Port-Cros National Park and Scandola Natural Reserve[...]To minimise any potential effect of seasonality, only surveys occurring during the same period of the year were considered for each site (end of summer vs. autumn for Port-Cros and Scandola respectively). A total of 24 photographic quadrats of 25 * 25 cm (replicates) were analysed for each site and temporal point resulting in 360 pictures in total. The sampling unit (625 cm2 per replicate) was selected following Kipson et al. (2011) and Casas-Guell et al. (2015). The percent cover of the different macro benthic sessile species was calculated in each quadrat by overimposing 100 stratified random points and identifying the underlying species to the lowest possible taxonomic level, using Photoquad photoquadrat' ",
-  comment_standardisation= "absences deleted"
+  comment_standardisation = "absences deleted",
+  doi = 'https://doi.org/10.5061/dryad.69p8cz91g'
 )]
 
 ##save data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata[,!"plot"], paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+  x = ddata[,!"plot"],
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
+  row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+  x = meta,
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
+  row.names = FALSE
 )
 
 
@@ -79,7 +84,7 @@ ddata[,":="(
 meta <- meta[unique(ddata[, .(dataset_id, local, regional, year)]),
              on = .(local, regional, year)]
 
-meta[,":="(
+meta[, ":="(
   effort = 1L,
   
   gamma_bounding_box = 10L,
@@ -92,14 +97,18 @@ meta[,":="(
   gamma_sum_grains_type = "sample",
   gamma_sum_grains_comment = "sum of the sampled areas of the 4 sites",
   
-  comment_standardisation = "Port-Cros site deleted because only one ite in the region. Percentage cover to presence absence. Plots pooled together."
+  comment_standardisation = "Port-Cros site deleted because only one site in the region. Percentage cover to presence absence. Plots pooled together."
 )]
 
 ## save data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+  x = ddata,
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
+  row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+  x = meta,
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
+  row.names = FALSE
 )

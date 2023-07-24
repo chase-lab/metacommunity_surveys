@@ -45,16 +45,24 @@ meta[, ":="(
   alpha_grain_comment = "area of one rake sample",
   
   comment = "Extracted from Muthukrishnan and Larkin 2020 Dryad repo (https://datadryad.org/stash/dataset/doi:10.5061/dryad.15dv41nt2). Macrophytes from 212 lakes distributed in 50 US counties were sampled 1 to 11 years between 2002 and 2014. Regional is the county name and local the lake_id.",
-  comment_standardisation = "unknown species excluded, sample_point_surveyed = no excluded"
+  comment_standardisation = "unknown species excluded, sample_point_surveyed = no excluded",
+  doi = 'https://doi.org/10.5061/dryad.15dv41nt2 | https://doi.org/10.1111/geb.13053'
 )]
 
 ##save data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata[,!c("County_code", "record_num", "lake_name", "alpha_grain","survey_id","survey_date", "rake", "sample_point_surveyed","depth_ft","secchi_ft","substrate","veg_code","vegetation_common_name")], paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
-                   row.names = FALSE
+deleted_columns <- c("County_code", "record_num", "lake_name", "alpha_grain","survey_id","survey_date", "rake", "sample_point_surveyed","depth_ft","secchi_ft","substrate","veg_code","vegetation_common_name")
+
+data.table::fwrite(
+  x = ddata[, !..deleted_columns],
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
+  row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
-                   row.names = FALSE
+
+data.table::fwrite(
+  x = meta,
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
+  row.names = FALSE
 )
 
 #Standardized data ----
@@ -95,7 +103,6 @@ meta[,":="(
   gamma_sum_grains_comment = "sum of the areas of rake samples each year",
   
   comment_standardisation = "Some lakes were sampled more than 1 time a year and a single survey was randomly selected. Empty samples were excluded. Sample based standardisation: Lakes with less than 6 rake samples were excluded and other lakes had 6 rake samples randomly selected and then pooled together."
-  
 )][, gamma_sum_grains := sum(alpha_grain), by = .(regional, year)]
 
 ## gamma scale ----
@@ -114,10 +121,14 @@ meta[, ":="(
 
 ##save data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
-                   row.names = FALSE
-)
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+  x = ddata,
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
+  row.names = FALSE
 )
 
+data.table::fwrite(
+  x = meta,
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
+  row.names = FALSE
+)

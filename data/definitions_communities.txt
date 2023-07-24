@@ -5,7 +5,6 @@ regional	"Region name, contains at least two localities. Can be a national park,
 local	"Name or code of the sampled locality or experimental sample as given by the original data provider. For example, it can correspond to the name of an island, a lake or forest. No missing value."
 species	"Species names. Whenever possible, complete (Genus + species epithet) names were included rather than codes. Whenever possible, species names were matched against GBIF and corrected by Dr Wubing Xu and when name was correct or no correction was found, species_original, from the original data set is used. No missing value."
 species_original  "Species names. Whenever possible, complete (Genus + species epithet) names were included rather than codes. No missing value."
-gbif_specieskey   "GBIF unique species code ID matching this species name."
 metric	"Describes the way species presence or abundance is measured, one of:  ""pa"", ""abundance"", ""frequency"", ""density"" or ""cover"" No missing value."
 value	Presence (1) or Abundance of a species in a given location and a given year. No missing value.
 unit	"Unit in which the presence (""pa"") or abundance (e.g. ""count"") is given. No missing value."

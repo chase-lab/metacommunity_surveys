@@ -49,8 +49,9 @@ meta[, ":="(
   alpha_grain_type = "plot",
   alpha_grain_comment = "19 0.25m2 circular quadrats per site",
   
-  comment = "Extracted from Larkin et al 2015 Dryad repo (https://datadryad.org/stash/dataset/doi:10.5061/dryad.763v6). Resurvey of plant communities of 41 sites in Illinois originally sampled in 1976 and resampled in 2001. Coordinates of the centre of Nort East Illinois.",
-  comment_standardisation = "Original sampling was standardised: 20 to 30 0.25m2 circular quadrats along a transect, per site BUT We keep only the first 19 plots of each site (19 is the minimal number of plots across sites). Then we pooled together species detected in the 19 quadrats of a site in a given year."
+  comment = "Extracted from Larkin et al 2015 Dryad repo (https://datadryad.org/stash/dataset/doi:10.5061/dryad.763v6). Resurvey of plant communities of 41 sites in Illinois originally sampled in 1976 and resampled in 2001. Coordinates of the centre of North East Illinois.",
+  comment_standardisation = "Original sampling was standardised: 20 to 30 0.25m2 circular quadrats along a transect, per site BUT We keep only the first 19 plots of each site (19 is the minimal number of plots across sites). Then we pooled together species detected in the 19 quadrats of a site in a given year.",
+  doi = 'https://doi.org/10.5061/dryad.763v6 | https://doi.org/10.1111/1365-2664.12516'
 )]
 
 #save data ----
@@ -68,7 +69,7 @@ data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_
 ddata <- ddata[, .SD[1:19], by = .(year, local)]
 
 ##transformation to pa data ----
-ddata <- unique(ddata[value != 0][, value := 1L]) 
+ddata <- unique(ddata[value != 0][, value := 1L])
 
 ### taxonomy cleaning ----
 ddata <- ddata[!species %in% c("dicot", "unkforb", "grass1", "grass3", "grasssp")]
@@ -105,10 +106,13 @@ meta[,":="(
 )]
 ##save data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+  x = ddata,
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
+  row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+  x = meta,
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
+  row.names = FALSE
 )
-

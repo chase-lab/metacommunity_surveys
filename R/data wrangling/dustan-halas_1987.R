@@ -1,7 +1,9 @@
 # dustan-halas_1987
 dataset_id <- "dustan-halas_1987"
 
-ddata <- data.table::fread(paste0("data/raw data/", dataset_id, "/rdata.csv"), skip = 1L, header = TRUE)
+ddata <- data.table::fread(
+  file = paste0("data/raw data/", dataset_id, "/rdata.csv"),
+  skip = 1L, header = TRUE)
 
 #Raw Data ----
 ddata <- data.table::melt(ddata,
@@ -59,7 +61,8 @@ meta[, ":="(
   alpha_grain_comment = "25m long transect, 0.2m width",
   
   comment = "Extracted from dustan-halas 1987 table 3 (table extraction with tabula). Regional is the area covering all 21 25m long transects, local are transects. 'Carysfort Reef was surveyed in 1975 (Dustan 1985) and resurveyed in the summers of 1982 and 1983; it took two field sessions to find and resample all the transects. Transects 1-10 were surveyed in 1982 and 11-21 in 1983.' The observer then used the transect line to measure contact length with coral colonies hence the estimated 20cm width of sampling. 'The length of line crossing over coral colonies and the space between them was measured to the nearest 0.5 cm'. ",
-  comment_standardisation = "none needed"
+  comment_standardisation = "none needed",
+  doi = 'https://doi.org/10.1007/BF00301378'
 )]
 
 ##save data ----
@@ -86,16 +89,20 @@ meta[,":="(
   
   gamma_bounding_box = 7500L,
   gamma_bounding_box_unit = "m2",
-  gamma_bounding_box_type = "functional",
+  gamma_bounding_box_type = "ecosystem",
   gamma_bounding_box_comment = "area covering all transects (25m * 300m)"
 )]
+
 ##save data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+  x = ddata,
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
+  row.names = FALSE
 )
 
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+  x = meta,
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
+  row.names = FALSE
 )
-

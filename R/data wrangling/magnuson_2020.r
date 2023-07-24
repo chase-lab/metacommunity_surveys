@@ -14,7 +14,7 @@ ddata <- ddata[, .(value = sum(value)), by = .(local, year, species, effort)][va
 ddata[, ":="(
   dataset_id = dataset_id,
   regional = "North Temperate Lakes",
-  local = c("Big Muskellunge", "Allequash", "Crystal Bog", "Crystal Lake", "Sparkling", "Trout Bog", "Trout")[match(local, c("BM", "AL", "CB", "CR", "SP", "TB", "TR"))],
+  local = c("Big Muskellunge", "Allequash", "Crystal Bog", "Crystal Lake", "Sparkling", "Trout Bog", "Trout")[data.table::chmatch(local, c("BM", "AL", "CB", "CR", "SP", "TB", "TR"))],
   
   metric = "abundance",
   unit = "count"
@@ -72,27 +72,31 @@ meta[, ":="(
   
   data_pooled_by_authors = FALSE,
   
-  latitude = coords[border == "latitude", coordinate][match(local, coords[border == "latitude", local])],
-  longitude = coords[border == "longitude", coordinate][match(local, coords[border == "longitude", local])],
+  latitude = coords[border == "latitude", coordinate][data.table::chmatch(local, coords[border == "latitude", local])],
+  longitude = coords[border == "longitude", coordinate][data.table::chmatch(local, coords[border == "longitude", local])],
   
-  # alpha_grain = c(396.3, 168.4, 0.5, 36.7, 64, 1.1, 1607.9)[match(local, c("Big Muskellunge", "Allequash", "Crystal Bog", "Crystal Lake", "Sparkling", "Trout Bog", "Trout"))],
-  alpha_grain = 36.7,
+  alpha_grain = c(396.3, 168.4, 0.5, 36.7, 64, 1.1, 1607.9)[data.table::chmatch(local, c("Big Muskellunge", "Allequash", "Crystal Bog", "Crystal Lake", "Sparkling", "Trout Bog", "Trout"))],
   alpha_grain_unit = "ha",
   alpha_grain_type = "lake_pond",
-  alpha_grain_comment = "area of lake Sparkling given by the authors",
+  alpha_grain_comment = "area of lakes given by the authors",
   
   comment = "Extracted from EDI data repository knb-lter-ntl.13.32 by John Magnuson et al. The authors sampled macroinvertebrates of 7 lakes every year between 1983 and 2020. Effort is the smallest number of replicates per year per lake (1 to 5)",
-  comment_standardisation = "Chaoborus pupae and larvae were counted with the adults."
+  comment_standardisation = "Chaoborus pupae and larvae were pooled with the adults.",
+  doi = 'https://doi.org/10.6073/pasta/40229f97abd97f274bc2a8c1e3ef4ab7'
 )]
 
 ##save data ----
 
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata[,!c("effort")], paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+  x = ddata[, !c("effort")],
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
+  row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+  x = meta,
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
+  row.names = FALSE
 )
 
 #Standardized Data ----
@@ -119,24 +123,33 @@ gamma_bounding_box <- geosphere::areaPolygon(
 meta <- meta[unique(ddata[, .(dataset_id, local, regional, year, effort = min(effort))]),
              on = .(local, regional, year)]
 meta[,":="(
+  alpha_grain = 36.7,
+  alpha_grain_unit = "ha",
+  alpha_grain_type = "lake_pond",
+  alpha_grain_comment = "area of lake Sparkling given by the authors",
+  
   gamma_sum_grains_unit = "ha",
-  gamma_sum_grains_type = "functional",
+  gamma_sum_grains_type = "ecosystem",
   gamma_sum_grains_comment = "sum of the areas of the lakes.",
   
   gamma_bounding_box = gamma_bounding_box,
   gamma_bounding_box_unit = "km2",
   gamma_bounding_box_type = "convex-hull",
   gamma_bounding_box_comment = "coordinates extracted fromm the data set metadata",
-  
-  comment_standardisation =  "Chaoborus pupae and larvae were counted with the adults. 1 to 5 replicate samples per lake per year were pooled together and abundances were resampled based on the smallest observed total abundance (73 individuals) in Sparkling Lake which was sampled only once in 2014."
+
+  comment_standardisation = "Chaoborus pupae and larvae were pooled with the adults.  Effort is the smallest number of replicates per year per lake (1 to 5) and alpha_grain is the size of the lake with the smallest effort. 1 to 5 replicate samples per lake per year were pooled together and abundances were resampled based on the smallest observed total abundance (73 individuals) in Sparkling Lake which was sampled only once in 2014."
 )][, gamma_sum_grains := sum(alpha_grain), by = year]
 
 ##save data ----
 
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata[,!c("effort", "sample_size")], paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+  x = ddata[,!c("effort", "sample_size")],
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
+  row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+  x = meta,
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
+  row.names = FALSE
 )

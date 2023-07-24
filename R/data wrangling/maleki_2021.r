@@ -38,7 +38,8 @@ meta[, ":="(
   alpha_grain_comment = "6 1ha permanent plots - given by the authors",
   
   comment = "Extracted from Maleki et al dryad repository (https://doi.org/10.5061/dryad.tqjq2bvwz). Tree community assessment between 1994 and 2019. Regional is the Lake Duparquet Research and Teaching Forest reserve, local are 6 1ha permanent plots. The name of the plots refer to the year when they were burnt. 'Each plot was divided into 100-m2 subplots, on which all living and dead trees (standing and fallen) with DBH greater than 5 cm were measured, mapped and identified to species level.' ",
-  comment_standardisation = "None"
+  comment_standardisation = "None needed",
+  doi = 'https://doi.org/10.5061/dryad.tqjq2bvwz'
 )]
 
 ddata[, ":="(
@@ -82,11 +83,15 @@ meta[,":="(
 
 ##save data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata[,!"status_id"], paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+  x = ddata[,!"status_id"],
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
+  row.names = FALSE
 )
 
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+  x = meta,
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
+  row.names = FALSE
 )
 

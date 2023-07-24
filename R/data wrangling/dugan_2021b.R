@@ -3,10 +3,13 @@ dataset_id <- "dugan_2021b"
 
 ddata <- base::readRDS("./data/raw data/dugan_2021/rdata.rds")
 
-data.table::setnames(ddata, c("MONTH", "YEAR", "SITE", "TOTAL"), c("month", "year", "local", "value"))
+data.table::setnames(
+  ddata,
+  old = c("MONTH", "YEAR", "SITE", "TOTAL"),
+  new = c("month", "year", "local", "value"))
 
-##delete absences for removing unneccessary duplicates ---- 
-ddata <- ddata[value != 0,]
+##delete absences for removing unneccessary duplicates ----
+ddata <- ddata[value != 0]
 
 ## community data ----
 
@@ -18,7 +21,7 @@ ddata[, ":="(
   
   metric = "abundance",
   unit = "count",
-  TAXON_CLASS = NULL, 
+  TAXON_CLASS = NULL,
   TAXON_GENUS = NULL,
   TAXON_GROUP = NULL,
   TAXON_KINGDOM = NULL,
@@ -49,7 +52,9 @@ meta[, ":="(
   alpha_grain_type = "transect",
   alpha_grain_comment = "1000m long transect along the beach estimated to be 100m wide",
   
-  comment = "Extracted from EDI repository knb-lter-sbc.51.10 https://pasta.lternet.edu/package/eml/knb-lter-sbc/51/10 . Authors counted birds, marine mammals, dogs and humans on 1km transects of 6 coastal sites of the Santa Barbara Coastal LTER. Only living mammals were included in this data set. Coordinates are from the Santa Barbara Coastal LTER website https://sbclter.msi.ucsb.edu/data/catalog/package/?package=knb-lter-sbc.51"
+  comment = "Extracted from EDI repository knb-lter-sbc.51.10 https://pasta.lternet.edu/package/eml/knb-lter-sbc/51/10 . Authors counted birds, marine mammals, dogs and humans on 1km transects of 6 coastal sites of the Santa Barbara Coastal LTER. Only living mammals were included in this data set. Coordinates are from the Santa Barbara Coastal LTER website https://sbclter.msi.ucsb.edu/data/catalog/package/?package=knb-lter-sbc.51",
+  comment_standardisation = "none needed",
+  doi = 'https://doi.org/10.6073/pasta/06c6b9983a5f0a44349e027a002f5040'
 )]
 
 ##save data ----
@@ -85,7 +90,7 @@ meta[,":="(
   
   gamma_bounding_box = 6L,
   gamma_bounding_box_unit = "km2",
-  gamma_bounding_box_type = "functional",
+  gamma_bounding_box_type = "ecosystem",
   gamma_bounding_box_comment = "60km long coastline between the most distant sites (measured on Google Earth) * 100m wide beach (estimated)",
   
   comment_standardisation = "Only sites actually sampled 12 times every year were included"

@@ -13,7 +13,9 @@ ddata <- data.table::melt(ddata,
 
 ddata <- ddata[value > 0]
 
-data.table::setnames(ddata, c("regional", "local", "year", "latitude", "longitude", "species", "value"))
+data.table::setnames(
+  ddata,
+  new = c("regional", "local", "year", "latitude", "longitude", "species", "value"))
 
 ##community data ----
 ddata[, ":="(
@@ -52,11 +54,15 @@ ddata[, ":="(
 
 ##save data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+  x = ddata,
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
+  row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+  x = meta,
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
+  row.names = FALSE
 )
 
 
@@ -72,15 +78,20 @@ meta[,":="(
   gamma_bounding_box = (c(1018L, 415L, 50L) * 10)[match(regional, c("Loire", "Allier", "Doubs"))],
   gamma_bounding_box_unit = "km2",
   gamma_bounding_box_type = "buffer",
-  gamma_bounding_box_comment = "Area of a 10 km wide buffer along the sampled rivers parts."
+  gamma_bounding_box_comment = "Area of a 10 km wide buffer along the sampled rivers parts.",
   
+  doi = 'https://doi.org/10.5061/dryad.1rn8pk0rx | https://doi.org/10.1111/jbi.14016'
 )][, gamma_sum_grains := pi * (50^2) * length(unique(local)), by = .(regional, year)]
 
 ##save data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+  x = ddata,
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
+  row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+  x = meta,
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
+  row.names = FALSE
 )

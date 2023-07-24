@@ -2,7 +2,7 @@ dataset_id <-  "tanner_2022"
 ddata <- base::readRDS(file = "data/raw data/tanner_2022/rdata.rds")
 
 #Raw Data ----
-data.table::setnames(ddata, c("local","year","species"))
+data.table::setnames(ddata, c("local", "year", "species"))
 
 ## Community data ----
 ddata[, ":="(
@@ -31,18 +31,23 @@ meta[, ":="(
    alpha_grain_type = "quadrat",
    
    comment = "Extracted from figshare repository Tanner, Jason E.; Connell, Joseph H. (2022): Heron Island exposed (north) crest coral community data. figshare. Dataset. https://doi.org/10.6084/m9.figshare.21114061.v1 . Coral communities in fixed quadrats followed over years.",
-   comment_standardisation = "none needed"
+   comment_standardisation = "none needed",
+   doi = 'https://doi.org/10.6084/m9.figshare.21114061.v1'
 )]
 meta[local == "NCNR", ":="(latitude = -23.43453, longitude = 151.92436)]
 
 ##saving data tables ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   x = ddata,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
+   row.names = FALSE
 )
 
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   x = meta,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
+   row.names = FALSE
 )
 
 #Standardized Data ----
@@ -64,11 +69,14 @@ meta[, ":="(
 
 ##saving data tables ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   x = ddata,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
+   row.names = FALSE
 )
 
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   x = meta,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
+   row.names = FALSE
 )
-

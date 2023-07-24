@@ -5,14 +5,16 @@ dataset_id <- "wardle_2014_mammals"
 ###https://datacommons.anu.edu.au/DataCommons/rest/display/anudc:5751
 ###Login for national university of australia needed. Data accessible after login without further requests.
 
-datapath <- "./data/raw data/wardle_2014_mammal/derg_small_mammal_trapping_data_1990+_p901t1206.csv"
+datapath <- "data/raw data/wardle_2014_mammal/derg_small_mammal_trapping_data_1990+_p901t1206.csv"
 
-ddata <- data.table::fread(file = datapath)
+ddata <- data.table::fread(file = datapath, sep = ',', header = TRUE,
+   drop = c("site_name", "site_code", "site_name", "trip_no",
+      "nights", "no_traps", "total_trap_nights", "recapt_same_trip",
+      "captures", "family", "month_year"), stringsAsFactors = TRUE)
 
 # Raw Data ----
 coords <- data.frame(longitude = c(137.86511, 138.6059, 137.86511, 138.6059),
                      latitude = c(-23.20549, -23.20549, -23.99417, -23.99417))
-
 
 data.table::setnames(
    x = ddata,
@@ -21,7 +23,10 @@ data.table::setnames(
 )
 
 #extract month
-ddata[,month := stringi::stri_extract_first_regex(str = month_year, pattern = "[A-Z][a-z]{1,3}")]
+ddata[, month := stringi::stri_extract_first_regex(
+   str = month_year,
+   pattern = "[A-Z][a-z]{1,3}")
+   ]
 
 ##community data ----
 
@@ -31,23 +36,11 @@ ddata[, ":="(
    regional = "Simpson Desert",
    
    metric = "abundance",
-   unit = "count",
-   
-   site_name = NULL,
-   site_code = NULL,
-   site_name = NULL,
-   trip_no = NULL,
-   nights = NULL,
-   no_traps = NULL,
-   total_trap_nights = NULL,
-   recapt_same_trip = NULL,
-   captures = NULL,
-   family = NULL,
-   month_year = NULL
+   unit = "count"
 )]
 
 ## meta ----
-meta <- unique(ddata[, .(dataset_id, year, regional, local)])
+meta <- unique(ddata[, .(dataset_id, year, month, regional, local)])
 meta[, ":="(
    realm = "Terrestrial",
    taxon = "Mammals",
@@ -67,25 +60,34 @@ meta[, ":="(
    alpha_grain_comment = "1 ha trapping grids with 36 traps per grid",
    
    comment = "Data manually downloaded via https://datacommons.anu.edu.au/DataCommons/rest/display/anudc:5751 for national university of australia. The authors estimated percent coverage in an area occupying 2.5 m radius around six traps on each plot and have been aggregated to plot level data. Regional in this dataset is defined as Site, local is defined as Plot ",
-   comment_standardisation = "Standartisation to achieve same Effort was given by the authors, already present in raw data: value =  unitnumbercaptures_100tn. Captures standardised for unequal trapping effort. captures/100 trap nights = captures/(number pitfalls (usually 36)*nights opened (usually 3))*100."
+   comment_standardisation = "Standartisation to achieve same Effort was given by the authors, already present in raw data: value =  unitnumbercaptures_100tn. Captures standardised for unequal trapping effort. captures/100 trap nights = captures/(number pitfalls (usually 36)*nights opened (usually 3))*100.",
+   doi = 'http://doi.org/10.25911/5c13171d944fe'
 )]
 
 meta[, gamma_sum_grains := sum(alpha_grain), by = year]
 
 ## saving raw data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   x = ddata,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
+   row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   x = meta,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
+   row.names = FALSE
 )
+
 # Standardised Data ----
 ## Selecting one sampling month sampled every year, every site: ----
 ddata <- ddata[month == "Apr" | month == "may"]
 
 ## meta ----
-meta <- meta[unique(ddata[,.(dataset_id, regional, local, year)]), on = .(regional, local, year)]
+meta <- meta[
+   unique(ddata[, .(dataset_id, regional, local, year)]),
+   on = .(regional, local, year)]
+
 meta[, ":="(
    effort = 36*100L, #6 lines of 6 traps per plot open for 100 nights by standartisation
    
@@ -102,10 +104,13 @@ meta[, ":="(
 )][, gamma_sum_grains := sum(alpha_grain), by = .(regional, year)]
 
 ## save data
-dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   x = ddata,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
+   row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised__metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   x = meta,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
+   row.names = FALSE
 )

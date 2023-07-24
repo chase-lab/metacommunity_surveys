@@ -46,7 +46,8 @@ meta[, ":="(
   alpha_grain_comment = "area of a single pitfall trap",
   
   comment = "Data extracted fro dryad repo 10.5061/dryad.vc80r13. On each 1ha site, 2 invertebrate trap grids with 6 pitfall traps were set, one at the top and one at the bottom of the dune. In some site-year, two samplings occurred each year, one in spring, one in winter. Only spring samples were kept. In some cases pitfall traps were lost. Only site-year surveys where all pitfall traps were recovered were kept. The authors do not make clear that pitfall grids are accurately placed at the same spot over the years and sampling was annual or seasonal hence the 'ecological_sampling' categorisation. IMPORTANT in each 1ha site, each grid is considered separately: each local value is a grid meaning that independence between grids belonging to the same site should be taken into account.",
-  comment_standardisation = "Deleting absences"
+  comment_standardisation = "Deleting absences",
+  doi = 'https://doi.org/10.5061/dryad.vc80r13 | https://doi.org/10.1111/1365-2656.13052'
 )]
 
 ##save data ----
@@ -65,7 +66,7 @@ env[season == "Spring" & no.traps == 6, both_grids := .N, by = .(year, site)]
 env <- env[both_grids == 2]
 
 ##meta data ----
-meta[,":="(
+meta[, ":="(
   effort = 1L,
   
   gamma_sum_grains = pi * (0.05^2) * 6,
@@ -75,18 +76,21 @@ meta[,":="(
   
   gamma_bounding_box = pi * (10^2),
   gamma_bounding_box_unit = "km2",
-  gamma_bounding_box_type = "functional",
+  gamma_bounding_box_type = "ecosystem",
   gamma_bounding_box_comment = "'five sites within 10 km of 'Main Camp'",
-  
+
   comment_standardisation = "1) deleting winter samples and 2) selecting only surveys where all pitfall traps were recovered."
 )]
 
 ##save data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+  x = ddata,
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
+  row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+  x = meta,
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
+  row.names = FALSE
 )
-

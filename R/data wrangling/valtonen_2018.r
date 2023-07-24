@@ -40,16 +40,22 @@ meta[, ":="(
   alpha_grain_comment = "area of the sampling sites",
   
   comment = 'Data extracted from the Dryad repository 10.5061/dryad.9m6vp. Compilation of butterflies trapped with light traps in Hungary. The data shared here were carefully curated to ensure the effort is constant as described in the article https://onlinelibrary.wiley.com/resolve/doi?DOI=10.1111/1365-2656.12687. "The traps were located in forests and forest  margins [...]. The traps were at the same locations (sites) throughout the study period, and they functioned generally throughout the annual active flight period of moths in the region." In each site there was one trap. alpha_grain is estimated as the area potentially sampled by a light-trap.',
-  comment_standardisation = "none"
+  comment_standardisation = "none needed",
+  doi = 'https://doi.org/10.5061/dryad.9m6vp | https://doi.org/10.1111/1365-2656.12687'
 )]
 
 ##saving data tables ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   x = ddata,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
+   row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
-                   row.names = FALSE
+
+data.table::fwrite(
+   x = meta,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
+   row.names = FALSE
 )
 
 #Standardized Data ----
@@ -66,15 +72,18 @@ meta[, ":="(
   gamma_bounding_box_unit = "km2",
   gamma_bounding_box_type = "administrative",
   gamma_bounding_box_comment = "area of Hungary"
-  
 )][, gamma_sum_grains := length(unique(local)), by = year]
 
 
 ##saving data tables ----
-dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   x = ddata,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
+   row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
-                   row.names = FALSE
+
+data.table::fwrite(
+   x = meta,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
+   row.names = FALSE
 )

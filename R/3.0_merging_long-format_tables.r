@@ -16,13 +16,13 @@ listfiles_metadata <- list.files(path = "data/wrangled data",
 template <- utils::read.csv("data/template_communities.txt", header = TRUE, sep = "\t")
 column_names_template <- template[, 1]
 
-lst <- lapply(listfiles, data.table::fread, integer64 = "character", encoding = "UTF-8")
+lst <- lapply(listfiles, data.table::fread, integer64 = "character", encoding = "UTF-8", sep = ',', header = TRUE, stringsAsFactors = TRUE)
 dt <- data.table::rbindlist(lst, fill = TRUE)
 
 template_metadata <- utils::read.csv("data/template_metadata.txt", header = TRUE, sep = "\t")
 column_names_template_metadata <- template_metadata[, 1L]
 
-lst_metadata <- lapply(listfiles_metadata, data.table::fread, integer64 = "character", encoding = "UTF-8")
+lst_metadata <- lapply(listfiles_metadata, data.table::fread, integer64 = "character", encoding = "UTF-8", sep = ',', header = TRUE, stringsAsFactors = TRUE)
 meta <- data.table::rbindlist(lst_metadata, fill = TRUE)
 
 # Checking data ----
@@ -32,7 +32,7 @@ check_indispensable_variables <- function(dt, indispensable_variables) {
       na_variables_names <- indispensable_variables[na_variables]
 
       for (na_variable in na_variables_names) {
-         warning(paste0("The variable -", na_variable, "- has missing values in the following datasets: ", paste(unique(dt[c(is.na(dt[, ..na_variable])), "dataset_id"]), collapse = ", ")))
+         warning(paste0("The variable -", na_variable, "- has missing values in the following datasets: ", paste(as.character(unique(dt[c(is.na(dt[, ..na_variable])), "dataset_id"])), collapse = ", ")))
       }
    }
 }
@@ -51,7 +51,7 @@ if (any(dt[, .(is.na(metric) | metric == "")])) warning(paste("missing _metric_ 
 if (any(dt[, .(is.na(unit) | unit == "")])) warning(paste("missing _unit_  value in ", unique(dt[is.na(unit) | unit == "", dataset_id]), collapse = ", "))
 
 ## Counting the study cases ----
-dt[, .(nsites = length(unique(local))), by = dataset_id][order(nsites, decreasing = TRUE)]
+dt[, .(nsites = data.table::uniqueN(.SD)), .SDcols = c('regional', 'local'), by = .(dataset_id)][order(nsites, decreasing = TRUE)]
 
 # Ordering ----
 # data.table::setcolorder(dt, intersect(column_names_template, colnames(dt)))
@@ -71,6 +71,12 @@ if (anyDuplicated(dt)) warning(
       paste(dt[duplicated(dt), unique(dataset_id)], collapse = ",")
    )
 )
+
+if (any(dt[, .N, by = .(dataset_id, regional, local, year, species)]$N != 1L))
+   warning(paste(
+      'duplicated species in:',
+      paste(collapse = ', ',
+            dt[, .N, by = .(dataset_id, regional, local, year, species)][N != 1L, unique(dataset_id)])))
 
 ## checking values ----
 if (dt[unit == "count", any(!is.integer(value))]) warning(paste("Non integer values in", paste(dt[unit == "count" & !is.integer(value), unique(dataset_id)], collapse = ", ")))
@@ -96,15 +102,6 @@ dt[is.na(species), species := species_original]
 if (!all(dt[metric == "pa", unit == "pa"]) || !all(dt[unit == "pa", metric == "pa"]) || !all(dt[metric == "pa" | unit == "pa", value == 1])) warning("inconsistent presence absence coding")
 if (any(dt[, length(unique(unit)), by = dataset_id]$V1) != 1L) warning("several units in a single data set")
 
-# Saving dt ----
-data.table::setcolorder(dt, c("dataset_id", "regional", "local", "year", "species", "species_original", "gbif_specieskey", "value", "metric", "unit"))
-
-data.table::fwrite(dt, "data/communities.csv", row.names = FALSE, na = "NA")
-
-if (file.exists("./data/references/homogenisation_dropbox_folder_path.rds")) {
-   path_to_homogenisation_dropbox_folder <- base::readRDS(file = "./data/references/homogenisation_dropbox_folder_path.rds")
-   data.table::fwrite(dt, paste0(path_to_homogenisation_dropbox_folder, "/metacommunity-survey-communities.csv"), row.names = FALSE)
-}
 
 
 
@@ -184,12 +181,13 @@ meta[is.na(alpha_grain_m2), unique(dataset_id)]
 meta[is.na(gamma_sum_grains_km2) & is.na(gamma_bounding_box_km2), unique(dataset_id)]
 
 # Converting coordinates into a common format with parzer ----
-unique_coordinates <- unique(meta[, .(latitude, longitude)])
+unique_coordinates <- unique(meta[, .(latitude = as.character(latitude), longitude = as.character(longitude))])
 unique_coordinates[, ":="(
    lat = parzer::parse_lat(latitude),
    lon = parzer::parse_lon(longitude)
 )]
 unique_coordinates[is.na(lat) | is.na(lon)]
+
 meta <- merge(meta, unique_coordinates, by = c("latitude", "longitude"))
 meta[, c("latitude", "longitude") := NULL]
 data.table::setnames(meta, c("lat", "lon"), c("latitude", "longitude"))
@@ -234,6 +232,10 @@ if (any(meta[(data_pooled_by_authors), is.na(sampling_years)])) warning(
 )
 if (any(meta[(data_pooled_by_authors), is.na(data_pooled_by_authors_comment)])) warning(paste("Missing data_pooled_by_authors_comment values in", meta[(data_pooled_by_authors) & is.na(data_pooled_by_authors_comment), paste(unique(dataset_id), collapse = ", ")]))
 
+## checking comment ----
+if (anyNA(meta$comment)) warning("Missing comment value")
+if (length(unique(meta$comment)) != length(unique(meta$dataset_id))) warning("Redundant comment values")
+
 ## checking comment_standardisation ----
 if (anyNA(meta$comment_standardisation)) warning("Missing comment_standardisation value")
 
@@ -262,6 +264,16 @@ data.table::setcolorder(meta, base::intersect(column_names_template_metadata, co
 if (length(base::setdiff(unique(dt$dataset_id), unique(meta$dataset_id))) > 0L) warning("Incomplete community or metadata tables")
 if (nrow(meta) != nrow(unique(meta[, .(dataset_id, regional, local, year)]))) warning("Redundant rows in meta")
 if (nrow(meta) != nrow(unique(dt[, .(dataset_id, regional, local, year)]))) warning("Discrepancies between dt and meta")
+
+# Saving dt ----
+data.table::setcolorder(dt, c("dataset_id", "regional", "local", "year", "species", "species_original", "value", "metric", "unit"))
+
+data.table::fwrite(dt, "data/communities.csv", row.names = FALSE, na = "NA")
+
+if (file.exists("./data/references/homogenisation_dropbox_folder_path.rds")) {
+   path_to_homogenisation_dropbox_folder <- base::readRDS(file = "./data/references/homogenisation_dropbox_folder_path.rds")
+   data.table::fwrite(dt, paste0(path_to_homogenisation_dropbox_folder, "/metacommunity-survey-communities.csv"), row.names = FALSE)
+}
 
 
 # Saving meta ----

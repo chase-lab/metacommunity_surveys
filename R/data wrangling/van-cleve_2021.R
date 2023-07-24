@@ -1,22 +1,22 @@
-
 dataset_id <- "van-cleve_2021"
+
 ddata <- base::readRDS("./data/raw data/van-cleve_2021/rdata.rds")
-data.table::setnames(ddata, tolower(colnames(ddata)))
+data.table::setnames(ddata, new = tolower(colnames(ddata)))
 
 
-#Raw Data ----
+# Raw Data ----
+ddata[, ":="(
+  species = tolower(trimws(species)),
+  year = format(date, "%Y"),
+  month = format(date, "%m"),
+  day = format(date, "%d")
+)]
 
-ddata[, species := tolower(trimws(species))]
-ddata[, year := format(date, "%Y")]
-ddata[, month := format(date, "%m")]
-ddata[, day := format(date, "%d")]
+## pooling individuals together -----
+ddata <- ddata[, .(value = .N), by = .(year, month, day, site, plot, species)
+  ][!is.na(species) & !species %in% c("", "?", "NoTrees", "nd")]
 
-
-##pooling individuals together -----
-ddata <- unique(ddata[, .(value = .N), by = .(year, month, day, site, plot, species)][!species %in% c("", "?", "NoTrees", "nd")])
-ddata <- unique(ddata[, .(value = sum(value)), by = .(site, year, month, day, plot, species)][!is.na(species)])
-
-data.table::setnames(ddata, "site", "local")
+data.table::setnames(ddata, old = "site", new = "local")
 
 ## community data ----
 
@@ -24,14 +24,22 @@ ddata[, ":="(
   dataset_id = dataset_id,
   regional = "Bonanza Creek LTER",
   
-  species = c("Picea mariana", "Picea glauca", "Picea sp.", "Populus balsamifera", "Populus tremuloides", "Betula neoalaskana", "Larix laricina")[data.table::chmatch(species, c("picmar", "picgla", "picea", "popbal", "poptre", "betneo", "larlar"))],
+  species = c(
+  "Picea mariana", "Picea glauca",
+  "Picea sp.", "Populus balsamifera",
+  "Populus tremuloides", "Betula neoalaskana",
+  "Larix laricina")[data.table::chmatch(species, c(
+    "picmar", "picgla",
+    "picea", "popbal",
+    "poptre", "betneo",
+    "larlar"))],
   
   metric = "abundance",
   unit = "count"
 )]
 
 ## metadata ----
-meta <- unique(ddata[, .(dataset_id, regional, local, year)])
+meta <- unique(ddata[, .(dataset_id, regional, local, year, month, day)])
 
 meta[, ":="(
   realm = "Terrestrial",
@@ -50,16 +58,21 @@ meta[, ":="(
   alpha_grain_comment = "sum of the 12 10*10m plots per site",
   
   comment = "Extracted from EDI repository knb-lter-bnz.320.23 https://doi.org/10.6073/pasta/93067176968c707ac8491ce98b3c9dca . Authors publish forest past and ongoing results from forest community samplings and individual tree DBH measures. Authors provided species codes only and Species scientific names were assumed.",
-  comment_standardisation = "None"
+  comment_standardisation = "None needed",
+  doi = 'https://doi.org/10.6073/pasta/93067176968c707ac8491ce98b3c9dca | https://doi.org/10.1002/hyp.14251'
 )]
 
 ##saving data tables ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata[,!c("plot")], paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+  x = ddata[, !c("plot")],
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
+  row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+  x = meta,
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
+  row.names = FALSE
 )
 
 #Standardized Data ----
@@ -79,8 +92,7 @@ ddata <- ddata[ddata[, .(plot = unique(plot)[sample(1:length(unique(plot)), 12L)
 ddata <- ddata[, !("12_sites_or_more")]
 
 ##meta data ----
-meta <- meta[unique(ddata[, .(dataset_id, regional, local, year)]), on = 
-               .(regional, local, year)]
+meta <- meta[unique(ddata[, .(dataset_id, regional, local, year)]), on = .(regional, local, year)]
 meta[, ":="(
   effort = 12L,
   
@@ -90,17 +102,20 @@ meta[, ":="(
   
   gamma_bounding_box = 50L,
   gamma_bounding_box_unit = "km2",
-  gamma_bounding_box_type = "functional",
+  gamma_bounding_box_type = "ecosystem",
   gamma_bounding_box_comment = "area of the Bonanza Creek Experimental Forest",
   
   comment_standardisation = "Standardisation: number of sampling events per year per plot reduced to 1 and number of plots per site per year reduced to 12 then all plots from a year and site were pooled together and abundances summed"
 )][, gamma_sum_grains := length(unique(local)) * 1200L, by = year]
 
-##saving data tables ----
-dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata[,!c("plot")], paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
-                   row.names = FALSE
+## saving data tables ----
+data.table::fwrite(
+  x = ddata[, !c("plot")],
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
+  row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+  x = meta,
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
+  row.names = FALSE
 )

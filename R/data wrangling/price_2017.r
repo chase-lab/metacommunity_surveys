@@ -52,16 +52,20 @@ meta[, ":="(
   alpha_grain_comment = "20 0.5m2 quadrats per wetland per survey",
 
   comment = "Extracted from Price et al 2017 Supplementary (https://doi.org/10.13012/B2IDB-0478588_V2 manual download only(?)). Data was produced as part of a Critical Trends Assessment Program and wetlands were sampled every 5 years since 1997. The sampling periods used in this study are as follows: 1997–2000, 2002–2005, 2007–2010 and 2012–2015. Effort is consistent over time: vegetation sampled in standard quadrats.",
-  comment_standardisation = "excluding 0 and na values"
-
+  comment_standardisation = "excluding 0 and na values",
+  doi = 'https://doi.org/10.13012/B2IDB-0478588_V2 | https://doi.org/10.1111/1365-2745.12883'
 )]
 
 ##save data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
+data.table::fwrite(
+  x = ddata,
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
   row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
+data.table::fwrite(
+  x = meta,
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
   row.names = FALSE
 )
 
@@ -84,10 +88,13 @@ meta[,":="(
 
 ##save data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+  x = ddata,
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
+  row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+  x = meta,
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
+  row.names = FALSE
 )
-

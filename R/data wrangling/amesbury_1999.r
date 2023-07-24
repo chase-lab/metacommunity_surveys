@@ -58,7 +58,8 @@ meta[, ":="(
   gamma_sum_grains_comment = "sum of the sampled transects",
 
   comment = "Extracted from Amesbury_1999 table 17. Abundances (in modern) turned into presence absence (as in historical). Effort is comparable: 'Four of the fish transects surveyed by Gawel(1977) [...] were resurveyed using Gawel's survey methods' and 'Fish were surveyed by an investigator swimming the length of the transect line enumerating by species fish which were seen within 1 m of either side of the line (an area of 100 m2).' Exact protocol is described in Eldredge, L.G., R. Dickinson, and S. Moras (eds.) 1977. Marine Survey of Agat Bay. Univ. Guam Mar.Lab., Tech. Rept. No. 31,251 p. Location of the 4 resurveyed transects in the different parts of the park is unknown.",
-  comment_standardisation = "none needed"
+  comment_standardisation = "none needed",
+  doi = NA
 )]
 
 # saving raw data ----

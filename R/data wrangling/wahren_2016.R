@@ -1,13 +1,13 @@
-dataset_id = "wahren_2016"
+dataset_id <- "wahren_2016"
 
-ddata <- data.table::fread(file = "./data/raw data/wahren_2016/vltm_vegetation_monitoring_1947-2013_p821t990.csv")
+ddata <- data.table::fread(
+   file = "./data/raw data/wahren_2016/vltm_vegetation_monitoring_1947-2013_p821t990.csv")
 
 #Raw Data ----
 
-ddata[,species := paste(genus,species)]
-ddata[,unique(species)]
+ddata[, species := paste(genus, species)]
 
-ddata <- unique(ddata[,.(site, year, species)])
+ddata <- unique(ddata[, .(site, year, species)])
 data.table::setnames(x = ddata, old =  "site", new = "local")
 
 ## community data ----
@@ -43,17 +43,22 @@ meta[, ":="(
    alpha_grain_comment = "Approximate Area of Pretty Valley plots in m2 given by the authors",
    
    comment = "Extracted from: https://datacommons.anu.edu.au/DataCommons/rest/display/anudc:5886?layout=def:display, data saved at raw data/wahren_2016, data download only possible with login, download not scriptedd",
-   comment_standardisation = "None"
+   comment_standardisation = "None needed",
+   doi = 'https://doi.org/10.25911/5c3ff778936da'
 )]
 
 ##saving data tables ----
 
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   x = ddata,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
+   row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   x = meta,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
+   row.names = FALSE
 )
 
 #Standardised Data ----
@@ -69,9 +74,9 @@ ddata <- ddata[!grepl(pattern = "no data|unknown|rock| litter|ground", x = speci
 
 ##metadata ----
 
-meta <- meta[unique(ddata[, .(dataset_id, regional, local, year)]), on =
-                .(dataset_id, regional, local, year)] 
-
+meta <- meta[
+   unique(ddata[, .(dataset_id, regional, local, year)]),
+   on = .(dataset_id, regional, local, year)]
 
 meta[, ":="(
    effort = 42L,
@@ -90,11 +95,13 @@ meta[, ":="(
 )]
 
 ##saving data tables ----
-
-dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   x = ddata,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
+   row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   x = meta,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
+   row.names = FALSE
 )

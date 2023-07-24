@@ -5,8 +5,14 @@ perennial_species <- base::readRDS(file = "./data/raw data/christensen_2021/pere
 taxo <- base::readRDS(file = "./data/raw data/christensen_2021/taxo.rds")
 
 #Raw data ----
-data.table::setnames(annual_species, c("quadrat", "species_code", "count"), c("local", "species", "value"))
-data.table::setnames(perennial_species, c("quadrat", "species_code"), c("local", "species"))
+data.table::setnames(
+   annual_species,
+   old = c("quadrat", "species_code", "count"),
+   new = c("local", "species", "value"))
+data.table::setnames(
+   perennial_species,
+   old = c("quadrat", "species_code"),
+   new = c("local", "species"))
 
 ##merging annual and perennial species abundances ----
 ###intersecting ----
@@ -27,12 +33,12 @@ taxo[, species := paste(genus, species)][species == " ", species := species_code
 ddata[, ":="(
    dataset_id = dataset_id,
    regional = "Jornada Experimental Range, USA",
-   
+
    species = taxo$species[match(species, taxo$species_code)],
-   
+
    metric = "abundance",
    unit = "count",
-   
+
    project_year = NULL,
    notes = NULL
 )]
@@ -47,29 +53,34 @@ meta <- unique(ddata[, .(dataset_id, regional, local, year)])
 meta[, ":="(
    taxon = "Plants",
    realm = "Terrestrial",
-   
+
    latitude = "32°37'N",
    longitude = "106°45'W",
-   
+
    study_type = "ecological_sampling",
-   
+
    data_pooled_by_authors = FALSE,
-   
+
    alpha_grain = 1L,
    alpha_grain_unit = "m2",
    alpha_grain_type = "plot",
    alpha_grain_comment = "plot area",
-   
+
    comment = "Extracted from supplementary 2 associated to article Christensen, E., James, D., Maxwell, C., Slaughter, A., Adler, P.B., Havstad, K. and Bestelmeyer, B. (2021), Quadrat-based monitoring of desert grassland vegetation at the Jornada Experimental Range, New Mexico, 1915–2016. Ecology. Accepted Author Manuscript e03530. https://doi.org/10.1002/ecy.3530 . Methods: 'The data set includes 122 1 m by 1 m permanent quadrats, although not all quadrats were sampled in each year of the study and there is a gap in monitoring from 1980–1995'. Data from annual species counts and perennial species counts were included. Exact locations and gamma_bounding_box are unknown.",
-   comment_standardisation = "None"
+   comment_standardisation = "None",
+   doi = 'https://doi.org/10.1002/ecy.3530'
 )]
 ##save data -----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   x = ddata, 
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
+   row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   x = meta,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
+   row.names = FALSE
 )
 
 #Standardized data ----
@@ -94,16 +105,16 @@ ddata <- rbind(annual_species, perennial_species, fill = TRUE)
 ddata <- ddata[!is.na(value)]
 
 ##community data ----
-ddata[,order_month := NULL]
+ddata[, order_month := NULL]
 
 ##meta data ----
-meta[,":="(
+meta[, ":="(
    effort = 1L,
-   
+
    gamma_sum_grains_unit = "m2",
    gamma_sum_grains_type = "sample",
    gamma_sum_grains_comment = "sum of sampled areas per year",
-   
+
    gamma_bounding_box = geosphere::areaPolygon(coords[, c("longitude", "latitude")]) / 10^6,
    gamma_bounding_box_unit = "km2",
    gamma_bounding_box_type = "box",
@@ -114,9 +125,13 @@ meta[,":="(
 
 ##save data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   x = ddata,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
+   row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   x = meta,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
+   row.names = FALSE
 )
