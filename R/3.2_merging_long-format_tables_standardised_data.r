@@ -15,13 +15,17 @@ listfiles_metadata_standardised <- list.files(
 template_community_standardised <- utils::read.csv(file = "data/template_communities_standardised.txt", header = TRUE, sep = "\t")
 column_names_template_community_standardised <- template_community_standardised[, 1]
 
-lst_community_standardised <- lapply(listfiles_community_standardised, data.table::fread, integer64 = "character", encoding = "UTF-8")
+lst_community_standardised <- lapply(listfiles_community_standardised,
+FUN = data.table::fread, integer64 = "character", encoding = "UTF-8",
+stringsAsFactors = TRUE)
 dt_standardised <- data.table::rbindlist(lst_community_standardised, fill = TRUE)
 
 template_metadata_standardised <- utils::read.csv(file = "data/template_metadata_standardised.txt", header = TRUE, sep = "\t")
 column_names_template_metadata_standardised <- template_metadata_standardised[, 1L]
 
-lst_metadata_standardised <- lapply(listfiles_metadata_standardised, data.table::fread, integer64 = "character", encoding = "UTF-8")
+lst_metadata_standardised <- lapply(listfiles_metadata_standardised,
+FUN = data.table::fread, integer64 = "character", encoding = "UTF-8",
+stringsAsFactors = TRUE)
 meta_standardised <- data.table::rbindlist(lst_metadata_standardised, fill = TRUE)
 
 ## Checking data ----
@@ -40,11 +44,12 @@ if (any(dt_standardised[, .(is.na(metric) | metric == "")])) warning(paste("miss
 if (any(dt_standardised[, .(is.na(unit) | unit == "")])) warning(paste("missing _unit_  value in ", unique(dt_standardised[is.na(unit) | unit == "", dataset_id]), collapse = ", "))
 
 ### Counting the study cases ----
-dt_standardised[, .(nsites = length(unique(local))), by = dataset_id][order(nsites, decreasing = TRUE)]
+dt_standardised[, .(nsites = data.table::uniqueN(.SD)), .SDcols = c('regional', 'local'), by = .(dataset_id)][order(nsites, decreasing = TRUE)]
 
 ## Ordering ----
 # data.table::setcolorder(dt, intersect(column_names_template, colnames(dt)))
-data.table::setorder(dt_standardised, dataset_id, regional, local, year, species)
+data.table::setorder(dt_standardised, dataset_id, regional, local,
+   year, species)
 
 ## Deleting special characters in regional and local ----
 # dt[, ":="(
@@ -61,17 +66,27 @@ if (anyDuplicated(dt_standardised)) warning(
    )
 )
 
+if (any(dt_standardised[, .N, by = .(dataset_id, regional, local, year, species)]$N != 1L))
+   warning(paste(
+      'duplicated species in:',
+      paste(collapse = ', ',
+            dt_standardised[, .N, by = .(dataset_id, regional, local, year, species)][N != 1L, unique(dataset_id)])))
+
 ### checking values ----
 if (dt_standardised[unit == "count", any(!is.integer(value))]) warning(paste("Non integer values in", paste(dt_standardised[unit == "count" & !is.integer(value), unique(dataset_id)], collapse = ", ")))
 
 ### checking species names ----
 for (i in seq_along(lst_community_standardised)) if (is.character(lst_community_standardised[[i]]$species)) if (any(!unique(Encoding(lst_community_standardised[[i]]$species)) %in% c("UTF-8", "unknown"))) warning(paste0("Encoding issue in ", listfiles_community_standardised[i]))
-#### adding GBIF matched names by Dr. Wubing Xu ----
-load("./data/requests to taxonomy databases/bhsplist_gbif.RDATA")
-data.table::setDT(bh_species)
 
-dt_standardised <- merge(dt_standardised, bh_species[, .(dataset_id, species, species.new, gbif_specieskey)],
-                         by = c("dataset_id", "species"), all.x = TRUE)
+#### adding GBIF matched names by Dr. Wubing Xu ----
+corrected_species_names <- data.table::fread(
+   file = "data/requests to taxonomy databases/manual_community_species_filled_20221003.csv",
+   select = c("dataset_id", "species", "species.new")
+)
+
+# data.table join with update by reference
+dt_standardised[corrected_species_names, on = .(dataset_id, species), species.new := i.species.new]
+
 data.table::setnames(dt_standardised, c("species", "species.new"), c("species_original", "species"))
 dt_standardised[is.na(species), species := species_original]
 # unique(dt[grepl("[^a-zA-Z\\._ ]", species) & nchar(species) < 10L, .(dataset_id)])
@@ -83,20 +98,12 @@ dt_standardised[is.na(species), species := species_original]
 if (!all(dt_standardised[metric == "pa", unit == "pa"]) || !all(dt_standardised[unit == "pa", metric == "pa"]) || !all(dt_standardised[metric == "pa" | unit == "pa", value == 1])) warning("inconsistent presence absence coding")
 if (any(dt_standardised[, length(unique(unit)), by = dataset_id]$V1) != 1L) warning("several units in a single data set")
 
-## Saving dt ----
-data.table::setcolorder(dt_standardised, c("dataset_id", "regional", "local", "year", "species", "species_original", "gbif_specieskey", "value", "metric", "unit"))
-
-data.table::fwrite(dt_standardised, "data/communities_standardised.csv", row.names = FALSE, na = "NA")
-
-if (file.exists("./data/references/homogenisation_dropbox_folder_path.rds")) {
-   path_to_homogenisation_dropbox_folder <- base::readRDS(file = "./data/references/homogenisation_dropbox_folder_path.rds")
-   data.table::fwrite(dt_standardised, paste0(path_to_homogenisation_dropbox_folder, "/metacommunity-survey-raw-communities.csv"), row.names = FALSE)
-}
-
-
 
 ## Metadata ----
-meta_standardised <- merge(meta_standardised, unique(dt_standardised[, .(dataset_id, regional, local, year)]), all.x = TRUE)
+meta_standardised <- meta_standardised[
+   unique(dt_standardised[, .(dataset_id, regional, local, year)]),
+   on = .(dataset_id, regional, local, year)
+]
 
 # Checking metadata
 if (any(!unique(meta_standardised$taxon) %in% c("Invertebrates", "Plants", "Mammals", "Fish", "Marine plants", "Birds", "Herpetofauna"))) warning(
@@ -133,9 +140,9 @@ if (any(!na.omit(unique(meta_standardised$gamma_bounding_box_unit)) %in% c("acre
 meta_standardised[, alpha_grain := as.numeric(alpha_grain)][,
                                                             alpha_grain := data.table::fcase(
                                                                alpha_grain_unit == "m2", alpha_grain,
-                                                               alpha_grain_unit == "cm2", alpha_grain / 10000,
-                                                               alpha_grain_unit == "ha", alpha_grain * 10000,
-                                                               alpha_grain_unit == "km2", alpha_grain * 1000000,
+                                                               alpha_grain_unit == "cm2", alpha_grain / 10^4,
+                                                               alpha_grain_unit == "ha", alpha_grain * 10^4,
+                                                               alpha_grain_unit == "km2", alpha_grain * 10,
                                                                alpha_grain_unit == "acres", alpha_grain * 4046.856422
                                                             )
 ][, alpha_grain_unit := NULL]
@@ -166,15 +173,20 @@ meta_standardised[is.na(alpha_grain_m2), unique(dataset_id)]
 meta_standardised[is.na(gamma_sum_grains_km2) & is.na(gamma_bounding_box_km2), unique(dataset_id)]
 
 ## Converting coordinates into a common format with parzer ----
-unique_coordinates_standardised <- unique(meta_standardised[, .(latitude, longitude)])
+unique_coordinates_standardised <- unique(meta_standardised[, .(as.character(latitude), as.character(longitude))])
 unique_coordinates_standardised[, ":="(
    lat = parzer::parse_lat(latitude),
    lon = parzer::parse_lon(longitude)
 )]
 unique_coordinates_standardised[is.na(lat) | is.na(lon)]
-meta_standardised <- merge(meta_standardised, unique_coordinates_standardised, by = c("latitude", "longitude"))
-meta_standardised[, c("latitude", "longitude") := NULL]
-data.table::setnames(meta_standardised, c("lat", "lon"), c("latitude", "longitude"))
+# data.table join with update by reference
+meta_standardised[
+   unique_coordinates_standardised,
+   on = .(latitude, longitude),
+   ":="(latitude = i.lat, longitude = i.lon)]
+# meta_standardised <- merge(meta_standardised, unique_coordinates_standardised, by = c("latitude", "longitude"))
+# meta_standardised[, c("latitude", "longitude") := NULL]
+# data.table::setnames(meta_standardised, c("lat", "lon"), c("latitude", "longitude"))
 
 ## Coordinate scale ----
 meta_standardised[, is_coordinate_local_scale := length(unique(latitude)) != 1L && length(unique(longitude)) != 1L, by = .(dataset_id, regional)]
@@ -195,7 +207,7 @@ for (i in seq_along(lst_metadata_standardised)) if (any(!unlist(unique(apply(lst
 if (any(meta_standardised[, length(unique(paste(range(year), collapse = "-"))), by = .(dataset_id, regional)]$V1 != 1L)) warning("all local scale sites were not sampled for the same years and timepoints has to be consistent with years")
 
 ### checking study_type ----
-if (any(!meta_standardised$study_type %in% c("ecological_sampling","resurvey")))
+if (any(!meta_standardised$study_type %in% c("ecological_sampling", "resurvey")))
    warning(
       paste(
          "study_type has to be either 'ecological_sampling' or 'resurvey', see: ",
@@ -215,12 +227,22 @@ if (any(meta_standardised[(data_pooled_by_authors), is.na(sampling_years)])) war
 )
 if (any(meta_standardised[(data_pooled_by_authors), is.na(data_pooled_by_authors_comment)])) warning(paste("Missing data_pooled_by_authors_comment values in", meta_standardised[(data_pooled_by_authors) & is.na(data_pooled_by_authors_comment), paste(unique(dataset_id), collapse = ", ")]))
 
+## checking comment ----
+if (anyNA(meta_standardised$comment)) warning("Missing comment value")
+if (length(unique(meta_standardised$comment)) != length(unique(meta_standardised$dataset_id))) warning("Redundant comment values")
+
 ### checking comment_standardisation ----
 if (anyNA(meta_standardised$comment_standardisation)) warning("Missing comment_standardisation value")
 
+## Checking that there is only one alpha_grain value per dataset_id ----
+if (any(meta_standardised[, any(length(unique(alpha_grain_m2)) != 1L), by = .(dataset_id, regional)]$V1)) warning(paste(
+   "Inconsistent grain in",
+   meta_standardised[, length(unique(alpha_grain_m2)) != 1L, by = .(dataset_id, regional)][, unique(dataset_id)]
+))
+
 ### checking alpha_grain_type ----
 # meta[(!checklist), .(lterm = diff(range(year)), taxon = taxon, realm = realm, alpha_grain_type = alpha_grain_type), by = .(dataset_id, regional)][lterm >= 10L][taxon == "Fish" & realm == "Freshwater" & grep("lake",alpha_grain_type), unique(dataset_id)]
-if (any(!unique(meta_standardised$alpha_grain_type) %in% c("island", "plot", "sample", "lake_pond", "trap", "transect", "functional", "box", "quadrat"))) warning(paste("Invalid alpha_grain_type value in", paste(unique(meta_standardised[!alpha_grain_type %in% c("island", "plot", "sample", "lake_pond", "trap", "transect", "functional", "box", "quadrat"), dataset_id]), collapse = ", ")))
+if (any(!unique(meta_standardised$alpha_grain_type) %in% c("island", "plot", "sample", "lake_pond", "trap", "transect", "functional", "box", "quadrat", "listening_point"))) warning(paste("Invalid alpha_grain_type value in", paste(unique(meta_standardised[!alpha_grain_type %in% c("island", "plot", "sample", "lake_pond", "trap", "transect", "functional", "box", "quadrat", "listening_point"), dataset_id]), collapse = ", ")))
 
 ### checking gamma_sum_grains_type & gamma_bounding_box_type ----
 if (any(!na.omit(unique(meta_standardised$gamma_sum_grains_type)) %in% c("archipelago", "sample", "lake_pond", "plot", "quadrat", "transect", "functional", "box"))) warning(paste("Invalid gamma_sum_grains_type value in", paste(unique(meta_standardised[!is.na(gamma_sum_grains_type) & !gamma_sum_grains_type %in% c("archipelago", "sample", "lake_pond", "plot", "quadrat", "transect", "functional", "box"), dataset_id]), collapse = ", ")))
@@ -239,8 +261,18 @@ if (nrow(meta_standardised) != nrow(unique(meta_standardised[, .(dataset_id, reg
 if (nrow(meta_standardised) != nrow(unique(dt_standardised[, .(dataset_id, regional, local, year)]))) warning("Discrepancies between dt and meta")
 
 
-## Saving meta ----
-data.table::fwrite(meta_standardised, "data/metadata_standardised.csv", sep = ",", row.names = FALSE, na = "NA")
-if (file.exists("./data/references/homogenisation_dropbox_folder_path.rds"))
-   data.table::fwrite(meta_standardised, paste0(path_to_homogenisation_dropbox_folder, "/metacommunity-survey-metadata-raw.csv"), sep = ",", row.names = FALSE)
+## Saving dt ----
+data.table::setcolorder(dt_standardised, c("dataset_id", "regional", "local", "year", "species", "species_original", "gbif_specieskey", "value", "metric", "unit"))
 
+data.table::fwrite(dt_standardised, "data/communities_standardised.csv", row.names = FALSE) # for iDiv data portal: add , na = "NA"
+
+if (file.exists("data/references/homogenisation_dropbox_folder_path.rds")) {
+   path_to_homogenisation_dropbox_folder <- base::readRDS(file = "data/references/homogenisation_dropbox_folder_path.rds")
+   data.table::fwrite(dt_standardised, paste0(path_to_homogenisation_dropbox_folder, "/metacommunity-survey-raw-communities.csv"), row.names = FALSE)
+}
+
+
+## Saving meta ----
+data.table::fwrite(meta_standardised, "data/metadata_standardised.csv", sep = ",", row.names = FALSE) # for iDiv data portal: add , na = "NA"
+if (file.exists("data/references/homogenisation_dropbox_folder_path.rds"))
+   data.table::fwrite(meta_standardised, paste0(path_to_homogenisation_dropbox_folder, "/metacommunity-survey-metadata-raw.csv"), sep = ",", row.names = FALSE)

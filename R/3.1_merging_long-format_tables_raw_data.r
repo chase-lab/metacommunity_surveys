@@ -15,13 +15,16 @@ listfiles_metadata_raw <- list.files(
 template_community_raw <- utils::read.csv(file = "data/template_communities_raw.txt", header = TRUE, sep = "\t")
 column_names_template_community_raw <- template_community_raw[, 1]
 
-lst_community_raw <- lapply(listfiles_community_raw, data.table::fread, integer64 = "character", encoding = "UTF-8")
+lst_community_raw <- lapply(listfiles_community_raw,
+FUN = data.table::fread, integer64 = "character", encoding = "UTF-8",
+stringsAsFactors = TRUE)
 dt_raw <- data.table::rbindlist(lst_community_raw, fill = TRUE)
 
 template_metadata_raw <- utils::read.csv(file = "data/template_metadata_raw.txt", header = TRUE, sep = "\t")
 column_names_template_metadata_raw <- template_metadata_raw[, 1L]
 
-lst_metadata_raw <- lapply(listfiles_metadata_raw, data.table::fread, integer64 = "character", encoding = "UTF-8")
+lst_metadata_raw <- lapply(listfiles_metadata_raw,
+FUN = data.table::fread, integer64 = "character", encoding = "UTF-8", stringsAsFactors = TRUE)
 meta_raw <- data.table::rbindlist(lst_metadata_raw, fill = TRUE)
 
 ## Checking data ----
@@ -40,11 +43,12 @@ if (any(dt_raw[, .(is.na(metric) | metric == "")])) warning(paste("missing _metr
 if (any(dt_raw[, .(is.na(unit) | unit == "")])) warning(paste("missing _unit_ value in ", unique(dt_raw[is.na(unit) | unit == "", dataset_id]), collapse = ", "))
 
 ### Counting the study cases ----
-dt_raw[, .(nsites = length(unique(local))), by = dataset_id][order(nsites, decreasing = TRUE)]
+dt_raw[, .(nsites = data.table::uniqueN(.SD)), .SDcols = c('regional', 'local'), by = .(dataset_id)][order(nsites, decreasing = TRUE)]
 
 ## Ordering ----
 # data.table::setcolorder(dt, intersect(column_names_template, colnames(dt)))
-data.table::setorder(dt_raw, dataset_id, regional, local, year, species)
+data.table::setorder(dt_raw, dataset_id, regional, local,
+   year, month, day, species)
 
 ## Deleting special characters in regional and local ----
 # dt[, ":="(
@@ -61,17 +65,27 @@ if (anyDuplicated(dt_raw)) warning(
    )
 )
 
+if (any(dt_raw[, .N, by = .(dataset_id, regional, local, year, month, day, species)]$N != 1L))
+   warning(paste(
+      'duplicated species in:',
+      paste(collapse = ', ',
+            dt_raw[, .N, by = .(dataset_id, regional, local, year, month, day, species)][N != 1L, unique(dataset_id)])))
+
 ### checking values ----
 if (dt_raw[unit == "count", any(!is.integer(value))]) warning(paste("Non integer values in", paste(dt_raw[unit == "count" & !is.integer(value), unique(dataset_id)], collapse = ", ")))
 
 ### checking species names ----
 for (i in seq_along(lst_community_raw)) if (is.character(lst_community_raw[[i]]$species)) if (any(!unique(Encoding(lst_community_raw[[i]]$species)) %in% c("UTF-8", "unknown"))) warning(paste0("Encoding issue in ", listfiles_community_raw[i]))
-#### adding GBIF matched names by Dr. Wubing Xu ----
-load("./data/requests to taxonomy databases/bhsplist_gbif.RDATA")
-data.table::setDT(bh_species)
 
-dt_raw <- merge(dt_raw, bh_species[, .(dataset_id, species, species.new, gbif_specieskey)],
-                by = c("dataset_id", "species"), all.x = TRUE)
+#### adding GBIF matched names by Dr. Wubing Xu ----
+corrected_species_names <- data.table::fread(
+   file = "data/requests to taxonomy databases/manual_community_species_filled_20221003.csv",
+   select = c("dataset_id","species","species.new")
+)
+
+# data.table join with update by reference
+dt_raw[corrected_species_names, on = .(dataset_id, species), species.new := i.species.new]
+
 data.table::setnames(dt_raw, c("species", "species.new"), c("species_original", "species"))
 dt_raw[is.na(species), species := species_original]
 # unique(dt[grepl("[^a-zA-Z\\._ ]", species) & nchar(species) < 10L, .(dataset_id)])
@@ -83,20 +97,12 @@ dt_raw[is.na(species), species := species_original]
 if (!all(dt_raw[metric == "pa", unit == "pa"]) || !all(dt_raw[unit == "pa", metric == "pa"]) || !all(dt_raw[metric == "pa" | unit == "pa", value == 1])) warning("inconsistent presence absence coding")
 if (any(dt_raw[, length(unique(unit)), by = dataset_id]$V1) != 1L) warning("several units in a single data set")
 
-## Saving dt ----
-data.table::setcolorder(dt_raw, c("dataset_id", "regional", "local", "year", "species", "species_original", "gbif_specieskey", "value", "metric", "unit"))
-
-data.table::fwrite(dt_raw, "data/communities_raw.csv", row.names = FALSE, na = "NA")
-
-if (file.exists("./data/references/homogenisation_dropbox_folder_path.rds")) {
-   path_to_homogenisation_dropbox_folder <- base::readRDS(file = "./data/references/homogenisation_dropbox_folder_path.rds")
-   # data.table::fwrite(dt_raw, paste0(path_to_homogenisation_dropbox_folder, "/metacommunity-survey-raw-communities.csv"), row.names = FALSE)
-}
-
-
 
 ## Metadata ----
-meta_raw <- merge(meta_raw, unique(dt_raw[, .(dataset_id, regional, local, year)]), all.x = TRUE)
+meta_raw <- meta_raw[
+   unique(dt_raw[, .(dataset_id, regional, local, year, month, day)]),
+   on = .(dataset_id, regional, local, year, month, day)
+]
 
 # Checking metadata
 if (any(!unique(meta_raw$taxon) %in% c("Invertebrates", "Plants", "Mammals", "Fish", "Marine plants", "Birds", "Herpetofauna"))) warning(
@@ -122,9 +128,9 @@ if (any(!na.omit(unique(meta_raw$alpha_grain_unit)) %in% c("acres", "ha", "km2",
 meta_raw[, alpha_grain := as.numeric(alpha_grain)][,
                                                    alpha_grain := data.table::fcase(
                                                       alpha_grain_unit == "m2", alpha_grain,
-                                                      alpha_grain_unit == "cm2", alpha_grain / 10000,
-                                                      alpha_grain_unit == "ha", alpha_grain * 10000,
-                                                      alpha_grain_unit == "km2", alpha_grain * 1000000,
+                                                      alpha_grain_unit == "cm2", alpha_grain / 10^4,
+                                                      alpha_grain_unit == "ha", alpha_grain * 10^4,
+                                                      alpha_grain_unit == "km2", alpha_grain * 10^6,
                                                       alpha_grain_unit == "acres", alpha_grain * 4046.856422
                                                    )
 ][, alpha_grain_unit := NULL]
@@ -134,15 +140,20 @@ data.table::setnames(meta_raw, "alpha_grain", "alpha_grain_m2")
 meta_raw[is.na(alpha_grain_m2), unique(dataset_id)]
 
 ## Converting coordinates into a common format with parzer ----
-unique_coordinates_raw <- unique(meta_raw[, .(latitude, longitude)])
+unique_coordinates_raw <- unique(meta_raw[, .(as.character(latitude), as.character(longitude))])
 unique_coordinates_raw[, ":="(
    lat = parzer::parse_lat(latitude),
    lon = parzer::parse_lon(longitude)
 )]
 unique_coordinates_raw[is.na(lat) | is.na(lon)]
-meta_raw <- merge(meta_raw, unique_coordinates_raw, by = c("latitude", "longitude"))
-meta_raw[, c("latitude", "longitude") := NULL]
-data.table::setnames(meta_raw, c("lat", "lon"), c("latitude", "longitude"))
+# data.table join with update by reference
+meta_raw[
+   unique_coordinates_raw,
+   on = .(latitude, longitude),
+   ":="(latitude = i.lat, longitude = i.lon)]
+# meta_raw <- merge(meta_raw, unique_coordinates_raw, by = c("latitude", "longitude"))
+# meta_raw[, c("latitude", "longitude") := NULL]
+# data.table::setnames(meta_raw, c("lat", "lon"), c("latitude", "longitude"))
 
 ## Coordinate scale ----
 meta_raw[, is_coordinate_local_scale := length(unique(latitude)) != 1L && length(unique(longitude)) != 1L, by = .(dataset_id, regional)]
@@ -163,7 +174,7 @@ for (i in seq_along(lst_metadata_raw)) if (any(!unlist(unique(apply(lst_metadata
 if (any(meta_raw[, length(unique(paste(range(year), collapse = "-"))), by = .(dataset_id, regional)]$V1 != 1L)) warning("all local scale sites were not sampled for the same years and timepoints has to be consistent with years")
 
 ### checking study_type ----
-if (any(!meta_raw$study_type %in% c("ecological_sampling","resurvey")))
+if (any(!meta_raw$study_type %in% c("ecological_sampling", "resurvey")))
    warning(
       paste(
          "study_type has to be either 'ecological_sampling' or 'resurvey', see: ",
@@ -179,12 +190,22 @@ if (any(meta_raw[(data_pooled_by_authors), is.na(sampling_years)])) warning(
 )
 if (any(meta_raw[(data_pooled_by_authors), is.na(data_pooled_by_authors_comment)])) warning(paste("Missing data_pooled_by_authors_comment values in", meta_raw[(data_pooled_by_authors) & is.na(data_pooled_by_authors_comment), paste(unique(dataset_id), collapse = ", ")]))
 
+## checking comment ----
+if (anyNA(meta_raw$comment)) warning("Missing comment value")
+if (length(unique(meta_raw$comment)) != length(unique(meta_raw$dataset_id))) warning("Redundant comment values")
+
 ### checking comment_standardisation ----
 if (anyNA(meta_raw$comment_standardisation)) warning("Missing comment_standardisation value")
 
+## Checking that there is only one alpha_grain value per dataset_id ----
+if (any(meta_raw[, any(length(unique(alpha_grain_m2)) != 1L), by = .(dataset_id, regional)]$V1)) warning(paste(
+   "Inconsistent grain in",
+   meta_raw[, length(unique(alpha_grain_m2)) != 1L, by = .(dataset_id, regional)][, unique(dataset_id)]
+))
+
 ### checking alpha_grain_type ----
 # meta[(!checklist), .(lterm = diff(range(year)), taxon = taxon, realm = realm, alpha_grain_type = alpha_grain_type), by = .(dataset_id, regional)][lterm >= 10L][taxon == "Fish" & realm == "Freshwater" & grep("lake",alpha_grain_type), unique(dataset_id)]
-if (any(!unique(meta_raw$alpha_grain_type) %in% c("island", "plot", "sample", "lake_pond", "trap", "transect", "functional", "box", "quadrat"))) warning(paste("Invalid alpha_grain_type value in", paste(unique(meta_raw[!alpha_grain_type %in% c("island", "plot", "sample", "lake_pond", "trap", "transect", "functional", "box", "quadrat"), dataset_id]), collapse = ", ")))
+if (any(!unique(meta_raw$alpha_grain_type) %in% c("island", "plot", "sample", "lake_pond", "trap", "transect", "functional", "box", "quadrat","listening_point"))) warning(paste("Invalid alpha_grain_type value in", paste(unique(meta_raw[!alpha_grain_type %in% c("island", "plot", "sample", "lake_pond", "trap", "transect", "functional", "box", "quadrat","listening_point"), dataset_id]), collapse = ", ")))
 
 ## Ordering metadata ----
 data.table::setorder(meta_raw, dataset_id, regional, local, year)
@@ -198,8 +219,19 @@ if (nrow(meta_raw) != nrow(unique(meta_raw[, .(dataset_id, regional, local, year
 if (nrow(meta_raw) != nrow(unique(dt_raw[, .(dataset_id, regional, local, year, month, day)]))) warning("Discrepancies between dt and meta")
 
 
+## Saving dt ----
+data.table::setcolorder(dt_raw, c("dataset_id", "regional", "local", "year", "species", "species_original", "gbif_specieskey", "value", "metric", "unit"))
+
+data.table::fwrite(dt_raw, "data/communities_raw.csv", row.names = FALSE) # for iDiv data portal: add , na = "NA"
+
+if (file.exists("data/references/homogenisation_dropbox_folder_path.rds")) {
+   path_to_homogenisation_dropbox_folder <- base::readRDS(file = "data/references/homogenisation_dropbox_folder_path.rds")
+   data.table::fwrite(dt_raw, paste0(path_to_homogenisation_dropbox_folder, "/metacommunity-survey-raw-communities.csv"), row.names = FALSE)
+}
+
+
 ## Saving meta ----
-data.table::fwrite(meta_raw, "data/metadata_raw.csv", sep = ",", row.names = FALSE, na = "NA")
-if (file.exists("./data/references/homogenisation_dropbox_folder_path.rds")) {
-   # data.table::fwrite(meta_raw, paste0(path_to_homogenisation_dropbox_folder, "/metacommunity-survey-metadata-raw.csv"), sep = ",", row.names = FALSE)
+data.table::fwrite(meta_raw, "data/metadata_raw.csv", sep = ",", row.names = FALSE)  # for iDiv data portal: add , na = "NA"
+if (file.exists("data/references/homogenisation_dropbox_folder_path.rds")) {
+   data.table::fwrite(meta_raw, paste0(path_to_homogenisation_dropbox_folder, "/metacommunity-survey-metadata-raw.csv"), sep = ",", row.names = FALSE)
 }
