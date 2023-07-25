@@ -78,7 +78,7 @@ ddata <- ddata[value != 0L]
 data.table::setnames(ddata, c("park", "plot","genus_species"), c("regional","local","species"))
 
 #format spatial data to have common identifier with ddata
-spatial[, regional := c("Kakadu", "Litchfield", "Nitmiluk")[match(substr(plot, 1, 3), c("KAK", "LIT", "NIT"))]]
+spatial[, regional := c("Kakadu", "Litchfield", "Nitmiluk")[data.table::chmatch(substr(plot, 1, 3), c("KAK", "LIT", "NIT"))]]
 spatial[, local := stringi::stri_extract_all_regex(str = plot, pattern = "[0-9]{2,3}")][, local := as.integer(sub("^0+(?=[1-9])", "", local, perl = TRUE))]
 
 

@@ -49,7 +49,7 @@ meta[, ":="(
    alpha_grain_comment = "1 m2 circular quadrats at 15 random points in one wetland-plot",
    
    comment = "The authors sampled vegetation in 40 randomly selected wetlands on commercial cattle ranch with over 6000 isolated seasonal wetlands. THey sampled wetland vegetation at the end of the wet season during October–November. They counted species occurence in 1 m2 circular quadrats at 15 random points per wetland stratified into five zones: the wetland centre, and its north-east, north-west, south-east and south-west quadrants.",
-   comment_standardisation = "rows with year = NA and Unknown species were excluded."
+   comment_standardisation = "rows with year = NA and Unknown species were excluded.",
    doi = 'https://doi.org/10.6073/pasta/f20622c01b40e1e08e72f01e29f59302'
 )]
 
@@ -81,7 +81,7 @@ ddata <- ddata[, ":="(
 meta <- meta[unique(ddata[, .(dataset_id, local, regional, year)]),
              on = .(local, regional, year)]
 
-meta[,":="(
+meta[, ":="(
    effort = 1L, #one observation per year
    
    gamma_bounding_box = 4170L,

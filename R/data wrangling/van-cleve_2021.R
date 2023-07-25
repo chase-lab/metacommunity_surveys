@@ -88,8 +88,12 @@ ddata <- ddata[ddata[, .(`12_sites_or_more` = length(unique(plot)) >= 12L), by =
 
 ##reducing number of plots to 12 in oversampled sites ----
 set.seed(42L)
-ddata <- ddata[ddata[, .(plot = unique(plot)[sample(1:length(unique(plot)), 12L)]), by = .(local, year)], on = .(local, plot, year)]
-ddata <- ddata[, !("12_sites_or_more")]
+ddata <- ddata[
+  ddata[,
+    .(plot = unique(plot)[sample(seq.len(data.table::uniqueN(plot)), 12L)]),
+    by = .(local, year)],
+  on = .(local, plot, year)]
+ddata[, `12_sites_or_more` := NULL]
 
 ##meta data ----
 meta <- meta[unique(ddata[, .(dataset_id, regional, local, year)]), on = .(regional, local, year)]

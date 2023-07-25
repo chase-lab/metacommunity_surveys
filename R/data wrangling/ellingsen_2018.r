@@ -76,7 +76,7 @@ meta[,":="(
   gamma_sum_grains_type = "sample",
   gamma_sum_grains_comment = "sum of sample areas per year",
   
-  gamma_bounding_box = geosphere::areaPolygon(meta[grDevices::chull(meta[, .(longitude, latitude)]), .(longitude, latitude)]) / 10^6
+  gamma_bounding_box = geosphere::areaPolygon(meta[grDevices::chull(meta[, .(longitude, latitude)]), .(longitude, latitude)]) / 10^6,
   gamma_bounding_box_unit = "km2",
   gamma_bounding_box_type = "convex-hull",
   gamma_bounding_box_comment = "area of the convex-hull covering the stations",

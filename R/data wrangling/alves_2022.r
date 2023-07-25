@@ -84,7 +84,7 @@ ddata <- ddata[
          .(n_surveys = length(unique(year))),
          by = .(local, transect)][n_surveys != 1L
          ][,
-           .(transect = transect[sample(x = 1:.N, size = 1L)]),
+           .(transect = transect[sample(x = seg.len(.N), size = 1L)]),
            by = local],
 
    on = c("local", "transect")
@@ -115,7 +115,7 @@ meta[, ":="(
    gamma_sum_grains = sum(alpha_grain),
    gamma_bounding_box = geosphere::areaPolygon(na.omit(data.frame(latitude, longitude))[grDevices::chull(na.omit(longitude), na.omit(latitude)), c("longitude", "latitude")]) / 10^6),
    by = .(regional, year)]
-   
+
 ## Saving standardised data ----
 data.table::fwrite(
    x = ddata,

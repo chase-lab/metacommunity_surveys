@@ -144,7 +144,7 @@ meta[,":="(
 
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
 data.table::fwrite(
-  x = ddata[,!c("effort", "sample_size")],
+  x = ddata[, !c("effort", "sample_size")],
   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
   row.names = FALSE
 )

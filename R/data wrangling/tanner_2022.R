@@ -68,7 +68,6 @@ meta[, ":="(
 )][, gamma_sum_grains := sum(alpha_grain), by = year]
 
 ##saving data tables ----
-dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
 data.table::fwrite(
    x = ddata,
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),

@@ -103,13 +103,12 @@ meta[, ":=" (
    gamma_bounding_box = geosphere::areaPolygon(coords) / 10^6,
    gamma_bounding_box_unit = "km2",
    gamma_bounding_box_type = "box",
-   gamma_bounding_box_comment = "coordinates provided by the authors"
+   gamma_bounding_box_comment = "coordinates provided by the authors",
    
    comment_standardisation = "Converted percent of cover into presence absence. Exclude rows with NA values for percent coverage. Exclude percent coverage of dead plants"
 )][, gamma_sum_grains := sum(alpha_grain), by = .(regional, year)]
 
 # save data -----
-dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
 data.table::fwrite(
    x = ddata,
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),

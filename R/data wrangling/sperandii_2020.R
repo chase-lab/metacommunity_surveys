@@ -53,7 +53,7 @@ meta[, ":="(
 ##save data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
 data.table::fwrite(
-  x = ddata[, !c("taxon")],
+  x = ddata,
   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
   row.names = FALSE
 )
@@ -89,7 +89,7 @@ meta[, ":="(
 
 ##save data ----
 data.table::fwrite(
-  x = ddata[, !c("taxon")],
+  x = ddata,
   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
   row.names = FALSE
 )

@@ -16,10 +16,12 @@ taxo <- data.table::fread(
 taxo[grepl("[0-9]", species), species := paste("sp.", species)][, species := paste(genus, species, author)]
 
 # melting species aka wide to long format
-variable_list <- c("year","month", "complete_sampling_year", "complete_sampling_month", "ecosystem", "transect")
+variable_list <- c("year", "month", "complete_sampling_year",
+  "complete_sampling_month", "ecosystem", "transect")
 species_list <- colnames(ddata)[!names(ddata) %in% variable_list]
  # replace all 0 values by NA
-ddata[, (species_list) := lapply(.SD, function(column) replace(column, column == 0L, NA_integer_)), .SDcols = species_list]
+ddata[, (species_list) := lapply(.SD, function(column) base::replace(column, column == 0L, NA_integer_)),
+  .SDcols = species_list]
 
 ddata <- data.table::melt(
   ddata,

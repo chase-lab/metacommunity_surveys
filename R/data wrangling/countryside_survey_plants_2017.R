@@ -78,7 +78,7 @@ data.table::setkey(ddata, local, year)
 ddata <- ddata[ddata[, .(nsite = length(unique(PLOT_ID))), by = .(year, local)][nsite >= 9L], on = .(local, year)] # data.table style join
 ## Randomly selecting 9 plots among the available plots
 set.seed(42L)
-ddata <- ddata[ddata[, .(PLOT_ID = unique(PLOT_ID)[sample(1:length(unique(PLOT_ID)), 9L)]), by = .(local, year)], on = .(year, local, PLOT_ID)] # data.table style join
+ddata <- ddata[ddata[, .(PLOT_ID = unique(PLOT_ID)[sample(seq_along(unique(PLOT_ID)), 9L)]), by = .(local, year)], on = .(year, local, PLOT_ID)] # data.table style join
 ## Pooling plots within squares ----
 ddata[, effort := length(unique(PLOT_ID)), by = .(local, year)]
 ddata <- unique(ddata[, .(local, year, effort, species)])

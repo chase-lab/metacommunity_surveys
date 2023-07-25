@@ -72,12 +72,12 @@ meta[, ":="(
    doi = 'https://doi.org/10.6073/pasta/29733b5269efe990c3d2d916453fe4dd'
 )]
 
-ddata[, c("latitude","longitude") := NULL]
+ddata[, c("latitude", "longitude") := NULL]
 
 ##save data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
 data.table::fwrite(
-  x = ddata[, !c("taxon")],
+  x = ddata[, !c("effort", "sample_size")],
   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
   row.names = FALSE
 )
@@ -119,7 +119,7 @@ meta[, ":="(
 
 ##save data ----
 data.table::fwrite(
-  x = ddata[, !c("taxon")],
+  x = ddata[, !c("effort", "sample_size")],
   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
   row.names = FALSE
 )

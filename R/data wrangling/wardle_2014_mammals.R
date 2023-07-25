@@ -81,7 +81,7 @@ data.table::fwrite(
 
 # Standardised Data ----
 ## Selecting one sampling month sampled every year, every site: ----
-ddata <- ddata[month == "Apr" | month == "may"]
+ddata <- ddata[month == "Apr" | month == "may"][, month := NULL]
 
 ## meta ----
 meta <- meta[

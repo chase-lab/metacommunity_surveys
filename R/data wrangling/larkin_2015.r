@@ -27,7 +27,6 @@ ddata[, ":="(
   
   metric = "abundance",
   unit = "count"
-  
 )]
 
 ## meta data ----

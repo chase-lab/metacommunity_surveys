@@ -79,13 +79,13 @@ data.table::fwrite(
 # Standardized Data ----
 ## standardising effort ----
 ### Selecting one Sampling month sampled every year, every site:
-ddata <- ddata[month == "Apr" | month == "may"]
+ddata <- ddata[month == "Apr" | month == "may"][, month := NULL]
 # excluding rows with value = 0
 ddata <- ddata[value != 0]
 
 
 ## meta ----
-meta <- meta[unique(ddata[,.(dataset_id, regional, local, year, month)]), on = .(regional, local, year, month)]
+meta <- meta[unique(ddata[,.(dataset_id, regional, local, year)]), on = .(regional, local, year)]
 meta[, ":="(
    effort = 36*100L, #6 lines of 6 traps per plot open for 100 nights by raw data  standartisation
    
