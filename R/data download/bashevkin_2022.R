@@ -9,7 +9,7 @@ if (!file.exists('data/raw data/bashevkin_2022/rdata.rds')) {
    base::saveRDS(object = data.table::fread(
       file = 'data/cache/bashevkin_2022_zooplankton_community.csv',
       select = c('Source','Station','Latitude','Longitude','Year','Date','SampleID',
-                 'Volume','Taxname','CPUE','Undersampled'),
+                 'Volume','Taxname','SizeClass','CPUE','Undersampled'),
       stringsAsFactors = TRUE
    )[CPUE > 0],
    file = 'data/raw data/bashevkin_2022/rdata.rds')
