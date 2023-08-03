@@ -1,43 +1,25 @@
 dataset_id <- 'rennie_2017_carabids'
 
 ddata <- base::readRDS(file = "data/raw data/rennie_2017_carabids/rdata.rds")
-data.table::setnames(ddata, c('regional','plot','date','local','value','species'))
+data.table::setnames(x = ddata,
+                     new = c('regional','plot','date','local','value','species'))
 
-# Standardisation ----
+# Raw data ----
+## Community data ----
 ddata[, date := data.table::as.IDate(date, format = '%d-%b-%y')]
-ddata[, year := data.table::year(date)][, month := data.table::month(date)]
-ddata[, local := as.factor(paste(plot, local, sep = '_'))]
 
-## Keeping only sites sampled at least twice 10 years apart ----
-ddata <- ddata[ddata[, diff(range(year)), by = local][V1 >= 9L][, V1 := NULL], on = 'local']
+## Pooling individuals from the same trap and day ----
+ddata <- ddata[, .(value = sum(value)),
+          by = .(regional, plot, local, date, species)]
 
-## When a site is sampled several times a year, selecting the 5 most frequently sampled months from the 6 most sampled months ----
-ddata[, month_order := (1L:6L)[match(month, c(6L, 7L, 10L, 9L, 8L, 5L), nomatch = NULL)]]
-data.table::setkey(ddata, month_order)
-
-ddata <- ddata[!is.na(month_order)]
-ddata[, nmonths := data.table::uniqueN(month), by = .(regional, plot, local, year)]
-ddata <- ddata[nmonths >= 5L][, nmonths := NULL]
-
-ddata <- ddata[
-   unique(ddata[, .(regional, plot, local, year, month)])[, .SD[1L:5L], by = .(regional, plot, local, year)],
-   on = .(regional, plot, local, year, month)][, month_order := NULL]
-
-## When a site is sampled 2+ a month, selecting the first visit ----
-ddata <- ddata[
-   unique(ddata[, .(regional, plot, local, year, month, date)])[, .SD[1L], by = .(regional, plot, local, year, month)],
-   on = .(regional, plot, local, year, month, date)
-   ][, month := NULL][, date := NULL]
-
-## Pooling all 5 samples from a year together ----
-ddata <- ddata[, .(value = sum(value)), by = .(regional, plot, local, year, species)]
-
-## removing empty traps ----
-ddata <- ddata[value != 0L & !species %in% c('XX', '', 'UU')]
-
-# Community data ----
 ddata[, ":="(
    dataset_id = dataset_id,
+
+   local = as.factor(paste(plot, local, sep = '_')),
+
+   year  = data.table::year(date),
+   month = data.table::month(date),
+   day   = data.table::mday(date),
 
    metric = "abundance",
    unit = "count"
@@ -62,8 +44,10 @@ coords <- data.table::as.data.table(matrix(
 ))
 
 # metadata ----
-meta <- unique(ddata[, .(dataset_id, regional, plot, local, year)])
-meta <- meta[coords, on = 'regional', nomatch = NULL]
+meta <- unique(ddata[, .(dataset_id, regional, plot, local, year, month, day)])
+meta[coords,
+     ":="(latitude = i.latitude, longitude = i.longitude),
+     on = 'regional']
 
 meta[, ":="(
    taxon = "Invertebrates",
@@ -72,13 +56,72 @@ meta[, ":="(
    study_type = "ecological_sampling",
 
    data_pooled_by_authors = FALSE,
-
-   effort = 5L,
+   data_pooled_by_authors_comment = NA,
+   sampling_years = NA,
 
    alpha_grain = 5 * pi * (7.5 / 2) ^ 2,
    alpha_grain_unit = "cm2",
    alpha_grain_type = "sample",
    alpha_grain_comment = "aperture of the pitfall traps * 5 samples per year",
+
+   comment = "Data were downloaded from https://doi.org/10.5285/8385f864-dd41-410f-b248-028f923cb281. Authors assessed Carabid community composition with pitfall traps. The local scale is a pitfall trap and its name is constituted as LCODE_TRAP. Site coordinates were extracted from IG_dataStructure.rtf found in the Supporting documentation.",
+   comment_standardisation = "none needed",
+   doi = 'https://doi.org/10.5285/8385f864-dd41-410f-b248-028f923cb281'
+)]
+
+## Saving raw data ----
+dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
+data.table::fwrite(
+   x = ddata[value != 0L & !species %in% c('XX', '', 'UU'), !c("date","plot")],
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
+   row.names = FALSE
+)
+data.table::fwrite(
+   x = meta[unique(ddata[value != 0L & !species %in% c('XX', '', 'UU'), .(regional, local, year)]), on = .(regional, local, year), !"plot"],
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
+   row.names = FALSE
+)
+
+# Standardised data ----
+# Standardisation ----
+## Keeping only sites sampled at least twice 10 years apart ----
+ddata <- ddata[
+   ddata[, diff(range(year)) >= 9L, by = local][(V1)][, V1 := NULL],
+   on = 'local']
+
+## When a site is sampled several times a year, selecting the 5 most frequently sampled months from the 6 most sampled months ----
+ddata[, month_order := (1L:6L)[match(month, c(6L, 7L, 10L, 9L, 8L, 5L), nomatch = NULL)]]
+data.table::setkey(ddata, month_order)
+
+ddata <- ddata[!is.na(month_order)]
+ddata[, nmonths := data.table::uniqueN(month), by = .(regional, local, year)]
+ddata <- ddata[nmonths >= 5L][, nmonths := NULL]
+
+ddata <- ddata[
+   unique(ddata[, .(regional, plot, local, year, month)])[, .SD[1L:5L], by = .(regional, plot, local, year)],
+   on = .(regional, plot, local, year, month)][, month_order := NULL]
+
+## When a site is sampled 2+ a month, selecting the first visit ----
+ddata <- ddata[
+   unique(ddata[, .(regional, plot, local, year, month, date)])[, .SD[1L], by = .(regional, plot, local, year, month)],
+   on = .(regional, plot, local, year, month, date)
+][, date := NULL][, month := NULL][, day := NULL]
+
+## Pooling all 5 samples from a year together ----
+ddata <- ddata[, .(value = sum(value)), by = .(dataset_id, regional, plot, local, year, metric, unit, species)]
+
+## removing empty traps ----
+ddata <- ddata[value != 0L & !species %in% c('XX', '', 'UU')]
+
+## Metadata ----
+meta[, c("month","day") := NULL]
+meta <- unique(meta[
+   unique(ddata[, .(regional, plot, local, year)]),
+   on = .(regional, plot, local, year)]
+)
+
+meta[, ":="(
+   effort = 5L,
 
    gamma_sum_grains_unit = "cm2",
    gamma_sum_grains_type = "sample",
@@ -88,29 +131,24 @@ meta[, ":="(
    gamma_bounding_box_type = "ecosystem",
    gamma_bounding_box_comment = "sum of the area of the 90m long transects of a site on a given year",
 
-   comment = "Data were downloaded from https://doi.org/10.5285/8385f864-dd41-410f-b248-028f923cb281. Authors assessed Carabid community composition with pitfall traps. The local scale is a pitfall trap and its name is constituted as LCODE_TRAP. Site coordinates were extracted from IG_dataStructure.rtf found in the Supporting documentation.",
-   comment_standardisation = "Keeping only sites sampled at least twice 10 years apart
-When a site is sampled several times a year, selecting the 5 most frequently sampled months from the 6 most sampled months
-When a site is sampled 2+ a month, selecting the first visit
-Pooling all 5 samples from a year together
-removing empty traps",
-   doi = 'https://doi.org/10.5285/8385f864-dd41-410f-b248-028f923cb281'
+   comment_standardisation = "Keeping only sites sampled at least twice 10 years apart.
+When a site is sampled several times a year, selecting the 5 most frequently sampled months from the 6 most sampled months.
+When a site is sampled 2+ a month, selecting the first visit.
+Pooling all 5 samples from a year together.
+Removing empty traps."
 )][, ":="(
    gamma_sum_grains = sum(alpha_grain),
    gamma_bounding_box = data.table::uniqueN(plot) * 90L * 1L),
    by = .(regional, year)]
 
-ddata[, plot := NULL]
-meta[, plot := NULL]
-
-dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
+## Saving standardised data ----
 data.table::fwrite(
-   x = ddata,
-   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, ".csv"),
+   x = ddata[, !"plot"],
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised.csv"),
    row.names = FALSE
 )
 data.table::fwrite(
-   x = meta,
-   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_metadata.csv"),
+   x = meta[, !"plot"],
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised_metadata.csv"),
    row.names = FALSE
 )

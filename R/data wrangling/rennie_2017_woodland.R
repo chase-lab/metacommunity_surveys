@@ -2,12 +2,8 @@ dataset_id <- 'rennie_2017_woodland'
 
 ddata <- base::readRDS(file = "data/raw data/rennie_2017_woodland/rdata.rds")
 
-# Standardisation ----
-ddata <- ddata[
-   ddata[, diff(range(year)) >= 9L, by = .(regional, plot, local)][(V1)][, V1 := NULL],
-   on = .(regional, plot, local)]
-
-# Community data ----
+# Raw data ----
+## Community data ----
 ddata[, ':='(
    dataset_id = dataset_id,
 
@@ -37,13 +33,13 @@ coords <- data.table::as.data.table(matrix(
 
 # Metadata data ----
 meta <- unique(ddata[, .(dataset_id, regional, local, plot, year)])
-meta <- meta[coords, on = 'regional', nomatch = NULL]
+meta[coords,
+     ":="(latitude = i.latitude, longitude = i.longitude),
+     on = 'regional']
 
 meta[, ":="(
    taxon = "Plants",
    realm = "Terrestrial",
-
-   effort = 1L,
 
    study_type = "ecological_sampling",
 
@@ -54,6 +50,40 @@ meta[, ":="(
    alpha_grain_type = "quadrat",
    alpha_grain_comment = "area of a cell",
 
+
+   comment = "Data were downloaded from hhttps://doi.org/10.5285/94aef007-634e-42db-bc52-9aae86adbd33. Authors counted trees and shrubs presence in 12 sites, each sampled in several 10*10m plots, each sampled in 10 40*40cm cells. The local scale is the cell and its name is constituted as plot_cell. Site coordinates were extracted from VW_DATA_STRUCTURE.rtf found in the Supporting documentation.",
+   comment_standardisation = "none needed",
+   doi = 'https://doi.org/10.5285/94aef007-634e-42db-bc52-9aae86adbd33'
+)]
+
+## Saving raw data ----
+dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
+data.table::fwrite(
+   x = ddata[, !"plot"],
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
+   row.names = FALSE
+)
+data.table::fwrite(
+   x = meta[, !"plot"],
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
+   row.names = FALSE
+)
+
+# Standardised data ----
+## Standardisation ----
+ddata <- ddata[
+   ddata[, diff(range(year)) >= 9L, by = .(regional, plot, local)][(V1)][, V1 := NULL],
+   on = .(regional, plot, local)]
+ddata[, plot := NULL]
+
+## Metadata ----
+meta <- meta[
+   unique(ddata[, .(regional, local, year)]),
+   on = .(regional, local, year)]
+
+meta[, ":="(
+   effort = 1L,
+
    gamma_sum_grains_unit = "cm2",
    gamma_sum_grains_type = "quadrat",
    gamma_sum_grains_comment = "sum of the areas of all cells of a site on a given year",
@@ -62,25 +92,23 @@ meta[, ":="(
    gamma_bounding_box_type = "ecosystem",
    gamma_bounding_box_comment = "sum of the area of the plot of a site on a given year",
 
-   comment = "Data were downloaded from hhttps://doi.org/10.5285/94aef007-634e-42db-bc52-9aae86adbd33. Authors counted trees and shrubs presence in 12 sites, each sampled in several 10*10m plots, each sampled in 10 40*40cm cells. The local scale is the cell and its name is constituted as plot_cell. Site coordinates were extracted from VW_DATA_STRUCTURE.rtf found in the Supporting documentation.",
-   comment_standardisation = "none needed",
-   doi = 'https://doi.org/10.5285/94aef007-634e-42db-bc52-9aae86adbd33'
+   comment_standardisation = "Selecting the first visit per month
+When a site is sampled several times a year, selecting the 3 most frequently sampled months from the 4 sampled months.
+Pooling all 3 samples from a year together.
+removing surveys with no observation."
 )][, ":="(
    gamma_sum_grains = sum(alpha_grain),
    gamma_bounding_box = data.table::uniqueN(plot) * 10L * 10L),
-   by = .(regional, year)]
+   by = .(regional, year)][, plot := NULL]
 
-ddata[, plot := NULL]
-meta[, plot := NULL]
-
-dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
+## Saving standardised data ----
 data.table::fwrite(
    x = ddata,
-   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, ".csv"),
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised.csv"),
    row.names = FALSE
 )
 data.table::fwrite(
    x = meta,
-   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_metadata.csv"),
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised_metadata.csv"),
    row.names = FALSE
 )

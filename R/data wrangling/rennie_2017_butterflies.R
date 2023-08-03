@@ -3,40 +3,27 @@ dataset_id <- 'rennie_2017_butterflies'
 ddata <- base::readRDS(file = "data/raw data/rennie_2017_butterflies/rdata.rds")
 data.table::setnames(ddata, c('regional','plot','date','local','value','species'))
 
-# Standardisation ----
+# Raw data ----
+## Community data ----
 ddata[, date := data.table::as.IDate(date, format = '%d-%b-%y')]
-ddata[, year := data.table::year(date)][, month := data.table::month(date)]
-ddata[, local := as.factor(paste(plot, local, sep = '_'))]
 
-## When a section is sampled 2+ a month, selecting the first 2 visits ----
-ddata[, ndates := length(unique(date)), by = .(regional, year, local, month)]
+## Pooling individuals from the same trap and day ----
+ddata <- ddata[, .(value = sum(value)),
+               by = .(regional, plot, local, date, species)]
 
-data.table::setkeyv(ddata, c('regional', 'year', 'local', 'month', 'date'))
-ddata <- ddata[
-   unique(ddata[ndates >= 2L, .(regional, plot, local, year, month, date)])[, .SD[1L:2L], by = .(regional, plot, local, year, month)],
-   on = .(regional, plot, local, year, month, date)
-]#[, month := NULL][, date := NULL]
-
-## When a site is sampled several times a year, selecting the 6 most frequently sampled months: April to September ----
-#table(unique(ddata[, .(regional, local, plot, date, month, year)])$month)
-ddata <- ddata[month %in% 4L:9L]
-
-## Keeping sites sampled all 6 months ----
-ddata <- ddata[, nmonths := data.table::uniqueN(month), by = .(regional, plot, local, year)
-][nmonths == 6L][, nmonths := NULL]
-
-## Pooling all 12 samples from a year together ----
-ddata <- ddata[, .(value = sum(value)), by = .(regional, plot, local, year, species)]
-
-## removing surveys with no observation ----
-ddata <- ddata[value != 0L]
-
-# Community data ----
 ddata[, ":="(
    dataset_id = dataset_id,
 
+   local = as.factor(paste(plot, local, sep = '_')),
+
+   year  = data.table::year(date),
+   month = data.table::month(date),
+   day = data.table::mday(date),
+
    metric = "abundance",
-   unit = "count"
+   unit = "count",
+
+   plot = NULL
 )]
 
 # Coordinates ----
@@ -58,8 +45,10 @@ coords <- data.table::as.data.table(matrix(
 ))
 
 # metadata ----
-meta <- unique(ddata[, .(dataset_id, regional, plot, local, year)])
-meta <- meta[coords, on = 'regional', nomatch = NULL]
+meta <- unique(ddata[, .(dataset_id, regional, local, year, month, day)])
+meta[coords,
+     ":="(latitude = i.latitude, longitude = i.longitude),
+     on = 'regional']
 
 meta[, ":="(
    taxon = "Invertebrates",
@@ -69,41 +58,84 @@ meta[, ":="(
 
    data_pooled_by_authors = FALSE,
 
-   effort = 12L,
-
    alpha_grain = 2000L / 15L * 5L * 12L,
    alpha_grain_unit = "m2",
    alpha_grain_type = "transect",
    alpha_grain_comment = "average length of a section * width of the transect * nb of surveys each year",
 
+   comment = "Data were downloaded from https://doi.org/10.5285/5aeda581-b4f2-4e51-b1a6-890b6b3403a3. Authors assessed butterfly communities along fixed transects. Each 1-2km long transect was split in up to 15 fixed sections based on habitats. Local scale is a section and it's name is built as LCODE_SECTION, LCODE being the code of a transect. Site coordinates were extracted from IB_DATA_STRUCTURE.rtf found in the Supporting documentation.",
+   comment_standardisation = "none needed",
+doi = 'https://doi.org/10.5285/5aeda581-b4f2-4e51-b1a6-890b6b3403a3'
+)]
+
+## Saving raw data ----
+dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
+data.table::fwrite(
+   x = ddata[value != 0L],
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
+   row.names = FALSE
+)
+data.table::fwrite(
+   x = meta[unique(ddata[value != 0L, .(regional, local, year)]), on = .(regional, local, year)],
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
+   row.names = FALSE
+)
+
+# Standardised data ----
+
+## Standardisation ----
+### When a section is sampled 2+ a month, selecting the first 2 visits ----
+ddata[, ndates := length(unique(date)), by = .(regional, year, local, month)]
+
+data.table::setkeyv(ddata, c('regional', 'year', 'local', 'month', 'date'))
+ddata <- ddata[
+   unique(ddata[ndates >= 2L, .(regional, local, year, month, date)])[, .SD[1L:2L], by = .(regional, local, year, month)],
+   on = .(regional, local, year, month, date)
+]#[, month := NULL][, date := NULL]
+
+### When a site is sampled several times a year, selecting the 6 most frequently sampled months: April to September ----
+#table(unique(ddata[, .(regional, local, plot, date, month, year)])$month)
+ddata <- ddata[month %in% 4L:9L]
+
+### Keeping sites sampled all 6 months ----
+ddata <- ddata[, nmonths := data.table::uniqueN(month), by = .(regional, local, year)
+][nmonths == 6L][, nmonths := NULL]
+
+### Pooling all 12 samples from a year together ----
+ddata <- ddata[, .(value = sum(value)), by = .(dataset_id, regional, local, year, metric, unit, species)]
+
+### removing surveys with no observation ----
+ddata <- ddata[value != 0L]
+
+## Metadata ----
+meta[, c("month","day") := NULL]
+meta <- unique(meta)
+meta <- meta[
+   unique(ddata[, .(regional, local, year)]),
+   on = .(regional, local, year)]
+
+meta[, ":="(
+   effort = 12L,
+
    gamma_sum_grains_unit = "m2",
    gamma_sum_grains_type = "sample",
    gamma_sum_grains_comment = "sum of the areas of the sections for one site and for one year",
-   gamma_bounding_box = NA,
-   gamma_bounding_box_unit = "m2",
-   gamma_bounding_box_type = "ecosystem",
-   gamma_bounding_box_comment = "",
 
-   comment = "Data were downloaded from https://doi.org/10.5285/5aeda581-b4f2-4e51-b1a6-890b6b3403a3. Authors assessed butterfly communities along fixed transects. Each 1-2km long transect was split in up to 15 fixed sections based on habitats. Local scale is a section and it's name is built as LCODE_SECTION, LCODE being the code of a transect. Site coordinates were extracted from IB_DATA_STRUCTURE.rtf found in the Supporting documentation.",
    comment_standardisation = "When a section is sampled 2+ a month, selecting the first 2 visits
-   When a site is sampled several times a year, selecting the 6 most frequently sampled months: April to September
-Keeping sites sampled all 6 months
-Pooling all 12 samples from a year together
-removing surveys with no observation",
-doi = 'https://doi.org/10.5285/5aeda581-b4f2-4e51-b1a6-890b6b3403a3'
+When a site is sampled several times a year, selecting the 6 most frequently sampled months: April to September.
+Keeping sites sampled all 6 months.
+Pooling all 12 samples from a year together.
+removing surveys with no observation."
 )][, gamma_sum_grains := sum(alpha_grain), by = .(regional, year)]
 
-ddata[, plot := NULL]
-meta[, plot := NULL]
-
-dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
+## Saving standardised data ----
 data.table::fwrite(
    x = ddata,
-   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, ".csv"),
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised.csv"),
    row.names = FALSE
 )
 data.table::fwrite(
    x = meta,
-   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_metadata.csv"),
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised_metadata.csv"),
    row.names = FALSE
 )

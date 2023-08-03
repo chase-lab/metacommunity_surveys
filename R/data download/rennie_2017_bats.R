@@ -6,12 +6,12 @@ if (!file.exists("data/raw data/rennie_2017_bats/rdata.rds")) {
    rdata <-  data.table::fread(
       file = "data/cache/rennie_2017_bats_ECN_BA1.csv",
       sep = ",", header = TRUE, stringsAsFactors = TRUE,
-      drop = c('ACTS','ACTH','ACTF'))
+      drop = c('BATLOC_ID','ACTS','ACTH','ACTF'))
 
    # saving
    base::dir.create("data/raw data/rennie_2017_bats", showWarnings = FALSE)
    base::saveRDS(
-      object = rdata,
+      object = unique(rdata),
       file = "data/raw data/rennie_2017_bats/rdata.rds"
    )
 }

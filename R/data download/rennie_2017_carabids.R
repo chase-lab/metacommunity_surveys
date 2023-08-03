@@ -25,7 +25,7 @@ if (!file.exists("data/raw data/rennie_2017_carabids/rdata.rds")) {
    # saving
    base::dir.create("data/raw data/rennie_2017_carabids", showWarnings = FALSE)
    base::saveRDS(
-      object = rdata,
+      object = unique(rdata),
       file = "data/raw data/rennie_2017_carabids/rdata.rds"
    )
 }

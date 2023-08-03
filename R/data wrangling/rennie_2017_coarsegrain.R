@@ -6,10 +6,11 @@ data.table::setnames(ddata, c('regional','year','plot','local','species'))
 # Standardisation ----
 ddata <- ddata[species != 'Litter']
 ddata <- ddata[
-   ddata[, diff(range(year)) >= 9L, by = .(regional, plot, local)][(V1)][, V1 := NULL],
-   on = .(regional, plot, local)]
+   ddata[, diff(range(year)) >= 9L, by = .(regional, local)][(V1)][, V1 := NULL],
+   on = .(regional, local)]
 
-# Community data ----
+# Raw data ----
+## Community data ----
 ddata[, ':='(
    dataset_id = dataset_id,
 
@@ -39,14 +40,14 @@ coords <- data.table::as.data.table(matrix(
 ))
 
 # Metadata data ----
-meta <- unique(ddata[, .(dataset_id, regional, local, plot, year)])
-meta <- meta[coords, on = 'regional', nomatch = NULL]
+meta <- unique(ddata[, .(dataset_id, regional, plot, local, year)])
+meta[coords,
+     ":="(latitude = i.latitude, longitude = i.longitude),
+     on = 'regional']
 
 meta[, ":="(
    taxon = "Plants",
    realm = "Terrestrial",
-
-   effort = 1L,
 
    study_type = "ecological_sampling",
 
@@ -57,6 +58,34 @@ meta[, ":="(
    alpha_grain_type = "quadrat",
    alpha_grain_comment = "area of a cell",
 
+   comment = "Data were downloaded from https://doi.org/10.5285/d349babc-329a-4d6e-9eca-92e630e1be3f. Authors measured plant species presence in 12 sites, each sampled 50 2*2m plots, each sampled in at least 2 40*40cm cells. The local scale is the cell and its name is constituted as plot_cell. Site coordinates were extracted from VC_DATA_STRUCTURE.rtf found in the Supporting documentation.",
+   comment_standardisation = "Records for `Litter` were removed.",
+   doi = 'https://doi.org/10.5285/d349babc-329a-4d6e-9eca-92e630e1be3f'
+)]
+
+## Saving raw data ----
+dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
+data.table::fwrite(
+   x = ddata[value != 0L, !"plot"],
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
+   row.names = FALSE
+)
+data.table::fwrite(
+   x = meta[unique(ddata[value != 0L, .(regional, local, year)]), on = .(regional, local, year), !"plot"],
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
+   row.names = FALSE
+)
+
+## Metadata ----
+meta[, c("month","day") := NULL]
+meta <- unique(meta)
+meta <- meta[
+   unique(ddata[, .(regional, local, year)]),
+   on = .(regional, local, year)]
+
+meta[, ":="(
+   effort = 1L,
+
    gamma_sum_grains_unit = "cm2",
    gamma_sum_grains_type = "quadrat",
    gamma_sum_grains_comment = "sum of the areas of all cells of a site on a given year",
@@ -65,25 +94,20 @@ meta[, ":="(
    gamma_bounding_box_type = "ecosystem",
    gamma_bounding_box_comment = "sum of the area of the plot of a site on a given year",
 
-   comment = "Data were downloaded from https://doi.org/10.5285/d349babc-329a-4d6e-9eca-92e630e1be3f. Authors measured plant species presence in 12 sites, each sampled 50 2*2m plots, each sampled in at least 2 40*40cm cells. The local scale is the cell and its name is constituted as plot_cell. Site coordinates were extracted from VC_DATA_STRUCTURE.rtf found in the Supporting documentation.",
    comment_standardisation = "Records for `Litter` were removed. Cells/local samples that were not sampled at least 10 years appart were removed.",
-   doi = 'https://doi.org/10.5285/d349babc-329a-4d6e-9eca-92e630e1be3f'
 )][, ":="(
    gamma_sum_grains = sum(alpha_grain),
    gamma_bounding_box = data.table::uniqueN(plot) * 2L * 2L),
    by = .(regional, year)]
 
-ddata[, plot := NULL]
-meta[, plot := NULL]
-
-dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
+## Saving standardised data ----
 data.table::fwrite(
-   x = ddata,
-   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, ".csv"),
+   x = ddata[, !"plot"],
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised.csv"),
    row.names = FALSE
 )
 data.table::fwrite(
-   x = meta,
-   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_metadata.csv"),
+   x = meta[, !"plot"],
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised_metadata.csv"),
    row.names = FALSE
 )
