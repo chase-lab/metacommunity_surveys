@@ -36,10 +36,14 @@ if (anyNA(dt_raw$year)) warning(paste("missing _year_ value in ", unique(dt_raw[
 if (anyNA(meta_raw$year)) warning(paste("missing _year_ value in ", unique(meta_raw[is.na(year), dataset_id]), collapse = ", "))
 if (any(dt_raw[metric == "pa", value] != 1)) warning(paste("abnormal presence absence value in ", unique(dt_raw[value != 1, dataset_id]), collapse = ", "))
 if (any(dt_raw[, .(is.na(regional) | regional == "")])) warning(paste("missing _regional_ value in ", unique(dt_raw[is.na(regional) | regional == "", dataset_id]), collapse = ", "))
-if (any(dt_raw[, .(is.na(local) | local == "")])) warning(paste("missing _local_ value in ", unique(dt_raw[is.na(local) | local == "", dataset_id]), collapse = ", "))
-if (any(dt_raw[, .(is.na(species) | species == "")])) warning(paste("missing _species_ value in ", unique(dt_raw[is.na(species) | species == "", dataset_id]), collapse = ", "))
-if (any(dt_raw[, .(is.na(value) | value == "" | value < 0)])) warning(paste("missing _value_ value in ", unique(dt_raw[is.na(value) | value == "" | value < 0, dataset_id]), collapse = ", "))
-if (any(dt_raw[, .(is.na(metric) | metric == "")])) warning(paste("missing _metric_ value in ", unique(dt_raw[is.na(metric) | metric == "", dataset_id]), collapse = ", "))
+if (any(dt_raw[, .(is.na(local) | local == "")]))
+   warning(paste("missing _local_ value in ", unique(dt_raw[is.na(local) | local == "", dataset_id]), collapse = ", "))
+if (any(dt_raw[, .(is.na(species) | species == "")]))
+   warning(paste("missing _species_ value in ", unique(dt_raw[is.na(species) | species == "", dataset_id]), collapse = ", "))
+if (any(dt_raw[, .(is.na(value) | value == "" | value < 0)]))
+   warning(paste("missing _value_ value in ", unique(dt_raw[is.na(value) | value == "" | value < 0, dataset_id]), collapse = ", "))
+if (any(dt_raw[, .(is.na(metric) | metric == "")]))
+   warning(paste("missing _metric_ value in ", unique(dt_raw[is.na(metric) | metric == "", dataset_id]), collapse = ", "))
 if (any(dt_raw[, .(is.na(unit) | unit == "")])) warning(paste("missing _unit_ value in ", unique(dt_raw[is.na(unit) | unit == "", dataset_id]), collapse = ", "))
 
 ### Counting the study cases ----
@@ -60,14 +64,14 @@ data.table::setorder(dt_raw, dataset_id, regional, local,
 ### checking duplicated rows ----
 if (anyDuplicated(dt_raw)) warning(
    paste(
-      "Duplicated rows in dt, see:",
+      "Duplicated rows in dt_raw, see:",
       paste(dt_raw[duplicated(dt_raw), unique(dataset_id)], collapse = ",")
    )
 )
 
 if (any(dt_raw[, .N, by = .(dataset_id, regional, local, year, month, day, species)]$N != 1L))
    warning(paste(
-      'duplicated species in:',
+      'Duplicated species in:',
       paste(collapse = ', ',
             dt_raw[, .N, by = .(dataset_id, regional, local, year, month, day, species)][N != 1L, unique(dataset_id)])))
 
@@ -140,14 +144,14 @@ data.table::setnames(meta_raw, "alpha_grain", "alpha_grain_m2")
 meta_raw[is.na(alpha_grain_m2), unique(dataset_id)]
 
 ## Converting coordinates into a common format with parzer ----
-unique_coordinates_raw <- unique(meta_raw[, .(as.character(latitude), as.character(longitude))])
+unique_coordinates_raw <- unique(meta_raw[, .(latitude = as.character(latitude), longitude = as.character(longitude))])
 unique_coordinates_raw[, ":="(
    lat = parzer::parse_lat(latitude),
    lon = parzer::parse_lon(longitude)
 )]
 unique_coordinates_raw[is.na(lat) | is.na(lon)]
 # data.table join with update by reference
-meta_raw[
+meta_raw[, c("latitude", "longitude") := NA_real_][
    unique_coordinates_raw,
    on = .(latitude, longitude),
    ":="(latitude = i.lat, longitude = i.lon)]
@@ -220,7 +224,7 @@ if (nrow(meta_raw) != nrow(unique(dt_raw[, .(dataset_id, regional, local, year, 
 
 
 ## Saving dt ----
-data.table::setcolorder(dt_raw, c("dataset_id", "regional", "local", "year", "species", "species_original", "gbif_specieskey", "value", "metric", "unit"))
+data.table::setcolorder(dt_raw, c("dataset_id", "regional", "local", "year", "species", "species_original", "value", "metric", "unit"))
 
 data.table::fwrite(dt_raw, "data/communities_raw.csv", row.names = FALSE) # for iDiv data portal: add , na = "NA"
 
@@ -235,3 +239,4 @@ data.table::fwrite(meta_raw, "data/metadata_raw.csv", sep = ",", row.names = FAL
 if (file.exists("data/references/homogenisation_dropbox_folder_path.rds")) {
    data.table::fwrite(meta_raw, paste0(path_to_homogenisation_dropbox_folder, "/metacommunity-survey-metadata-raw.csv"), sep = ",", row.names = FALSE)
 }
+

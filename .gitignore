@@ -7,7 +7,12 @@
 backup/**
 
 data/communities.csv
+data/raw_communities.csv
+data/standardised_communities.csv
 data/metadata.csv
+data/raw_metadata.csv
+data/standardised_metadata.csv
+
 
 data/wrangled data/**
 data/cache/**
@@ -84,3 +89,4 @@ $RECYCLE.BIN/
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,windows
 .Rproj.user
+

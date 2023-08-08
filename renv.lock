@@ -1323,6 +1323,17 @@
       ],
       "Hash": "56b6934ef0f8c68225949a8672fe1a8f"
     },
+    "tictoc": {
+      "Package": "tictoc",
+      "Version": "1.2",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "methods"
+      ],
+      "Hash": "2c6c63f3f4f103d41cb2aae1ab1c7ce1"
+    },
     "tidyselect": {
       "Package": "tidyselect",
       "Version": "1.1.2",

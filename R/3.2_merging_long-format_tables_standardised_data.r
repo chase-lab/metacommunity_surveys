@@ -7,7 +7,7 @@ listfiles_community_standardised <- list.files(
 )
 listfiles_metadata_standardised <- list.files(
    path = "data/wrangled data",
-   pattern = "raw_metadata.csv",
+   pattern = "standardised_metadata.csv",
    full.names = TRUE, recursive = TRUE
 )
 
@@ -173,14 +173,14 @@ meta_standardised[is.na(alpha_grain_m2), unique(dataset_id)]
 meta_standardised[is.na(gamma_sum_grains_km2) & is.na(gamma_bounding_box_km2), unique(dataset_id)]
 
 ## Converting coordinates into a common format with parzer ----
-unique_coordinates_standardised <- unique(meta_standardised[, .(as.character(latitude), as.character(longitude))])
+unique_coordinates_standardised <- unique(meta_standardised[, .(latitude = as.character(latitude), longitude = as.character(longitude))])
 unique_coordinates_standardised[, ":="(
    lat = parzer::parse_lat(latitude),
    lon = parzer::parse_lon(longitude)
 )]
 unique_coordinates_standardised[is.na(lat) | is.na(lon)]
 # data.table join with update by reference
-meta_standardised[
+meta_standardised[, c("latitude", "longitude") := NA_real_][
    unique_coordinates_standardised,
    on = .(latitude, longitude),
    ":="(latitude = i.lat, longitude = i.lon)]
@@ -262,7 +262,7 @@ if (nrow(meta_standardised) != nrow(unique(dt_standardised[, .(dataset_id, regio
 
 
 ## Saving dt ----
-data.table::setcolorder(dt_standardised, c("dataset_id", "regional", "local", "year", "species", "species_original", "gbif_specieskey", "value", "metric", "unit"))
+data.table::setcolorder(dt_standardised, c("dataset_id", "regional", "local", "year", "species", "species_original", "value", "metric", "unit"))
 
 data.table::fwrite(dt_standardised, "data/communities_standardised.csv", row.names = FALSE) # for iDiv data portal: add , na = "NA"
 
