@@ -97,6 +97,9 @@ data.table::fwrite(
 )
 
 # Standaridzed Data----
+## Change of local name to remove the transect and vegzone names ----
+ddata[, local := gsub("_.*$", "", local, perl = TRUE)]
+meta[, local := gsub("_.*$", "", local, perl = TRUE)]
 
 ## selecting only months when all 3 transects were sampled ----
 ddata[, full_sample_month := length(unique(TRANSECT)), by = .(local, year, month)]
@@ -116,7 +119,8 @@ ddata <- ddata[nmonth == 6L]
 # ddata[, .N / sum(grepl("\\.", value)), by = .(year, local, TRANSECT, VEGZONE)]
 
 ## pooling all months, TRANSECTs and VEGZONEs together
-ddata <- unique(ddata[, .(value = sum(as.numeric(value))), by = .(local, year, species)])
+ddata <- unique(ddata[, .(value = sum(as.numeric(value))),
+                      by = .(dataset_id, regional, local, year, species, metric, unit)])
 
 ## exclude dry pond samples: value == D ----
 ddata <- ddata[!value %in% c("D")]
