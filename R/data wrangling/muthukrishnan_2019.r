@@ -64,7 +64,9 @@ meta[, ":="(
    alpha_grain_comment = "area of one rake sample",
 
    comment = "Extracted from Muthukrishnan and Larkin 2020 Dryad repo (https://datadryad.org/stash/dataset/doi:10.5061/dryad.15dv41nt2). Macrophytes from 212 lakes distributed in 50 US counties were sampled 1 to 11 years between 2002 and 2014. Regional is the county name and local the lake_id_rake-number.",
-   comment_standardisation = "unknown species excluded, sample_point_surveyed = no were excluded a few duplicated rows were excluded",
+   comment_standardisation = "Unknown species excluded,
+Sample_point_surveyed = no were excluded,
+A few duplicated rows were excluded",
    doi = 'https://doi.org/10.5061/dryad.15dv41nt2 | https://doi.org/10.1111/geb.13053'
 )]
 
@@ -150,7 +152,11 @@ meta[,":="(
    gamma_sum_grains_comment = "sum of the areas of rake samples each year",
 
    comment = "Extracted from Muthukrishnan and Larkin 2020 Dryad repo (https://datadryad.org/stash/dataset/doi:10.5061/dryad.15dv41nt2). Macrophytes from 212 lakes distributed in 50 US counties were sampled 1 to 11 years between 2002 and 2014. Regional is the county name and local the lake_id_rake-number.",
-   comment_standardisation = "Some lakes were sampled more than 1 time a year and a single survey was randomly selected. Empty samples were excluded. Sample based standardisation: Lakes with less than 6 rake samples were excluded and other lakes had 6 rake samples randomly selected and then pooled together."
+   comment_standardisation = "Unknown species excluded,
+Sample_point_surveyed = no were excluded,
+A few duplicated rows were excluded
+Some lakes were sampled more than 1 time a year and a single survey was randomly selected. Empty samples were excluded.
+Sample based standardisation: Lakes with less than 6 rake samples were excluded and other lakes had 6 rake samples randomly selected and then pooled together."
 )][, gamma_sum_grains := sum(alpha_grain), by = .(regional, year)]
 
 ## gamma scale ----
