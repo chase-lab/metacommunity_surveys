@@ -67,7 +67,7 @@ data.table::fwrite(
 )
 data.table::fwrite(
    x = meta,
-   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised_metadata.csv"),
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
    row.names = FALSE
 )
 
