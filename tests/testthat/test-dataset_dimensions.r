@@ -101,7 +101,7 @@ lst_column_names_metadata_raw <- sapply(
 )
 
 template_metadata_raw <- utils::read.table(
-   file = paste0(absolute_path, "/data/template_communities_raw.txt"),
+   file = paste0(absolute_path, "/data/template_metadata_raw.txt"),
    header = TRUE, sep = "\t")
 reference_column_names_metadata_raw <- template_metadata_raw[, 1L]
 
@@ -122,7 +122,7 @@ lst_column_names_metadata_standardised <- sapply(
 )
 
 template_metadata_standardised <- utils::read.table(
-   file = paste0(absolute_path, "/data/template_communities_raw.txt"),
+   file = paste0(absolute_path, "/data/template_metadata_standardised.txt"),
    header = TRUE, sep = "\t")
 reference_column_names_metadata_standardised <- template_metadata_standardised[, 1L]
 
