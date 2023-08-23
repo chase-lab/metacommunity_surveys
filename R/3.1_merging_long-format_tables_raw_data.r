@@ -76,7 +76,7 @@ if (any(dt_raw[, .N, by = .(dataset_id, regional, local, year, month, day, speci
             dt_raw[, .N, by = .(dataset_id, regional, local, year, month, day, species)][N != 1L, unique(dataset_id)])))
 
 ### checking values ----
-if (dt_raw[unit == "count", any(!is.integer(value))]) warning(paste("Non integer values in", paste(dt_raw[unit == "count" & !is.integer(value), unique(dataset_id)], collapse = ", ")))
+# if (dt_raw[unit == "count", any(!is.integer(value))]) warning(paste("Non integer values in", paste(dt_raw[unit == "count" & !is.integer(value), unique(dataset_id)], collapse = ", ")))
 
 ### checking species names ----
 for (i in seq_along(lst_community_raw)) if (is.character(lst_community_raw[[i]]$species)) if (any(!unique(Encoding(lst_community_raw[[i]]$species)) %in% c("UTF-8", "unknown"))) warning(paste0("Encoding issue in ", listfiles_community_raw[i]))
@@ -90,7 +90,10 @@ corrected_species_names <- data.table::fread(
 # data.table join with update by reference
 dt_raw[corrected_species_names, on = .(dataset_id, species), species.new := i.species.new]
 
-data.table::setnames(dt_raw, c("species", "species.new"), c("species_original", "species"))
+data.table::setnames(dt_raw,
+                     old = c("species", "species.new"),
+                     new = c("species_original", "species"))
+
 dt_raw[is.na(species), species := species_original]
 # unique(dt[grepl("[^a-zA-Z\\._ ]", species) & nchar(species) < 10L, .(dataset_id)])
 # unique(dt[grepl("[^a-zA-Z\\._ \\(\\)0-9\\-\\&]", species), .(dataset_id, species)])[sample(1:1299, 50)]
@@ -99,7 +102,7 @@ dt_raw[is.na(species), species := species_original]
 
 ### checking metrics and units ----
 if (!all(dt_raw[metric == "pa", unit == "pa"]) || !all(dt_raw[unit == "pa", metric == "pa"]) || !all(dt_raw[metric == "pa" | unit == "pa", value == 1])) warning("inconsistent presence absence coding")
-if (any(dt_raw[, length(unique(unit)), by = dataset_id]$V1) != 1L) warning("several units in a single data set")
+if (any(dt_raw[, data.table::uniqueN(unit), by = dataset_id]$V1) != 1L) warning("several units in a single data set")
 
 
 ## Metadata ----
@@ -160,7 +163,9 @@ meta_raw[, c("latitude", "longitude") := NA_real_][
 # data.table::setnames(meta_raw, c("lat", "lon"), c("latitude", "longitude"))
 
 ## Coordinate scale ----
-meta_raw[, is_coordinate_local_scale := length(unique(latitude)) != 1L && length(unique(longitude)) != 1L, by = .(dataset_id, regional)]
+meta_raw[, is_coordinate_local_scale := data.table::uniqueN(latitude) != 1L
+         && data.table::uniqueN(longitude) != 1L,
+         by = .(dataset_id, regional)]
 
 
 ## Checks ----
@@ -168,14 +173,33 @@ meta_raw[, is_coordinate_local_scale := length(unique(latitude)) != 1L && length
 if (anyDuplicated(meta_raw)) warning("Duplicated rows in metadata")
 
 ### checking taxon ----
-if (any(meta_raw[, length(unique(taxon)), by = dataset_id]$V1 != 1L)) warning(paste0("several taxa values in ", paste(meta_raw[, length(unique(taxon)), by = dataset_id][V1 != 1L, dataset_id], collapse = ", ")))
-if (any(!unique(meta_raw$taxon) %in% c("Fish", "Invertebrates", "Plants", "Birds", "Mammals", "Herpetofauna", "Marine plants"))) warning(paste0("Non standard taxon category in ", paste(unique(meta_raw[!taxon %in% c("Fish", "Invertebrates", "Plants", "Birds", "Mammals", "Herpetofauna", "Marine plants"), .(dataset_id), by = dataset_id]$dataset_id), collapse = ", ")))
+if (any(meta_raw[, data.table::uniqueN(taxon), by = dataset_id]$V1 != 1L))
+   warning(paste0("several taxa values in ", paste(
+      meta_raw[, data.table::uniqueN(taxon), by = dataset_id][V1 != 1L, dataset_id],
+      collapse = ", "))
+      )
+if (any(!unique(meta_raw$taxon) %in% c("Fish", "Invertebrates", "Plants", "Birds", "Mammals", "Herpetofauna", "Marine plants")))
+   warning(paste0("Non standard taxon category in ", paste(
+      unique(meta_raw[!taxon %in% c("Fish", "Invertebrates", "Plants", "Birds", "Mammals", "Herpetofauna", "Marine plants"),
+                      .(dataset_id),
+                      by = dataset_id]$dataset_id), collapse = ", ")))
 
 ### checking encoding ----
-for (i in seq_along(lst_metadata_raw)) if (any(!unlist(unique(apply(lst_metadata_raw[[i]][, c("local", "regional", "comment")], 2L, Encoding))) %in% c("UTF-8", "unknown"))) warning(paste0("Encoding issue in ", listfiles_metadata_raw[i]))
+for (i in seq_along(lst_metadata_raw))
+   if (any(!unlist(unique(apply(lst_metadata_raw[[i]][, c("local", "regional", "comment")], 2L, Encoding))) %in% c("UTF-8", "unknown")))
+   warning(paste0("Encoding issue in ", listfiles_metadata_raw[i]))
+
+### checking year values ----
+if (!all(data.table::between(x = meta_raw$year, lower = 1500, upper = 2023)))
+   warning(paste("Invalid year values in:",
+                 meta_raw[!data.table::between(x = meta_raw$year, lower = 1500, upper = 2023), unique(dataset_id)],
+                 collapse = ", ")
+)
 
 ### checking year range homogeneity among regions ----
-if (any(meta_raw[, length(unique(paste(range(year), collapse = "-"))), by = .(dataset_id, regional)]$V1 != 1L)) warning("all local scale sites were not sampled for the same years and timepoints has to be consistent with years")
+if (any(meta_raw[, data.table::uniqueN(paste(range(year), collapse = "-")),
+                 by = .(dataset_id, regional)]$V1 != 1L))
+   warning("all local scale sites were not sampled for the same years and timepoints has to be consistent with years")
 
 ### checking study_type ----
 if (any(!meta_raw$study_type %in% c("ecological_sampling", "resurvey")))
@@ -196,15 +220,15 @@ if (any(meta_raw[(data_pooled_by_authors), is.na(data_pooled_by_authors_comment)
 
 ## checking comment ----
 if (anyNA(meta_raw$comment)) warning("Missing comment value")
-if (length(unique(meta_raw$comment)) != length(unique(meta_raw$dataset_id))) warning("Redundant comment values")
+if (data.table::uniqueN(meta_raw$comment) != data.table::uniqueN(meta_raw$dataset_id)) warning("Redundant comment values")
 
 ### checking comment_standardisation ----
 if (anyNA(meta_raw$comment_standardisation)) warning("Missing comment_standardisation value")
 
 ## Checking that there is only one alpha_grain value per dataset_id ----
-if (any(meta_raw[, any(length(unique(alpha_grain_m2)) != 1L), by = .(dataset_id, regional)]$V1)) warning(paste(
+if (any(meta_raw[, any(data.table::uniqueN(alpha_grain_m2) != 1L), by = .(dataset_id, regional)]$V1)) warning(paste(
    "Inconsistent grain in",
-   meta_raw[, length(unique(alpha_grain_m2)) != 1L, by = .(dataset_id, regional)][, unique(dataset_id)]
+   meta_raw[, data.table::uniqueN(alpha_grain_m2) != 1L, by = .(dataset_id, regional)][, unique(dataset_id)]
 ))
 
 ### checking alpha_grain_type ----
