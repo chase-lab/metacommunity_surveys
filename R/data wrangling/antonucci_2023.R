@@ -7,10 +7,15 @@ data.table::setnames(
    old = c('country','stationid','abundance_l'),
    new = c('regional','local','value'))
 
+# ddata[
+#    ddata[, .N, by = .(regional, local, date, species, functional_group)][N != 1],
+#    on = .(regional, local, date)]
+
 # Raw data ----
-ddata[, date := data.table::as.IDate(date, '%d.%m.%y')]
-ddata[, ":="(month = data.table::month(date),
-             day    = data.table::mday(date)
+ddata[, date := data.table::as.IDate(date, '%d.%m.%Y')]
+ddata[, ":="(
+   month = data.table::month(date),
+   day   = data.table::mday(date)
 )]
 
 
@@ -18,13 +23,18 @@ ddata[, ":="(month = data.table::month(date),
 ddata[, ":="(
    dataset_id = dataset_id,
 
-   species = as.factor(paste(functional_group, genus, species, sep = '_')),
+   species = as.factor(paste(functional_group, species, sep = '_')),
+
    metric = "density",
    unit = "individuals per liter",
 
-   genus = NULL
+   functional_group = NULL
 )]
 
+## Samples with duplicate observations removed ----
+ddata <- ddata[
+   !ddata[, .N, by = .(regional, local, date, species)][N != 1],
+   on = .(regional, local, date)]
 
 ## Coordinates ----
 coords <- data.frame(matrix(byrow = TRUE, ncol = 3L,
@@ -49,7 +59,9 @@ coords <- data.frame(matrix(byrow = TRUE, ncol = 3L,
 
 ## metadata ----
 meta <- unique(ddata[, .(dataset_id, regional, local, year, month, day)])
-meta <- meta[coords, on = 'local', nomatch = NULL]
+meta[coords,
+     ":="(latitude = i.latitude, longitude = i.longitude),
+     on = 'local']
 
 meta[, ":="(
    taxon = "Marine plants",
@@ -62,11 +74,10 @@ meta[, ":="(
    alpha_grain = NA,
    alpha_grain_unit = "m2",
    alpha_grain_type = "sample",
-   alpha_grain_comment = "",
 
    comment = "Extracted from Josie Antonucci di Carvalho's GitHub repository https://github.com/josieantonucci/TemporalChange_PPKT_WaddenSea/blob/befbf4575dc63afdca069367b96d57be0d782779/Data/PPKT_count_WaddenSea_1999_2018.csv and from the preprint article `Temporal change in phytoplankton diversity and functional group composition` https://doi.org/10.21203/rs.3.rs-2760923/v1
    They aggregated long-term phytoplankton data from coastal stations in Germany and the Netherlands. Provided abundance values are number of individuals per litre.",
-   comment_standardisation = 'none needed',
+   comment_standardisation = 'Samples with duplicate observations removed',
    doi = 'https://doi.org/10.21203/rs.3.rs-2760923/v1'
 )]
 
@@ -107,14 +118,16 @@ ddata <- ddata[
    unique(ddata[, .(local, year, month, date)])[, .SD[1L],
                                                 by = .(local, year, month)],
    on = .(local, year, month, date)
-][, month := NULL][, date := NULL]
+][, month := NULL][, date := NULL][, day := NULL]
 
 ## Pooling all samples from a year together ----
-ddata <- ddata[, .(value = sum(value)), by = .(regional, local, year, species)]
+ddata <- ddata[, .(value = sum(value)), by = .(dataset_id, regional, local, year, species, metric, unit)]
 
 ## metadata ----
+meta[, c("month","day") := NULL]
+meta <- unique(meta)
 meta <- meta[
-   unique(ddata[,.(regional, local, year)]),
+   unique(ddata[, .(regional, local, year)]),
    on = .(regional, local, year)
 ]
 
@@ -129,7 +142,10 @@ meta[, ":="(
    gamma_bounding_box_type = "convex-hull",
    gamma_bounding_box_comment = "coordinates provided by the authors",
 
-   comment_standardisation = 'When a site is sampled several times a year, selecting the 4 most frequently sampled months from the 6 most sampled months ie selecting sites from summer and spring. When a site is sampled several times a month, selecting the first visit. Pooling all 4 samples from a year together.'
+   comment_standardisation = 'Samples with duplicate observations removed.
+When a site is sampled several times a year, selecting the 4 most frequently sampled months from the 6 most sampled months ie selecting sites from summer and spring.
+When a site is sampled several times a month, selecting the first visit.
+Pooling all 4 samples from a year together.'
 )][, ":="(
    gamma_bounding_box = geosphere::areaPolygon(data.frame(longitude, latitude)[grDevices::chull(longitude, latitude), ]) / 10^6,
    gamma_sum_grains = sum(alpha_grain)
