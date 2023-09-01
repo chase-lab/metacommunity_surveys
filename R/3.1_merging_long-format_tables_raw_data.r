@@ -12,19 +12,22 @@ listfiles_metadata_raw <- list.files(
 )
 
 
-template_community_raw <- utils::read.csv(file = "data/template_communities_raw.txt", header = TRUE, sep = "\t")
+template_community_raw <- utils::read.csv(file = "data/template_communities_raw.txt",
+                                          header = TRUE, sep = "\t")
 column_names_template_community_raw <- template_community_raw[, 1]
 
 lst_community_raw <- lapply(listfiles_community_raw,
-FUN = data.table::fread, integer64 = "character", encoding = "UTF-8",
-stringsAsFactors = TRUE)
+                            FUN = data.table::fread, integer64 = "character", encoding = "UTF-8",
+                            stringsAsFactors = TRUE)
 dt_raw <- data.table::rbindlist(lst_community_raw, fill = TRUE)
 
-template_metadata_raw <- utils::read.csv(file = "data/template_metadata_raw.txt", header = TRUE, sep = "\t")
+template_metadata_raw <- utils::read.csv(file = "data/template_metadata_raw.txt",
+                                         header = TRUE, sep = "\t")
 column_names_template_metadata_raw <- template_metadata_raw[, 1L]
 
 lst_metadata_raw <- lapply(listfiles_metadata_raw,
-FUN = data.table::fread, integer64 = "character", encoding = "UTF-8", stringsAsFactors = TRUE)
+                           FUN = data.table::fread, integer64 = "character", encoding = "UTF-8",
+                           stringsAsFactors = TRUE, sep = ",", header = TRUE)
 meta_raw <- data.table::rbindlist(lst_metadata_raw, fill = TRUE)
 
 ## Checking data ----
@@ -34,17 +37,17 @@ check_indispensable_variables(meta_raw, column_names_template_metadata_raw[as.lo
 
 if (anyNA(dt_raw$year)) warning(paste("missing _year_ value in ", unique(dt_raw[is.na(year), dataset_id]), collapse = ", "))
 if (anyNA(meta_raw$year)) warning(paste("missing _year_ value in ", unique(meta_raw[is.na(year), dataset_id]), collapse = ", "))
-if (any(dt_raw[metric == "pa", value] != 1)) warning(paste("abnormal presence absence value in ", unique(dt_raw[value != 1, dataset_id]), collapse = ", "))
-if (any(dt_raw[, .(is.na(regional) | regional == "")])) warning(paste("missing _regional_ value in ", unique(dt_raw[is.na(regional) | regional == "", dataset_id]), collapse = ", "))
-if (any(dt_raw[, .(is.na(local) | local == "")]))
+if (dt_raw[metric == "pa", any(value != 1)]) warning(paste("abnormal presence absence value in ", unique(dt_raw[value != 1, dataset_id]), collapse = ", "))
+if (dt_raw[, any(is.na(regional) | regional == "")]) warning(paste("missing _regional_ value in ", unique(dt_raw[is.na(regional) | regional == "", dataset_id]), collapse = ", "))
+if (dt_raw[, any(is.na(local) | local == "")])
    warning(paste("missing _local_ value in ", unique(dt_raw[is.na(local) | local == "", dataset_id]), collapse = ", "))
-if (any(dt_raw[, .(is.na(species) | species == "")]))
+if (dt_raw[, any(is.na(species) | species == "")])
    warning(paste("missing _species_ value in ", unique(dt_raw[is.na(species) | species == "", dataset_id]), collapse = ", "))
-if (any(dt_raw[, .(is.na(value) | value == "" | value < 0)]))
+if (dt_raw[, any(is.na(value) | value == "" | value < 0)])
    warning(paste("missing _value_ value in ", unique(dt_raw[is.na(value) | value == "" | value < 0, dataset_id]), collapse = ", "))
-if (any(dt_raw[, .(is.na(metric) | metric == "")]))
+if (dt_raw[, any(is.na(metric) | metric == "")])
    warning(paste("missing _metric_ value in ", unique(dt_raw[is.na(metric) | metric == "", dataset_id]), collapse = ", "))
-if (any(dt_raw[, .(is.na(unit) | unit == "")])) warning(paste("missing _unit_ value in ", unique(dt_raw[is.na(unit) | unit == "", dataset_id]), collapse = ", "))
+if (dt_raw[, any(is.na(unit) | unit == "")]) warning(paste("missing _unit_ value in ", unique(dt_raw[is.na(unit) | unit == "", dataset_id]), collapse = ", "))
 
 ### Counting the study cases ----
 dt_raw[, .(nsites = data.table::uniqueN(.SD)), .SDcols = c('regional', 'local'), by = .(dataset_id)][order(nsites, decreasing = TRUE)]
@@ -102,7 +105,7 @@ dt_raw[is.na(species), species := species_original]
 
 ### checking metrics and units ----
 if (!all(dt_raw[metric == "pa", unit == "pa"]) || !all(dt_raw[unit == "pa", metric == "pa"]) || !all(dt_raw[metric == "pa" | unit == "pa", value == 1])) warning("inconsistent presence absence coding")
-if (any(dt_raw[, data.table::uniqueN(unit), by = dataset_id]$V1) != 1L) warning("several units in a single data set")
+if (any(dt_raw[, data.table::uniqueN(unit), by = dataset_id]$V1 != 1L)) warning("several units in a single data set")
 
 
 ## Metadata ----

@@ -35,13 +35,13 @@ check_indispensable_variables(meta_standardised, column_names_template_metadata_
 
 if (anyNA(dt_standardised$year)) warning(paste("missing _year_ value in ", unique(dt_standardised[is.na(year), dataset_id]), collapse = ", "))
 if (anyNA(meta_standardised$year)) warning(paste("missing _year_ value in ", unique(meta_standardised[is.na(year), dataset_id]), collapse = ", "))
-if (any(dt_standardised[metric == "pa", value] != 1)) warning(paste("abnormal presence absence value in ", unique(dt_standardised[value != 1, dataset_id]), collapse = ", "))
-if (any(dt_standardised[, .(is.na(regional) | regional == "")])) warning(paste("missing _regional_ value in ", unique(dt_standardised[is.na(regional) | regional == "", dataset_id]), collapse = ", "))
-if (any(dt_standardised[, .(is.na(local) | local == "")])) warning(paste("missing _local_ value in ", unique(dt_standardised[is.na(local) | local == "", dataset_id]), collapse = ", "))
-if (any(dt_standardised[, .(is.na(species) | species == "")])) warning(paste("missing _species_  value in ", unique(dt_standardised[is.na(species) | species == "", dataset_id]), collapse = ", "))
-if (any(dt_standardised[, .(is.na(value) | value == "" | value <= 0)])) warning(paste("missing _value_  value in ", unique(dt_standardised[is.na(value) | value == "" | value <= 0, dataset_id]), collapse = ", "))
-if (any(dt_standardised[, .(is.na(metric) | metric == "")])) warning(paste("missing _metric_  value in ", unique(dt_standardised[is.na(metric) | metric == "", dataset_id]), collapse = ", "))
-if (any(dt_standardised[, .(is.na(unit) | unit == "")])) warning(paste("missing _unit_  value in ", unique(dt_standardised[is.na(unit) | unit == "", dataset_id]), collapse = ", "))
+if (dt_standardised[metric == "pa", any(value != 1)]) warning(paste("abnormal presence absence value in ", unique(dt_standardised[value != 1, dataset_id]), collapse = ", "))
+if (dt_standardised[, any(is.na(regional) | regional == "")]) warning(paste("missing _regional_ value in ", unique(dt_standardised[is.na(regional) | regional == "", dataset_id]), collapse = ", "))
+if (dt_standardised[, any(is.na(local) | local == "")]) warning(paste("missing _local_ value in ", unique(dt_standardised[is.na(local) | local == "", dataset_id]), collapse = ", "))
+if (dt_standardised[, any(is.na(species) | species == "")]) warning(paste("missing _species_  value in ", unique(dt_standardised[is.na(species) | species == "", dataset_id]), collapse = ", "))
+if (dt_standardised[, any(is.na(value) | value == "" | value <= 0)]) warning(paste("missing _value_  value in ", unique(dt_standardised[is.na(value) | value == "" | value <= 0, dataset_id]), collapse = ", "))
+if (dt_standardised[, any(is.na(metric) | metric == "")]) warning(paste("missing _metric_  value in ", unique(dt_standardised[is.na(metric) | metric == "", dataset_id]), collapse = ", "))
+if (dt_standardised[, any(is.na(unit) | unit == "")]) warning(paste("missing _unit_  value in ", unique(dt_standardised[is.na(unit) | unit == "", dataset_id]), collapse = ", "))
 
 ### Counting the study cases ----
 dt_standardised[, .(nsites = data.table::uniqueN(.SD)), .SDcols = c('regional', 'local'), by = .(dataset_id)][order(nsites, decreasing = TRUE)]
@@ -96,7 +96,7 @@ dt_standardised[is.na(species), species := species_original]
 
 ### checking metrics and units ----
 if (!all(dt_standardised[metric == "pa", unit == "pa"]) || !all(dt_standardised[unit == "pa", metric == "pa"]) || !all(dt_standardised[metric == "pa" | unit == "pa", value == 1])) warning("inconsistent presence absence coding")
-if (any(dt_standardised[, length(unique(unit)), by = dataset_id]$V1) != 1L) warning("several units in a single data set")
+if (any(dt_standardised[, data.table::uniqueN(unit), by = dataset_id]$V1 != 1L)) warning("several units in a single data set")
 
 
 ## Metadata ----
@@ -189,7 +189,8 @@ meta_standardised[, c("latitude", "longitude") := NA_real_][
 # data.table::setnames(meta_standardised, c("lat", "lon"), c("latitude", "longitude"))
 
 ## Coordinate scale ----
-meta_standardised[, is_coordinate_local_scale := length(unique(latitude)) != 1L && length(unique(longitude)) != 1L, by = .(dataset_id, regional)]
+meta_standardised[, is_coordinate_local_scale := data.table::uniqueN(latitude) != 1L && data.table::uniqueN(longitude) != 1L,
+                  by = .(dataset_id, regional)]
 
 
 ## Checks ----
@@ -197,14 +198,15 @@ meta_standardised[, is_coordinate_local_scale := length(unique(latitude)) != 1L 
 if (anyDuplicated(meta_standardised)) warning("Duplicated rows in metadata")
 
 ### checking taxon ----
-if (any(meta_standardised[, length(unique(taxon)), by = dataset_id]$V1 != 1L)) warning(paste0("several taxa values in ", paste(meta_standardised[, length(unique(taxon)), by = dataset_id][V1 != 1L, dataset_id], collapse = ", ")))
+if (any(meta_standardised[, data.table::uniqueN(taxon), by = dataset_id]$V1 != 1L)) warning(paste0("several taxa values in ", paste(meta_standardised[, data.table::uniqueN(taxon), by = dataset_id][V1 != 1L, dataset_id], collapse = ", ")))
 if (any(!unique(meta_standardised$taxon) %in% c("Fish", "Invertebrates", "Plants", "Birds", "Mammals", "Herpetofauna", "Marine plants"))) warning(paste0("Non standard taxon category in ", paste(unique(meta_standardised[!taxon %in% c("Fish", "Invertebrates", "Plants", "Birds", "Mammals", "Herpetofauna", "Marine plants"), .(dataset_id), by = dataset_id]$dataset_id), collapse = ", ")))
 
 ### checking encoding ----
 for (i in seq_along(lst_metadata_standardised)) if (any(!unlist(unique(apply(lst_metadata_standardised[[i]][, c("local", "regional", "comment")], 2L, Encoding))) %in% c("UTF-8", "unknown"))) warning(paste0("Encoding issue in ", listfiles_metadata_standardised[i]))
 
 ### checking year range homogeneity among regions ----
-if (any(meta_standardised[, length(unique(paste(range(year), collapse = "-"))), by = .(dataset_id, regional)]$V1 != 1L)) warning("all local scale sites were not sampled for the same years and timepoints has to be consistent with years")
+if (any(meta_standardised[, data.table::uniqueN(paste(range(year), collapse = "-")),
+                          by = .(dataset_id, regional)]$V1 != 1L)) warning("all local scale sites were not sampled for the same years and timepoints has to be consistent with years")
 
 ### checking study_type ----
 if (any(!meta_standardised$study_type %in% c("ecological_sampling", "resurvey")))
@@ -229,15 +231,17 @@ if (any(meta_standardised[(data_pooled_by_authors), is.na(data_pooled_by_authors
 
 ## checking comment ----
 if (anyNA(meta_standardised$comment)) warning("Missing comment value")
-if (length(unique(meta_standardised$comment)) != length(unique(meta_standardised$dataset_id))) warning("Redundant comment values")
+if (data.table::uniqueN(meta_standardised$comment) != data.table::uniqueN(meta_standardised$dataset_id)) warning("Redundant comment values")
 
 ### checking comment_standardisation ----
 if (anyNA(meta_standardised$comment_standardisation)) warning("Missing comment_standardisation value")
 
 ## Checking that there is only one alpha_grain value per dataset_id ----
-if (any(meta_standardised[, any(length(unique(alpha_grain_m2)) != 1L), by = .(dataset_id, regional)]$V1)) warning(paste(
+if (any(meta_standardised[, any(data.table::uniqueN(alpha_grain_m2) != 1L),
+                          by = .(dataset_id, regional)]$V1)) warning(paste(
    "Inconsistent grain in",
-   meta_standardised[, length(unique(alpha_grain_m2)) != 1L, by = .(dataset_id, regional)][, unique(dataset_id)]
+   meta_standardised[, data.table::uniqueN(alpha_grain_m2) != 1L,
+                     by = .(dataset_id, regional)][, unique(dataset_id)]
 ))
 
 ### checking alpha_grain_type ----

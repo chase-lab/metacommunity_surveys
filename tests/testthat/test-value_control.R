@@ -58,8 +58,8 @@ testthat::test_that(desc = "data quality check - community data - raw data", cod
             file = i, sep = ",", dec = ".", header = TRUE, stringsAsFactors = TRUE
          )[, .(all(
             all(data.table::between(year, 1500L, 2023L)),
-            all(try(data.table::between(month, 1L, 12L))),
-            all(try(data.table::between(day, 1L, 31L))),
+            all(try(data.table::between(month, 1L, 12L), silent = TRUE)),
+            all(try(data.table::between(day, 1L, 31L), silent = TRUE)),
             all(value > 0),
             length(levels(dataset_id)) == 1L,
             length(levels(metric)) == 1L,
@@ -117,10 +117,10 @@ testthat::test_that(desc = "data quality check - metadata data - raw data", code
             levels(taxon) %in% c("Fish", "Invertebrates", "Plants", "Birds", "Mammals",
                                  "Herpetofauna", "Marine plants"),
             levels(realm) %in% c("Terrestrial","Freshwater","Marine"),
-            try(levels(alpha_grain_unit) %in% c("acres", "ha", "km2", "m2", "cm2")),
+            try(levels(alpha_grain_unit) %in% c("acres", "ha", "km2", "m2", "cm2"), silent = TRUE),
             try(levels(alpha_grain_type) %in% c("island", "plot", "sample", "lake_pond",
                                                 "trap", "transect", "functional", "box",
-                                                "quadrat","listening_point")),
+                                                "quadrat","listening_point"), silent = TRUE),
             na.rm = TRUE
          ))]),
          info = i
@@ -150,15 +150,15 @@ testthat::test_that(desc = "data quality check - metadata data - standardised da
             levels(realm) %in% c("Terrestrial","Freshwater","Marine"),
             try(levels(alpha_grain_type) %in% c("island", "plot", "sample", "lake_pond",
                                                 "trap", "transect", "functional", "box",
-                                                "quadrat","listening_point")),
-            try(levels(alpha_grain_unit) %in% c("acres", "ha", "km2", "m2", "cm2")),
+                                                "quadrat","listening_point"), silent = TRUE),
+            try(levels(alpha_grain_unit) %in% c("acres", "ha", "km2", "m2", "cm2"), silent = TRUE),
             try(levels(gamma_sum_grains_type) %in% c("archipelago", "sample", "lake_pond",
                                                      "plot", "quadrat", "transect",
-                                                     "functional", "box")),
+                                                     "functional", "box"), silent = TRUE),
             try(levels(gamma_bounding_box_type) %in% c("administrative", "island", "functional",
                                                        "convex-hull", "watershed", "box",
                                                        "buffer", "ecosystem", "shore",
-                                                       "lake_pond")),
+                                                       "lake_pond"), silent = TRUE),
             na.rm = TRUE
          ))]),
          info = i

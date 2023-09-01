@@ -1,105 +1,108 @@
 # countryside_survey_invertebrates
 dataset_id <- "countryside_survey_invertebrates_2017"
+ddata <- base::readRDS(file = "data/raw data/countryside_survey_invertebrates_2017/rdata.rds")
 
-ddata <- data.table::rbindlist(list(
-  `1990` = data.table::fread(file = "./data/raw data/countryside_survey_invertebrates_2017/b4c17f35-1b50-4ed7-87d2-b63004a96ca2/data/STREAM_INVERT_TAXA_90.csv"),
-  `1998` = data.table::fread(file = "./data/raw data/countryside_survey_invertebrates_2017/fd0ce233-3b4d-4a5e-abcb-c0a26dd71c95/data/STREAM_INVERT_TAXA_98.csv"),
-  `2007` = data.table::fread(file = "./data/raw data/countryside_survey_invertebrates_2017/18849325-358b-4af1-b20d-d750b1c723a3/data/STREAM_INVERT_TAXA_07.csv")
-),
-fill = TRUE, use.names = TRUE, idcol = FALSE
-)
+ddata[, SAMPLE_DATE := data.table::as.IDate(SAMPLE_DATE, format = "%d-%b-%y")]
+ddata[, ":="(month = data.table::month(SAMPLE_DATE),
+             day = data.table::mday(SAMPLE_DATE))]
 
-#Raw Data ----
-data.table::setnames(ddata, c("YEAR", "SQUARE", "EZ_DESC_07", "NAME", "ABUNDANCE"), c("year", "local", "regional", "species", "value"))
-
-##cleaning species names ----
-ddata <- ddata[!grepl("ae$", species)]
-
+# Raw Data ----
 ## community data ----
 ddata[, ":="(
-  dataset_id = dataset_id,
-  regional = stringi::stri_extract_first_regex(str = regional, pattern = "(?<=\\().*(?=\\))"),
-  metric = "abundance",
-  unit = "count",
-  
-  SITE_ID = NULL,
-  SPECIES_CODE = NULL,
-  LC07 = NULL,
-  LC07_NUM = NULL,
-  COUNTRY = NULL,
-  COUNTY07 = NULL,
-  SAMPLE_DATE = NULL
+   dataset_id = dataset_id,
+
+   metric = "abundance",
+   unit = "count",
+
+   SITE_ID = NULL,
+   SPECIES_CODE = NULL,
+   LC07 = NULL,
+   LC07_NUM = NULL,
+   COUNTY07 = NULL,
+   SAMPLE_DATE = NULL
 )]
 
 ## Meta data ----
-meta <- unique(ddata[, .(dataset_id, regional, local, year)])
+meta <- unique(ddata[, .(dataset_id, COUNTRY, regional, local, year, month, day)])
 
 meta[, ":="(
-  taxon = "Invertebrates",
-  realm = "Freshwater",
-  
-  study_type = "resurvey",
-  
-  data_pooled_by_authors = FALSE,
-  
-  latitude = c(52.3, 53, 57)[match(regional, c("Wales", "England", "Scotland"))],
-  longitude = c(-3.6, -1, -4)[match(regional, c("Wales", "England", "Scotland"))],
-  
-  alpha_grain = 1L,
-  alpha_grain_unit = "km2",
-  alpha_grain_type = "plot",
-  
-  comment = "Extracted from 3 published Environmental Information Data Centre data sets, DOIs https://doi.org/10.5285/18849325-358b-4af1-b20d-d750b1c723a3 ,  https://doi.org/10.5285/fd0ce233-3b4d-4a5e-abcb-c0a26dd71c95 , https://doi.org/10.5285/b4c17f35-1b50-4ed7-87d2-b63004a96ca2 . Authors sampled invertebrates in streams located in 1km2 grid cells in England, Scotland and Wales. Effort: Each square was sampled only once a year. Each Square was sampled in only one site_id. Effort could be more accurately measured by using the sampling time given in the environment table. alpha grain could be more precisely computed by multiplying river width in the environment table by 5-15m, the length of stream typically sampled.",
-  comment_standardisation = "Family level taxa were excluded.",
-  doi = 'https://doi.org/10.5285/18849325-358b-4af1-b20d-d750b1c723a3 | https://doi.org/10.5285/b4c17f35-1b50-4ed7-87d2-b63004a96ca2 | https://doi.org/10.5285/fd0ce233-3b4d-4a5e-abcb-c0a26dd71c95'
+   taxon = "Invertebrates",
+   realm = "Freshwater",
+
+   study_type = "resurvey",
+
+   data_pooled_by_authors = FALSE,
+
+   latitude = c(52.3, 53, 57)[match(COUNTRY, c("WAL", "ENG", "SCO"))],
+   longitude = c(-3.6, -1, -4)[match(COUNTRY, c("WAL", "ENG", "SCO"))],
+
+   alpha_grain = 1L,
+   alpha_grain_unit = "km2",
+   alpha_grain_type = "plot",
+
+   comment = "Extracted from 3 published Environmental Information Data Centre data sets, DOIs https://doi.org/10.5285/18849325-358b-4af1-b20d-d750b1c723a3 ,  https://doi.org/10.5285/fd0ce233-3b4d-4a5e-abcb-c0a26dd71c95 , https://doi.org/10.5285/b4c17f35-1b50-4ed7-87d2-b63004a96ca2 . Authors sampled invertebrates in streams located in 1km2 grid cells in England, Scotland and Wales. Effort: Each square was sampled only once a year. Each Square was sampled in only one site_id. Effort could be more accurately measured by using the sampling time given in the environment table. alpha grain could be more precisely computed by multiplying river width in the environment table by 5-15m, the length of stream typically sampled.",
+   comment_standardisation = "none needed",
+   doi = 'https://doi.org/10.5285/18849325-358b-4af1-b20d-d750b1c723a3 | https://doi.org/10.5285/b4c17f35-1b50-4ed7-87d2-b63004a96ca2 | https://doi.org/10.5285/fd0ce233-3b4d-4a5e-abcb-c0a26dd71c95'
 )]
+
+ddata[, COUNTRY := NULL]
 
 ##save data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
 data.table::fwrite(
-  x = ddata,
-  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
-  row.names = FALSE
+   x = ddata,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
+   row.names = FALSE, sep = ",", encoding = "UTF-8"
 )
 data.table::fwrite(
-  x = meta,
-  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
-  row.names = FALSE
+   x = meta[, !"COUNTRY"],
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
+   row.names = FALSE, sep = ",", encoding = "UTF-8"
 )
 
-#Standardized data ----
+#standardised data ----
 ##community data ----
-ddata[, ":="(
-  value = 1L,
-  metric = "pa",
-  unit = "pa"
-)]
+ddata[, c("month", "day") := NULL]
+ddata <- ddata[
+   !ddata[is.na(value)],
+   on = .(regional, local, year)
+]
+
+### cleaning species names? ----
+# ddata[, sum(grepl("ae$", species)) / data.table::uniqueN(species), by = .(regional, local, year)]
 
 ##meta data ----
+meta[, c("month", "day") := NULL]
+meta <- meta[
+   unique(ddata[, .(regional, local, year)]),
+   on = .(regional, local, year)
+]
+
 meta[,":="(
-  effort = 1L,
-  
-  gamma_sum_grains_unit = "km2",
-  gamma_sum_grains_type = "plot",
-  gamma_sum_grains_comment = "sum of the plots per year per region",
-  
-  gamma_bounding_box = c(20779L, 130279L, 77933L)[match(regional, c("Wales", "England", "Scotland"))],
-  gamma_bounding_box_unit = "km2",
-  gamma_bounding_box_type = "administrative",
-  gamma_bounding_box_comment = "ecological zone area is unknown so gamma has been set to the country",
-  
-  comment_standardisation = "Abundances from 2007 were turned into presence absence. Family level taxa were excluded."
-)][, gamma_sum_grains := length(unique(local)), by = .(regional, year)]
+   effort = 1L,
+
+   gamma_sum_grains_unit = "km2",
+   gamma_sum_grains_type = "plot",
+   gamma_sum_grains_comment = "sum of the plots per year per region",
+
+   gamma_bounding_box = c(20779L, 130279L, 77933L)[match(COUNTRY, c("WAL", "ENG", "SCO"))],
+   gamma_bounding_box_unit = "km2",
+   gamma_bounding_box_type = "administrative",
+   gamma_bounding_box_comment = "ecological zone area is unknown so gamma has been set to the country",
+
+   comment_standardisation = "Samples with NA abundance values were excluded.",
+
+   COUNTRY = NULL
+)][, gamma_sum_grains := sum(alpha_grain), by = .(regional, year)]
 
 ##save data ----
-dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
 data.table::fwrite(
-  x = ddata,
-  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
-  row.names = FALSE
+   x = ddata,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised.csv"),
+   row.names = FALSE, sep = ",", encoding = "UTF-8"
 )
 data.table::fwrite(
-  x = meta,
-  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
-  row.names = FALSE
+   x = meta,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised_metadata.csv"),
+   row.names = FALSE, sep = ",", encoding = "UTF-8"
 )

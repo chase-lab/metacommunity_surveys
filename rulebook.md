@@ -6,6 +6,7 @@ The Rulebook
 - Do we keep empty sites? (alston_2021a, alston_2021b) Yes. This has to be described in data set comments and in the manual. NA species can mean empty trap or a problem: double check.
 - What if the data is incomplete: missing site name or missing species name or missing year. If there is no way to figure it out, throw away and document.
 - Do we keep duplicated rows? toss it
+- Do we keep duplicated observations of species in a sample? Remove whole sample and document.
 - Do we keep "bare ground" cover? exclude it but keep unknown sponge
 - Do we keep cover? alston_2021c. Keep it. type = cover, unit = percentage
  
