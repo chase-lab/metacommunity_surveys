@@ -7,11 +7,11 @@
 backup/**
 
 data/communities.csv
-data/raw_communities.csv
-data/standardised_communities.csv
+data/communities_raw.csv
+data/communities_standardised.csv
 data/metadata.csv
-data/raw_metadata.csv
-data/standardised_metadata.csv
+data/metadata_raw.csv
+data/metadata_standardised.csv
 
 
 data/wrangled data/**
