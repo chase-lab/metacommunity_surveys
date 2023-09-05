@@ -84,6 +84,12 @@ data.table::fwrite(
 )
 
 #standardised data ----
+## Excluding sites that were not resampled at least 10 years appart
+ddata <- ddata[
+   !ddata[, .(diff(range(year)) < 9L), by = .(regional, local)][(V1)],
+   on = .(regional, local)
+]
+
 ## When a site is sampled several times a year, selecting the most frequently sampled month from the 6 most sampled months ----
 month_order <- ddata[, data.table::uniqueN(.SD), by = .(local, year, month), .SDcols = c("year", "month")][, sum(V1), by = month][order(-V1)]
 ddata[, month_order := (1L:6L)[match(month, month_order, nomatch = NULL)]]
@@ -110,7 +116,8 @@ meta[, ":="(
    gamma_bounding_box_type = "box",
    gamma_bounding_box_comment = "coordinates provided by the authors",
 
-   comment_standardisation = "When sampled several times a year, sample from the generally most sampled month kept"
+   comment_standardisation = "Only sites sampled at least twice at 10 years apart are kept.
+When sampled several times a year, sample from the generally most sampled month kept"
 )][, gamma_sum_grains := sum(alpha_grain), by = year]
 
 ##save data ----

@@ -204,6 +204,16 @@ if (any(!unique(meta_standardised$taxon) %in% c("Fish", "Invertebrates", "Plants
 ### checking encoding ----
 for (i in seq_along(lst_metadata_standardised)) if (any(!unlist(unique(apply(lst_metadata_standardised[[i]][, c("local", "regional", "comment")], 2L, Encoding))) %in% c("UTF-8", "unknown"))) warning(paste0("Encoding issue in ", listfiles_metadata_standardised[i]))
 
+
+### checking year range length among regions ----
+if (any(meta_standardised[, .(diff(range(year)) < 9L), by = .(dataset_id, regional, local)]))
+   warning(
+      paste(
+         "Time periods shorter than 10 years in: ",
+         paste(meta_standardised[, .(diff(range(year))), by = .(dataset_id, regional, local)][V1 < 9L, unique(dataset_id)], collapse = ",")
+      )
+   )
+
 ### checking year range homogeneity among regions ----
 if (any(meta_standardised[, data.table::uniqueN(paste(range(year), collapse = "-")),
                           by = .(dataset_id, regional)]$V1 != 1L)) warning("all local scale sites were not sampled for the same years and timepoints has to be consistent with years")
