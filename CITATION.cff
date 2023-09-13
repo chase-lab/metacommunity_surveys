@@ -1,5 +1,5 @@
 cff-version: 1.2.0
-message: "If you use these data, please cite it as below."
+message: "If you use these data and code, please cite this work as below."
 authors:
   - family-names: Alban
     given-names: Sagouis
@@ -14,5 +14,5 @@ authors:
     given-names: Xu
     orcid: https://orcid.org/0000-0002-6566-4452
 title: chase-lab/metacommunity_surveys, Metacommunity Surveys data for `Local changes dominate variation in biotic homogenization and differentiation`
-version: v2.1-review
-date-released: 2023-06-09
+version: v2.2-Blowes_etal_Science_Advances 
+date-released: 2023-09-13
