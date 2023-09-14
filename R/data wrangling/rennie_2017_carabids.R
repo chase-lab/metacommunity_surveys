@@ -74,12 +74,12 @@ dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
 data.table::fwrite(
    x = ddata[value != 0L & !species %in% c('XX', '', 'UU'), !c("date","plot")],
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
-   row.names = FALSE
+   row.names = FALSE, sep = ",", encoding = "UTF-8"
 )
 data.table::fwrite(
    x = meta[unique(ddata[value != 0L & !species %in% c('XX', '', 'UU'), .(regional, local, year)]), on = .(regional, local, year), !"plot"],
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
-   row.names = FALSE
+   row.names = FALSE, sep = ",", encoding = "UTF-8"
 )
 
 # Standardised data ----
@@ -110,8 +110,9 @@ ddata <- ddata[value != 0L & !species %in% c('XX', '', 'UU')]
 
 ## Keeping only sites sampled at least twice 10 years apart ----
 ddata <- ddata[
-   !ddata[, diff(range(year)) < 9L, by = local][(V1)],
-   on = 'local']
+   !ddata[, diff(range(year)), by = .(regional, local)][(V1 < 9L)],
+   on = .(regional, local)
+]
 
 ## Metadata ----
 meta[, c("month","day") := NULL]
@@ -139,16 +140,18 @@ Removing empty traps."
 )][, ":="(
    gamma_sum_grains = sum(alpha_grain),
    gamma_bounding_box = data.table::uniqueN(plot) * 90L * 1L),
-   by = .(regional, year)]
+   by = .(regional, year)][, plot := NULL]
+
+ddata[, plot := NULL]
 
 ## Saving standardised data ----
 data.table::fwrite(
-   x = ddata[, !"plot"],
+   x = ddata,
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised.csv"),
-   row.names = FALSE
+   row.names = FALSE, sep = ",", encoding = "UTF-8"
 )
 data.table::fwrite(
-   x = meta[, !"plot"],
+   x = meta,
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised_metadata.csv"),
-   row.names = FALSE
+   row.names = FALSE, sep = ",", encoding = "UTF-8"
 )

@@ -79,8 +79,9 @@ data.table::fwrite(
 # Standardised data ----
 ## Keeping only sites sampled at least twice 10 years apart ----
 ddata <- ddata[
-   !ddata[, diff(range(year)) < 9L, by = local][(V1)],
-   on = 'local']
+   !ddata[, diff(range(year)), by = .(regional, local)][(V1 < 9L)],
+   on = .(regional, local)
+]
 
 
 ## Metadata ----
