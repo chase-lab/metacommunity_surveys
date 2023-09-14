@@ -84,11 +84,6 @@ data.table::fwrite(
 
 # Standardised data ----
 # Standardisation ----
-## Keeping only sites sampled at least twice 10 years apart ----
-ddata <- ddata[
-   ddata[, diff(range(year)) >= 9L, by = local][(V1)][, V1 := NULL],
-   on = 'local']
-
 ## When a site is sampled several times a year, selecting the 5 most frequently sampled months from the 6 most sampled months ----
 ddata[, month_order := (1L:6L)[match(month, c(6L, 7L, 10L, 9L, 8L, 5L), nomatch = NULL)]]
 data.table::setkey(ddata, month_order)
@@ -112,6 +107,11 @@ ddata <- ddata[, .(value = sum(value)), by = .(dataset_id, regional, plot, local
 
 ## removing empty traps ----
 ddata <- ddata[value != 0L & !species %in% c('XX', '', 'UU')]
+
+## Keeping only sites sampled at least twice 10 years apart ----
+ddata <- ddata[
+   !ddata[, diff(range(year)) < 9L, by = local][(V1)],
+   on = 'local']
 
 ## Metadata ----
 meta[, c("month","day") := NULL]

@@ -2,7 +2,7 @@
 dataset_id <- "edgar_2022_cryptic"
 
 # reading the data ----
-ddata <- base::readRDS(file =  "data/raw data/egar_2022_cryptic/rdata.rds")
+ddata <- base::readRDS(file =  "data/raw data/edgar_2022_cryptic/rdata.rds")
 data.table::setnames(x = ddata,
                      old = c("location", "total", "species_name"),
                      new = c("regional", "value", "species"))
@@ -23,7 +23,10 @@ ddata[, ':='(
 )]
 
 ### pooling individual observations from the same species ----
-ddata <- ddata[, .(value = sum(value)), by = .(regional, local, latitude, longitude, year, month, day, survey_date, species)]
+ddata <- ddata[, .(value = sum(value)), by = .(dataset_id, regional, local,
+                                               latitude, longitude,
+                                               year, month, day, survey_date,
+                                               species, metric, unit)]
 
 ## Metadata ----
 meta <- unique(ddata[, .(dataset_id, regional, local, year, month, day, latitude, longitude)])
@@ -44,7 +47,7 @@ meta[, ":="(
 
    comment = factor("Methods: 'This dataset contains records of cryptobenthic fishes collected by RLS and ATRC divers and partners along 50m transects on shallow rocky and coral reefs using standard methods. Abundance information is available for all species recorded within quantitative survey limits (50 x 1 m swathes either side of the transect line, each distinguished as a 'Block'), with divers searching the reef surface (including cracks) carefully for hidden fishes. These observations are recorded concurrently with the macroinvertebrate observations and together make up the 'Method 2' component of the surveys. For this method, typically one 'Block' is completed per 50 m transect for the program ATRC and 2 blocks are completed for RLS' "),
    comment_standardisation = "Only fish (Bony + cartilagenous), only method 2.
-    Abundances of individual observations of different sizes were pooled together by species.",
+Abundances of individual observations of different sizes were pooled together by species.",
    doi = 'https://doi.org/10.1016/j.biocon.2020.108855 | https://doi.org/10.1017/S0376892912000185'
 )]
 
@@ -55,12 +58,12 @@ dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
 data.table::fwrite(
    x = ddata[, !"survey_date"],
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
-   row.names = FALSE
+   row.names = FALSE, sep = ",", encoding = "UTF-8"
 )
 data.table::fwrite(
    x = meta,
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
-   row.names = FALSE
+   row.names = FALSE, sep = ",", encoding = "UTF-8"
 )
 
 
@@ -69,10 +72,14 @@ data.table::fwrite(
 ## standardisation ----
 ### subsetting ----
 ### Subsetting sites samples at least 10 years apart
-ddata <- ddata[ddata[, diff(range(year)) >= 9L, by = local][(V1)][, local], on = 'local']
+ddata <- ddata[
+   ddata[, diff(range(year)) >= 9L, by = local][(V1)][, local],
+   on = 'local']
 
 ### subsetting locations/regions with 4 sites/local scale samples or more.
-ddata <- ddata[ddata[, data.table::uniqueN(local) >= 4L, by = .(regional)][(V1)][, regional], on = 'regional']
+ddata <- ddata[
+   ddata[, data.table::uniqueN(local) >= 4L, by = .(regional)][(V1)][, regional],
+   on = 'regional']
 # subsetting one sample per year from the most sampled months
 month_order <- table(unique(ddata[,.(regional, local, year, month, survey_date)])$month)
 ddata <- ddata[
@@ -89,7 +96,8 @@ ddata <- ddata[
 
 
 ### pooling species ----
-ddata <- ddata[, .(value = sum(value)), by = .(regional, local, year, species)]
+ddata <- ddata[, .(value = sum(value)), by = .(dataset_id, regional, local, year,
+                                               species, metric, unit)]
 
 ## Metadata
 meta[, c("month", "day") := NULL]
@@ -112,16 +120,15 @@ meta[, ":="(
           gamma_sum_grains = sum(alpha_grain)),
    by = .(regional, year)]
 
-
 ## Saving standardised data ----
 data.table::fwrite(
    x = ddata,
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised.csv"),
-   row.names = FALSE
+   row.names = FALSE, sep = ",", encoding = "UTF-8"
 )
 data.table::fwrite(
    x = meta,
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised_metadata.csv"),
-   row.names = FALSE
+   row.names = FALSE, sep = ",", encoding = "UTF-8"
 )
 

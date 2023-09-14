@@ -109,6 +109,11 @@ ddata <- ddata[, .(value = sum(value)), by = .(dataset_id, regional, local, year
 ## removing surveys with no observation ----
 ddata <- ddata[value != 0L]
 
+## Keeping only sites sampled at least twice 10 years apart ----
+ddata <- ddata[
+   !ddata[, diff(range(year)) < 9L, by = local][(V1)],
+   on = 'local']
+
 ## Metadata ----
 meta[, c("month","day") := NULL]
 meta <- unique(meta)
@@ -131,7 +136,8 @@ meta[, ":="(
 Selecting the 7 most frequently sampled months: April to October.
 Keeping sites sampled all 6 months.
 Pooling all 28 samples from a year together.
-removing surveys with no observation."
+removing surveys with no observation.
+removing sites that were not sampled at least twice 10 years apart"
 )][, ":="(
    gamma_bounding_box = geosphere::areaPolygon(data.frame(longitude, latitude)[grDevices::chull(longitude, latitude), ]) / 10^6,
    gamma_sum_grains = sum(alpha_grain)

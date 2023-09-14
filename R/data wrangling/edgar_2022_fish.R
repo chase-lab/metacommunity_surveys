@@ -2,7 +2,7 @@
 dataset_id <- "edgar_2022_fish"
 
 # reading the data ----
-ddata <- base::readRDS(file =  "data/raw data/egar_2022_fish/rdata.rds")
+ddata <- base::readRDS(file =  "data/raw data/edgar_2022_fish/rdata.rds")
 data.table::setnames(x = ddata,
                      old = c("location", "site_code", "total", "species_name"),
                      new = c("regional", "local", "value", "species"))
@@ -22,13 +22,15 @@ ddata[, ':='(
 )]
 
 ### pooling individual observations from the same species ----
-ddata <- ddata[, .(value = sum(value)), by = .(regional, local,
+ddata <- ddata[, .(value = sum(value)), by = .(dataset_id, regional, local,
                                                latitude, longitude,
                                                year, month, day, survey_date,
+                                               metric, unit,
                                                species)]
 
 ## Metadata ----
-meta <- unique(ddata[, .(dataset_id, regional, local, year, month, day, latitude, longitude)])
+meta <- unique(ddata[, .(dataset_id, regional, local, year, month, day,
+                         latitude, longitude)])
 meta[, ":="(
    realm = "Marine",
    taxon = "Fish",
@@ -54,12 +56,12 @@ dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
 data.table::fwrite(
    x = ddata[, !"survey_date"],
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
-   row.names = FALSE
+   row.names = FALSE, sep = ",", encoding = "UTF-8"
 )
 data.table::fwrite(
    x = meta,
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
-   row.names = FALSE
+   row.names = FALSE, sep = ",", encoding = "UTF-8"
 )
 
 
@@ -68,8 +70,8 @@ data.table::fwrite(
 ### subsetting ----
 ### subsetting locations/regions with 4 sites/local scale samples or more.
 ddata <- ddata[
-   ddata[, data.table::uniqueN(local) >= 4L,
-         by = regional][(V1)][, V1 := NULL],
+   !ddata[, data.table::uniqueN(local) < 4L,
+         by = regional][(V1)],
    on = .(regional)
 ]
 
@@ -87,6 +89,12 @@ ddata <- ddata[
    on = .(regional, local, year, survey_date)
 ][, c("month", "day", 'survey_date') := NULL]
 
+
+### Excluding sites that were not sampled at least twice 10 years apart ----
+ddata <- ddata[
+   !ddata[, diff(range(year)), by = .(regional, local)][(V1 < 9L)],
+   on = .(regional, local)
+]
 
 ## Metadata ----
 meta[, c("month", "day") := NULL]
@@ -106,7 +114,8 @@ meta[, ":="(
    gamma_bounding_box_comment = "coordinates provided by the authors",
 
    comment_standardisation = "Only fish (Bony + cartilagenous), only method 1, only regions with at least 4 sites, when there are several samplings a year, only the first sample from the most frequently sampled month.
-    Abundances of individual observations of different sizes were pooled together by species."
+Sites that were not sampled at least twice 10 years apart were excluded.
+Abundances of individual observations of different sizes were pooled together by species."
 )][, ":="(gamma_bounding_box = geosphere::areaPolygon(data.frame(longitude, latitude)[grDevices::chull(longitude, latitude), ]) / 10^6,
           gamma_sum_grains = sum(alpha_grain)),
    by = .(regional, year)]
@@ -115,10 +124,10 @@ meta[, ":="(
 data.table::fwrite(
    x = ddata,
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised.csv"),
-   row.names = FALSE
+   row.names = FALSE, sep = ",", encoding = "UTF-8"
 )
 data.table::fwrite(
    x = meta,
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised_metadata.csv"),
-   row.names = FALSE
+   row.names = FALSE, sep = ",", encoding = "UTF-8"
 )

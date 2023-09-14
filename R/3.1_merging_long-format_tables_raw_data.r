@@ -150,14 +150,18 @@ data.table::setnames(meta_raw, "alpha_grain", "alpha_grain_m2")
 meta_raw[is.na(alpha_grain_m2), unique(dataset_id)]
 
 ## Converting coordinates into a common format with parzer ----
-unique_coordinates_raw <- unique(meta_raw[, .(latitude = as.character(latitude), longitude = as.character(longitude))])
+meta_raw[, ":="(
+   latitude = as.character(latitude),
+   longitude = as.character(longitude)
+)]
+unique_coordinates_raw <- unique(meta_raw[, .(latitude, longitude)])
 unique_coordinates_raw[, ":="(
    lat = parzer::parse_lat(latitude),
    lon = parzer::parse_lon(longitude)
 )]
 unique_coordinates_raw[is.na(lat) | is.na(lon)]
 # data.table join with update by reference
-meta_raw[, c("latitude", "longitude") := NA_real_][
+meta_raw[
    unique_coordinates_raw,
    on = .(latitude, longitude),
    ":="(latitude = i.lat, longitude = i.lon)]
@@ -255,15 +259,15 @@ data.table::setcolorder(dt_raw, c("dataset_id", "regional", "local", "year", "sp
 
 data.table::fwrite(dt_raw, "data/communities_raw.csv", row.names = FALSE) # for iDiv data portal: add , na = "NA"
 
-if (file.exists("data/references/homogenisation_dropbox_folder_path.rds")) {
-   path_to_homogenisation_dropbox_folder <- base::readRDS(file = "data/references/homogenisation_dropbox_folder_path.rds")
-   data.table::fwrite(dt_raw, paste0(path_to_homogenisation_dropbox_folder, "/metacommunity-survey-raw-communities.csv"), row.names = FALSE)
-}
+# if (file.exists("data/references/homogenisation_dropbox_folder_path.rds")) {
+#    path_to_homogenisation_dropbox_folder <- base::readRDS(file = "data/references/homogenisation_dropbox_folder_path.rds")
+#    data.table::fwrite(dt_raw, paste0(path_to_homogenisation_dropbox_folder, "/metacommunity-survey-raw-communities.csv"), row.names = FALSE)
+# }
 
 
 ## Saving meta ----
 data.table::fwrite(meta_raw, "data/metadata_raw.csv", sep = ",", row.names = FALSE)  # for iDiv data portal: add , na = "NA"
-if (file.exists("data/references/homogenisation_dropbox_folder_path.rds")) {
-   data.table::fwrite(meta_raw, paste0(path_to_homogenisation_dropbox_folder, "/metacommunity-survey-metadata-raw.csv"), sep = ",", row.names = FALSE)
-}
+# if (file.exists("data/references/homogenisation_dropbox_folder_path.rds")) {
+#    data.table::fwrite(meta_raw, paste0(path_to_homogenisation_dropbox_folder, "/metacommunity-survey-metadata-raw.csv"), sep = ",", row.names = FALSE)
+# }
 

@@ -96,7 +96,6 @@ data.table::fwrite(
 
 # Standardised data ----
 ## community data standardisation ----
-
 ### When a site is sampled several times a year, selecting the 4 most frequently sampled months from the 6 most sampled months ----
 month_order <- ddata[, data.table::uniqueN(date), by = .(regional, local, year, month)][, sum(V1), by = month][order(-V1)][1L:6L, month]
 ddata[, month_order := (1L:6L)[match(month, month_order, nomatch = NULL)]]
@@ -104,11 +103,11 @@ data.table::setkey(ddata, month_order)
 
 ddata <- ddata[!base::is.na(month_order)]
 ddata[, nmonths := data.table::uniqueN(month), by = .(regional, local, year)]
-ddata <- ddata[nmonths >= 4L][, nmonths := NULL]
+ddata <- ddata[nmonths >= 3L][, nmonths := NULL]
 
 ddata <- ddata[
    unique(ddata[,
-                .(regional, local, year, month)])[, .SD[1L:4L],
+                .(regional, local, year, month)])[, .SD[1L:3L],
                                                   by = .(regional, local, year)],
    on = .(regional, local, year, month)
 ][, month_order := NULL]
@@ -122,6 +121,12 @@ ddata <- ddata[
 
 ## Pooling all samples from a year together ----
 ddata <- ddata[, .(value = sum(value)), by = .(dataset_id, regional, local, year, species, metric, unit)]
+
+## Excluding sites that were not sampled at least twice 10 years apart ----
+ddata <- ddata[
+   !ddata[, diff(range(year)), by = .(regional, local)][(V1 < 9L)],
+   on = .(regional, local)
+]
 
 ## metadata ----
 meta[, c("month","day") := NULL]
@@ -143,9 +148,10 @@ meta[, ":="(
    gamma_bounding_box_comment = "coordinates provided by the authors",
 
    comment_standardisation = 'Samples with duplicate observations removed.
-When a site is sampled several times a year, selecting the 4 most frequently sampled months from the 6 most sampled months ie selecting sites from summer and spring.
+When a site is sampled several times a year, selecting the 3 most frequently sampled months from the 6 most sampled months ie selecting sites from summer and spring.
 When a site is sampled several times a month, selecting the first visit.
-Pooling all 4 samples from a year together.'
+Pooling all 3 samples from a year together.
+Excluding sites that were not sampled at least twice 10 years apart.'
 )][, ":="(
    gamma_bounding_box = geosphere::areaPolygon(data.frame(longitude, latitude)[grDevices::chull(longitude, latitude), ]) / 10^6,
    gamma_sum_grains = sum(alpha_grain)

@@ -72,7 +72,7 @@ data.table::fwrite(
 # Standardised data ----
 ## Standardisation ----
 ddata <- ddata[
-   ddata[, diff(range(year)) >= 9L, by = .(regional, plot, local)][(V1)][, V1 := NULL],
+   !ddata[, diff(range(year)) < 9L, by = .(regional, plot, local)][(V1)],
    on = .(regional, plot, local)]
 ddata[, plot := NULL]
 

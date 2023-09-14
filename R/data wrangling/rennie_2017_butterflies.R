@@ -65,13 +65,13 @@ meta[, ":="(
 
    comment = "Data were downloaded from https://doi.org/10.5285/5aeda581-b4f2-4e51-b1a6-890b6b3403a3. Authors assessed butterfly communities along fixed transects. Each 1-2km long transect was split in up to 15 fixed sections based on habitats. Local scale is a section and it's name is built as LCODE_SECTION, LCODE being the code of a transect. Site coordinates were extracted from IB_DATA_STRUCTURE.rtf found in the Supporting documentation.",
    comment_standardisation = "none needed",
-doi = 'https://doi.org/10.5285/5aeda581-b4f2-4e51-b1a6-890b6b3403a3'
+   doi = 'https://doi.org/10.5285/5aeda581-b4f2-4e51-b1a6-890b6b3403a3'
 )]
 
 ## Saving raw data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
 data.table::fwrite(
-   x = ddata[value != 0L],
+   x = ddata[value != 0L, !"date"],
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
    row.names = FALSE
 )
@@ -85,7 +85,7 @@ data.table::fwrite(
 
 ## Standardisation ----
 ### When a section is sampled 2+ a month, selecting the first 2 visits ----
-ddata[, ndates := length(unique(date)), by = .(regional, year, local, month)]
+ddata[, ndates := data.table::uniqueN(date), by = .(regional, year, local, month)]
 
 data.table::setkeyv(ddata, c('regional', 'year', 'local', 'month', 'date'))
 ddata <- ddata[
@@ -107,6 +107,12 @@ ddata <- ddata[, .(value = sum(value)), by = .(dataset_id, regional, local, year
 ### removing surveys with no observation ----
 ddata <- ddata[value != 0L]
 
+## Selecting sites/regions sampled at least 10 years apart ----
+ddata <- ddata[
+   !ddata[, diff(range(year)), by = .(regional, local)][(V1 < 9L)],
+   on = .(regional, local)
+]
+
 ## Metadata ----
 meta[, c("month","day") := NULL]
 meta <- unique(meta)
@@ -125,7 +131,8 @@ meta[, ":="(
 When a site is sampled several times a year, selecting the 6 most frequently sampled months: April to September.
 Keeping sites sampled all 6 months.
 Pooling all 12 samples from a year together.
-removing surveys with no observation."
+removing surveys with no observation.
+removing surveys that were not sampled at least twice 10 years apart."
 )][, gamma_sum_grains := sum(alpha_grain), by = .(regional, year)]
 
 ## Saving standardised data ----

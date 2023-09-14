@@ -173,14 +173,18 @@ meta_standardised[is.na(alpha_grain_m2), unique(dataset_id)]
 meta_standardised[is.na(gamma_sum_grains_km2) & is.na(gamma_bounding_box_km2), unique(dataset_id)]
 
 ## Converting coordinates into a common format with parzer ----
-unique_coordinates_standardised <- unique(meta_standardised[, .(latitude = as.character(latitude), longitude = as.character(longitude))])
+meta_standardised[, ":="(
+   latitude = as.character(latitude),
+   longitude = as.character(longitude)
+)]
+unique_coordinates_standardised <- unique(meta_standardised[, .(latitude, longitude)])
 unique_coordinates_standardised[, ":="(
    lat = parzer::parse_lat(latitude),
    lon = parzer::parse_lon(longitude)
 )]
 unique_coordinates_standardised[is.na(lat) | is.na(lon)]
 # data.table join with update by reference
-meta_standardised[, c("latitude", "longitude") := NA_real_][
+meta_standardised[
    unique_coordinates_standardised,
    on = .(latitude, longitude),
    ":="(latitude = i.lat, longitude = i.lon)]
@@ -206,7 +210,7 @@ for (i in seq_along(lst_metadata_standardised)) if (any(!unlist(unique(apply(lst
 
 
 ### checking year range length among regions ----
-if (any(meta_standardised[, .(diff(range(year)) < 9L), by = .(dataset_id, regional, local)]))
+if (any(meta_standardised[, diff(range(year)) < 9L, by = .(dataset_id, regional, local)]$V1))
    warning(
       paste(
          "Time periods shorter than 10 years in: ",
@@ -280,13 +284,13 @@ data.table::setcolorder(dt_standardised, c("dataset_id", "regional", "local", "y
 
 data.table::fwrite(dt_standardised, "data/communities_standardised.csv", row.names = FALSE) # for iDiv data portal: add , na = "NA"
 
-if (file.exists("data/references/homogenisation_dropbox_folder_path.rds")) {
-   path_to_homogenisation_dropbox_folder <- base::readRDS(file = "data/references/homogenisation_dropbox_folder_path.rds")
-   data.table::fwrite(dt_standardised, paste0(path_to_homogenisation_dropbox_folder, "/metacommunity-survey-raw-communities.csv"), row.names = FALSE)
-}
+# if (file.exists("data/references/homogenisation_dropbox_folder_path.rds")) {
+#    path_to_homogenisation_dropbox_folder <- base::readRDS(file = "data/references/homogenisation_dropbox_folder_path.rds")
+#    data.table::fwrite(dt_standardised, paste0(path_to_homogenisation_dropbox_folder, "/metacommunity-survey-raw-communities.csv"), row.names = FALSE)
+# }
 
 
 ## Saving meta ----
 data.table::fwrite(meta_standardised, "data/metadata_standardised.csv", sep = ",", row.names = FALSE) # for iDiv data portal: add , na = "NA"
-if (file.exists("data/references/homogenisation_dropbox_folder_path.rds"))
-   data.table::fwrite(meta_standardised, paste0(path_to_homogenisation_dropbox_folder, "/metacommunity-survey-metadata-raw.csv"), sep = ",", row.names = FALSE)
+# if (file.exists("data/references/homogenisation_dropbox_folder_path.rds"))
+#    data.table::fwrite(meta_standardised, paste0(path_to_homogenisation_dropbox_folder, "/metacommunity-survey-metadata-raw.csv"), sep = ",", row.names = FALSE)

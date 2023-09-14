@@ -13,6 +13,8 @@ data/metadata.csv
 data/metadata_raw.csv
 data/metadata_standardised.csv
 
+data/communities_09_07_2023.csv
+data/metadata_09_07_2023.csv
 
 data/wrangled data/**
 data/cache/**

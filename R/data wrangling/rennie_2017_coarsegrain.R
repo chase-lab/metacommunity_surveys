@@ -76,9 +76,14 @@ data.table::fwrite(
    row.names = FALSE
 )
 
+# Standardised data ----
+## Keeping only sites sampled at least twice 10 years apart ----
+ddata <- ddata[
+   !ddata[, diff(range(year)) < 9L, by = local][(V1)],
+   on = 'local']
+
+
 ## Metadata ----
-meta[, c("month","day") := NULL]
-meta <- unique(meta)
 meta <- meta[
    unique(ddata[, .(regional, local, year)]),
    on = .(regional, local, year)]
@@ -94,7 +99,7 @@ meta[, ":="(
    gamma_bounding_box_type = "ecosystem",
    gamma_bounding_box_comment = "sum of the area of the plot of a site on a given year",
 
-   comment_standardisation = "Records for `Litter` were removed. Cells/local samples that were not sampled at least 10 years appart were removed.",
+   comment_standardisation = "Records for `Litter` were removed. Cells/local samples that were not sampled at least 10 years appart were removed."
 )][, ":="(
    gamma_sum_grains = sum(alpha_grain),
    gamma_bounding_box = data.table::uniqueN(plot) * 2L * 2L),

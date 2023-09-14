@@ -70,7 +70,7 @@ meta[, ":="(
 ## Saving raw data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
 data.table::fwrite(
-   x = ddata[value != 0L],
+   x = ddata[value != 0L, !"date"],
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
    row.names = FALSE
 )
@@ -82,9 +82,6 @@ data.table::fwrite(
 
 # Standardised data ----
 # Standardisation ----
-## Selecting sites/regions sampled at least 10 years apart ----
-ddata <- ddata[ddata[, diff(range(year)), by = .(regional, local)][V1 >= 9L][, V1 := NULL],
-               on = .(regional, local)]
 
 ## Selecting the first visit per month ----
 ddata[, ndates := length(unique(date)), by = .(regional, year, local, month)]
@@ -112,6 +109,11 @@ ddata <- ddata[, .(value = sum(value)), by = .(dataset_id, regional, local, year
 ## removing surveys with no observation ----
 ddata <- ddata[value != 0L]
 
+## Selecting sites/regions sampled at least 10 years apart ----
+ddata <- ddata[
+   !ddata[, diff(range(year)), by = .(regional, local)][(V1 < 9L)],
+   on = .(regional, local)
+]
 
 ## Metadata ----
 meta[, c("month","day") := NULL]
@@ -135,7 +137,8 @@ meta[, ":="(
    comment_standardisation = "Selecting the first visit per month
 When a site is sampled several times a year, selecting the 3 most frequently sampled months from the 4 sampled months.
 Pooling all 3 samples from a year together.
-removing surveys with no observation."
+removing surveys with no observation.
+removing surveys that were not sampled at least twice 10 years apart."
 )][, gamma_sum_grains := sum(alpha_grain), by = year]
 
 ## Saving standardised data ----

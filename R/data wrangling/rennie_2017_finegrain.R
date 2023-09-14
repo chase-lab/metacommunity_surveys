@@ -74,7 +74,7 @@ data.table::fwrite(
 ## Standardisation ----
 ddata <- ddata[species != 'Litter']
 ddata <- ddata[
-   ddata[, diff(range(year)) >= 9L, by = .(regional, local)][(V1)][, V1 := NULL],
+   !ddata[, diff(range(year)) < 9L, by = .(regional, local)][(V1)],
    on = .(regional, local)]
 
 ## Metadata ----

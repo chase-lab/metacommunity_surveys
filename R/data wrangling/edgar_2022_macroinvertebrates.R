@@ -1,7 +1,7 @@
 # edgar_2022_macroinvertebrates ----
 dataset_id <- "edgar_2022_macroinvertebrates"
 # reading the data ----
-ddata <- base::readRDS("data/raw data/egar_2022_macroinvertebrates/rdata.rds")
+ddata <- base::readRDS("data/raw data/edgar_2022_macroinvertebrates/rdata.rds")
 
 # Raw data ----
 ## Communities ----
@@ -15,7 +15,10 @@ ddata[, ":="(
 )]
 
 #### pooling individual observations from the same species ----
-ddata <- ddata[, .(value = sum(total)), by = .(regional = location, local, year, month, day, latitude, longitude, species = species_name)]
+ddata <- ddata[, .(value = sum(total)), by = .(regional = location, local,
+                                               year, month, day,
+                                               latitude, longitude,
+                                               species = species_name)]
 
 ddata[, ':='(
    dataset_id = dataset_id,
@@ -26,7 +29,8 @@ ddata[, ':='(
 
 
 ## Metadata ----
-meta <- unique(ddata[, .(dataset_id, regional, local, year, month, day, latitude, longitude)])
+meta <- unique(ddata[, .(dataset_id, regional, local, year, month, day,
+                         latitude, longitude)])
 meta[, ":="(
    realm = "Marine",
    taxon = "Invertebrates",
@@ -52,21 +56,23 @@ dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
 data.table::fwrite(
    x = ddata,
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
-   row.names = FALSE
+   row.names = FALSE, sep = ",", encoding = "UTF-8"
 )
 data.table::fwrite(
    x = meta,
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
-   row.names = FALSE
+   row.names = FALSE, sep = ",", encoding = "UTF-8"
 )
 
 # standardised data ----
 ## Community data ----
-#### Subsetting sites samples at least 10 years appart
-ddata <- ddata[ddata[, diff(range(year)) >= 9L, by = local][(V1)][, local], on = 'local']
-### subsetting locations/regions with 4 sites/local scale samples or more.
+#### Subsetting sites samples at least 10 years apart
 ddata <- ddata[
-   ddata[, data.table::uniqueN(local) >= 4L, by = .(regional)][(V1)][, regional],
+   !ddata[, diff(range(year)) < 9L, by = local][(V1)],
+   on = 'local']
+### excluding locations/regions with less than 4 sites/local scale samples.
+ddata <- ddata[
+   !ddata[, data.table::uniqueN(local) < 4L, by = .(regional)][(V1)],
    on = 'regional']
 
 
@@ -88,7 +94,7 @@ meta[, ":="(
    gamma_bounding_box_comment = "coordinates provided by the authors",
 
    comment_standardisation = "Abundances of individual observations of different sizes were pooled together by species.
-   Only regions with at least 4 sites sampled at least 10 years appart."
+Only regions with at least 4 sites sampled at least 10 years appart."
 )][, ":="(gamma_bounding_box = geosphere::areaPolygon(data.frame(longitude, latitude)[grDevices::chull(longitude, latitude), ]) / 10^6,
           gamma_sum_grains = sum(alpha_grain)),
    by = .(regional, year)]
@@ -97,10 +103,10 @@ meta[, ":="(
 data.table::fwrite(
    x = ddata,
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised.csv"),
-   row.names = FALSE
+   row.names = FALSE, sep = ",", encoding = "UTF-8"
 )
 data.table::fwrite(
    x = meta,
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised_metadata.csv"),
-   row.names = FALSE
+   row.names = FALSE, sep = ",", encoding = "UTF-8"
 )
