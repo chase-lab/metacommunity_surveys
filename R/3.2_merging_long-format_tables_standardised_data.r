@@ -137,34 +137,37 @@ if (any(!na.omit(unique(meta_standardised$gamma_sum_grains_unit)) %in% c("acres"
 if (any(!na.omit(unique(meta_standardised$gamma_bounding_box_unit)) %in% c("acres", "ha", "km2", "m2", "mile2"))) warning("Non standard unit in gamma_bounding_box")
 
 ### converting areas ----
-meta_standardised[, alpha_grain := as.numeric(alpha_grain)][,
-                                                            alpha_grain := data.table::fcase(
-                                                               alpha_grain_unit == "m2", alpha_grain,
-                                                               alpha_grain_unit == "cm2", alpha_grain / 10^4,
-                                                               alpha_grain_unit == "ha", alpha_grain * 10^4,
-                                                               alpha_grain_unit == "km2", alpha_grain * 10,
-                                                               alpha_grain_unit == "acres", alpha_grain * 4046.856422
-                                                            )
+meta_standardised[, alpha_grain := as.numeric(alpha_grain)
+][,
+  alpha_grain := data.table::fcase(
+     alpha_grain_unit == "m2", alpha_grain,
+     alpha_grain_unit == "cm2", alpha_grain / 10^4,
+     alpha_grain_unit == "ha", alpha_grain * 10^4,
+     alpha_grain_unit == "km2", alpha_grain * 10,
+     alpha_grain_unit == "acres", alpha_grain * 4046.856422
+  )
 ][, alpha_grain_unit := NULL]
 
-meta_standardised[, gamma_sum_grains := as.numeric(gamma_sum_grains)][,
-                                                                      gamma_sum_grains := data.table::fcase(
-                                                                         gamma_sum_grains_unit == "km2", gamma_sum_grains,
-                                                                         gamma_sum_grains_unit == "m2", gamma_sum_grains / 10^6,
-                                                                         gamma_sum_grains_unit == "ha", gamma_sum_grains / 100,
-                                                                         gamma_sum_grains_unit == "cm2", gamma_sum_grains / 10^10,
-                                                                         gamma_sum_grains_unit == "acres", gamma_sum_grains * 0.004046856422
-                                                                      )
+meta_standardised[, gamma_sum_grains := as.numeric(gamma_sum_grains)
+][,
+  gamma_sum_grains := data.table::fcase(
+     gamma_sum_grains_unit == "km2", gamma_sum_grains,
+     gamma_sum_grains_unit == "m2", gamma_sum_grains / 10^6,
+     gamma_sum_grains_unit == "ha", gamma_sum_grains / 100,
+     gamma_sum_grains_unit == "cm2", gamma_sum_grains / 10^10,
+     gamma_sum_grains_unit == "acres", gamma_sum_grains * 0.004046856422
+  )
 ][, gamma_sum_grains_unit := NULL]
 
-meta_standardised[, gamma_bounding_box := as.numeric(gamma_bounding_box)][,
-                                                                          gamma_bounding_box := data.table::fcase(
-                                                                             gamma_bounding_box_unit == "km2", gamma_bounding_box,
-                                                                             gamma_bounding_box_unit == "m2", gamma_bounding_box / 1000000,
-                                                                             gamma_bounding_box_unit == "ha", gamma_bounding_box / 100,
-                                                                             gamma_bounding_box_unit == "acres", gamma_bounding_box * 0.004046856422,
-                                                                             gamma_bounding_box_unit == "mile2", gamma_bounding_box * 2.589988
-                                                                          )
+meta_standardised[, gamma_bounding_box := as.numeric(gamma_bounding_box)
+][,
+  gamma_bounding_box := data.table::fcase(
+     gamma_bounding_box_unit == "km2", gamma_bounding_box,
+     gamma_bounding_box_unit == "m2", gamma_bounding_box / 1000000,
+     gamma_bounding_box_unit == "ha", gamma_bounding_box / 100,
+     gamma_bounding_box_unit == "acres", gamma_bounding_box * 0.004046856422,
+     gamma_bounding_box_unit == "mile2", gamma_bounding_box * 2.589988
+  )
 ][, gamma_bounding_box_unit := NULL]
 
 data.table::setnames(meta_standardised, c("alpha_grain", "gamma_bounding_box", "gamma_sum_grains"), c("alpha_grain_m2", "gamma_bounding_box_km2", "gamma_sum_grains_km2"))
