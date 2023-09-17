@@ -89,22 +89,34 @@ testthat::test_that(desc = "no duplicates - community data - standardised data",
 ## Meta data ----
 testthat::test_that(desc = "no duplicates - metadata data - raw data", code = {
    for (i in listfiles_metadata_raw) {
+      col_names <- data.table::fread(file = i, sep = ",", dec = ".",
+                                     header = FALSE, nrows = 1L)
       testthat::expect_true(
-         anyDuplicated(data.table::fread(
+         if (all(c("month", "day") %in% col_names)) {
+            data.table::fread(
+               file = i, sep = ",", dec = ".", header = TRUE, stringsAsFactors = TRUE
+            )[, .N, by = .(regional, local, year, month, day)][, all(N == 1L)]
+
+         } else if ("month" %in% col_names) {
+            data.table::fread(
+               file = i, sep = ",", dec = ".", header = TRUE, stringsAsFactors = TRUE
+            )[, .N, by = .(regional, local, year, month)][, all(N == 1L)]
+
+         } else { data.table::fread(
             file = i, sep = ",", dec = ".", header = TRUE, stringsAsFactors = TRUE
-         )) == 0L,
+         )[, .N, by = .(regional, local, year)][, all(N == 1L)]
+         },
          info = i
       )
    }
 })
 
-
 testthat::test_that(desc = "no duplicates - metadata data - standardised data", code = {
    for (i in listfiles_metadata_standardised) {
       testthat::expect_true(
-         anyDuplicated(data.table::fread(
+         data.table::fread(
             file = i, sep = ",", dec = ".", header = TRUE, stringsAsFactors = TRUE
-         )) == 0L,
+         )[, .N, by = .(regional, local, year)][, all(N == 1L)],
          info = i
       )
    }

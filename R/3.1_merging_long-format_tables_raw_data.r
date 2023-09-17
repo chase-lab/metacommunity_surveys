@@ -54,8 +54,8 @@ dt_raw[, .(nsites = data.table::uniqueN(.SD)), .SDcols = c('regional', 'local'),
 
 ## Ordering ----
 # data.table::setcolorder(dt, intersect(column_names_template, colnames(dt)))
-data.table::setorder(dt_raw, dataset_id, regional, local,
-   year, month, day, species)
+data.table::setkey(dt_raw, dataset_id, regional, local,
+                   year, month, day, species)
 
 ## Deleting special characters in regional and local ----
 # dt[, ":="(
@@ -184,7 +184,7 @@ if (any(meta_raw[, data.table::uniqueN(taxon), by = dataset_id]$V1 != 1L))
    warning(paste0("several taxa values in ", paste(
       meta_raw[, data.table::uniqueN(taxon), by = dataset_id][V1 != 1L, dataset_id],
       collapse = ", "))
-      )
+   )
 if (any(!unique(meta_raw$taxon) %in% c("Fish", "Invertebrates", "Plants", "Birds", "Mammals", "Herpetofauna", "Marine plants")))
    warning(paste0("Non standard taxon category in ", paste(
       unique(meta_raw[!taxon %in% c("Fish", "Invertebrates", "Plants", "Birds", "Mammals", "Herpetofauna", "Marine plants"),
@@ -194,14 +194,14 @@ if (any(!unique(meta_raw$taxon) %in% c("Fish", "Invertebrates", "Plants", "Birds
 ### checking encoding ----
 for (i in seq_along(lst_metadata_raw))
    if (any(!unlist(unique(apply(lst_metadata_raw[[i]][, c("local", "regional", "comment")], 2L, Encoding))) %in% c("UTF-8", "unknown")))
-   warning(paste0("Encoding issue in ", listfiles_metadata_raw[i]))
+      warning(paste0("Encoding issue in ", listfiles_metadata_raw[i]))
 
 ### checking year values ----
 if (!all(data.table::between(x = meta_raw$year, lower = 1500, upper = 2023)))
    warning(paste("Invalid year values in:",
                  meta_raw[!data.table::between(x = meta_raw$year, lower = 1500, upper = 2023), unique(dataset_id)],
                  collapse = ", ")
-)
+   )
 
 ### checking year range homogeneity among regions ----
 if (any(meta_raw[, data.table::uniqueN(paste(range(year), collapse = "-")),
@@ -235,7 +235,9 @@ if (anyNA(meta_raw$comment_standardisation)) warning("Missing comment_standardis
 ## Checking that there is only one alpha_grain value per dataset_id ----
 if (any(meta_raw[, any(data.table::uniqueN(alpha_grain_m2) != 1L), by = .(dataset_id, regional)]$V1)) warning(paste(
    "Inconsistent grain in",
-   meta_raw[, data.table::uniqueN(alpha_grain_m2) != 1L, by = .(dataset_id, regional)][, unique(dataset_id)]
+   paste(
+      meta_raw[, data.table::uniqueN(alpha_grain_m2) != 1L, by = .(dataset_id, regional)][, unique(dataset_id)],
+      collapse = ", ")
 ))
 
 ### checking alpha_grain_type ----
@@ -243,13 +245,16 @@ if (any(meta_raw[, any(data.table::uniqueN(alpha_grain_m2) != 1L), by = .(datase
 if (any(!unique(meta_raw$alpha_grain_type) %in% c("island", "plot", "sample", "lake_pond", "trap", "transect", "functional", "box", "quadrat","listening_point"))) warning(paste("Invalid alpha_grain_type value in", paste(unique(meta_raw[!alpha_grain_type %in% c("island", "plot", "sample", "lake_pond", "trap", "transect", "functional", "box", "quadrat","listening_point"), dataset_id]), collapse = ", ")))
 
 ## Ordering metadata ----
-data.table::setorder(meta_raw, dataset_id, regional, local, year)
+data.table::setorder(meta_raw, dataset_id, regional, local, year, month, day)
 data.table::setcolorder(meta_raw, base::intersect(column_names_template_metadata_raw, colnames(meta_raw)))
 
 
 
 ## Checking that all data sets have both community and metadata data ----
 if (length(base::setdiff(unique(dt_raw$dataset_id), unique(meta_raw$dataset_id))) > 0L) warning("Incomplete community or metadata tables")
+if (any(meta_raw[, .N, by = .(dataset_id, regional, local, year)][, N != 1L])) warning(
+   paste("Several values per local year in metadata of data sets:",
+         paste(meta_raw[, .N, by = .(dataset_id, regional, local, year)][N != 1L][, unique(dataset_id)], collapse = ", ")))
 if (nrow(meta_raw) != nrow(unique(meta_raw[, .(dataset_id, regional, local, year, month, day)]))) warning("Redundant rows in meta")
 if (nrow(meta_raw) != nrow(unique(dt_raw[, .(dataset_id, regional, local, year, month, day)]))) warning("Discrepancies between dt and meta")
 
@@ -270,4 +275,3 @@ data.table::fwrite(meta_raw, "data/metadata_raw.csv", sep = ",", row.names = FAL
 # if (file.exists("data/references/homogenisation_dropbox_folder_path.rds")) {
 #    data.table::fwrite(meta_raw, paste0(path_to_homogenisation_dropbox_folder, "/metacommunity-survey-metadata-raw.csv"), sep = ",", row.names = FALSE)
 # }
-
