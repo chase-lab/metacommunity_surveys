@@ -27,7 +27,6 @@ ddata[, ":="(
 
 meta <- unique(ddata[, .(dataset_id, regional, local, year)])
 meta[, ":="(
-
    realm = "Marine",
    taxon = "Fish",
 
@@ -39,8 +38,6 @@ meta[, ":="(
    study_type = "resurvey",
 
    data_pooled_by_authors = FALSE,
-   data_pooled_by_authors_comment = NA,
-   sampling_years = NA,
 
    alpha_grain = 100L,
    alpha_grain_unit = "m2",
