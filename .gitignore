@@ -27,6 +27,7 @@ data/requests to taxonomy databases/**
 !data/requests to taxonomy databases/manual_community_species_filled_20221003.csv
 data/references/homogenisation_dropbox_folder_path.rds
 
+to-do.md
 !README.md
 !rulebook.md
 to-do.md
@@ -95,5 +96,3 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,windows
-.Rproj.user
-
