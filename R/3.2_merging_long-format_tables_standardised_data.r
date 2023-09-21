@@ -298,5 +298,5 @@ data.table::fwrite(dt_standardised, "data/communities_standardised.csv", sep = "
 ## Saving meta ----
 data.table::fwrite(meta_standardised, "data/metadata_standardised.csv", sep = ",", row.names = FALSE) # for iDiv data portal: add , na = "NA"
 # if (file.exists("data/references/homogenisation_dropbox_folder_path.rds")) {
-#    data.table::fwrite(meta_standardised, paste0(path_to_homogenisation_dropbox_folder, "/metacommunity-survey_metadata-standardised"), sep = ",", row.names = FALSE)
+#    data.table::fwrite(meta_standardised, paste0(path_to_homogenisation_dropbox_folder, "/metacommunity-survey_metadata-standardised.csv"), sep = ",", row.names = FALSE)
 # }

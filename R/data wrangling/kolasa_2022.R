@@ -28,8 +28,6 @@ meta[, ':='(
    taxon = "Invertebrates",
    realm = "Marine",
 
-   effort = 1L,
-
    longitude = mean(-77.415652, -77.415198),
    latitude = mean(18.469648, 18.468932),
 
@@ -42,7 +40,7 @@ meta[, ':='(
    alpha_grain_comment = "mean area of the pools, mean diameter given by the authors",
 
    comment = 'Data extracted from:  Schenk, Siobhan, Lavender, Thomas Michael, and Kolasa, Jurek. 2023. "Long-Term Supratidal Rockpool Invertebrate Community, Discovery Bay, Jamaica." Ecology e4013. https://doi.org/10.1002/ecy.4013 . METHOD: "A sample of rockpool invertebrates is a collection of individuals of all species extracted from 500 mL of homogenized rockpool contents" Macro- and microinvertebrates were then counted in the lab.',
-   comment_standardisation = 'Redundant rows were deleted.',
+   comment_standardisation = 'None needed',
    doi = 'https://doi.org/10.1002/ecy.4013 | https://doi.org/10.5683/SP3/FNAU9L | https://esajournals.onlinelibrary.wiley.com/doi/full/10.1002/ecs2.3078'
 )]
 
@@ -63,7 +61,7 @@ data.table::fwrite(
 # Standardised data ----
 ## Selecting data ----
 ddata <- ddata[
-   ddata[month != 6L][, .(keep = length(unique(month)) == 1L, month = unique(month)), by = .(local, year)][(keep) | month == 1L][, keep := NULL],
+   ddata[month != 6L][, .(keep = data.table::uniqueN(month) == 1L, month = unique(month)), by = .(local, year)][(keep) | month == 1L][, keep := NULL],
    on = .(year, month, local)
 ][, month := NULL]
 
@@ -72,7 +70,6 @@ meta <- meta[unique(ddata[, .(local, year)]),
              on = .(local, year)]
 
 meta[, ":="(
-
    effort = 1L,
 
    gamma_sum_grains_unit = "cm2",
@@ -84,7 +81,9 @@ meta[, ":="(
    gamma_bounding_box_type = "box",
    gamma_bounding_box_comment = "box encompassing all pools, given by the authors",
 
-   comment_standardisation = 'Redundant rows were deleted. June samples were excluded. When a pool was sampled twice during a year (January and December), only January was kept.',
+   comment_standardisation = 'Redundant rows were deleted.
+   June samples were excluded.
+   When a pool was sampled twice during a year (January and December), only January was kept.',
    month = NULL
 )][, gamma_sum_grains := sum(alpha_grain), by = year]
 
