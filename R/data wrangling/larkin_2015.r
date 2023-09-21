@@ -1,14 +1,15 @@
 dataset_id <- "larkin_2015"
 
-ddata <- base::readRDS(file = "./data/raw data/larkin_2015/ddata.rds")
+ddata <- base::readRDS(file = "data/raw data/larkin_2015/ddata.rds")
 
 #Raw Data ----
 data.table::setnames(
-  ddata, c("Year", "Site", "Plot"),
-  c("year", "local", "block")
+   ddata,
+   old = c("Year", "Site", "Plot"),
+   new = c("year", "local", "block")
 )
 
-taxonomy <- base::readRDS(file = "./data/raw data/larkin_2015/taxonomy.rds")
+taxonomy <- base::readRDS(file = "data/raw data/larkin_2015/taxonomy.rds")
 
 
 ## pooling ----
@@ -22,49 +23,53 @@ ddata <- data.table::melt(ddata,
 
 ## community data ----
 ddata[, ":="(
-  dataset_id = dataset_id,
-  regional = "Illinois",
-  
-  metric = "abundance",
-  unit = "count"
+   dataset_id = dataset_id,
+   regional = "Illinois",
+
+   metric = "abundance",
+   unit = "count"
 )]
 
 ## meta data ----
 meta <- unique(ddata[, .(dataset_id, regional, local, year)])
 meta[, ":="(
-  
-  realm = "Terrestrial",
-  taxon = "Plants",
-  
-  latitude = 41.5,
-  longitude = -88.5,
-  
-  study_type = "resurvey",
-  
-  data_pooled_by_authors = FALSE,
-  
-  alpha_grain = 4.75,
-  alpha_grain_unit = "m2",
-  alpha_grain_type = "plot",
-  alpha_grain_comment = "19 0.25m2 circular quadrats per site",
-  
-  comment = "Extracted from Larkin et al 2015 Dryad repo (https://datadryad.org/stash/dataset/doi:10.5061/dryad.763v6). Resurvey of plant communities of 41 sites in Illinois originally sampled in 1976 and resampled in 2001. Coordinates of the centre of North East Illinois.",
-  comment_standardisation = "Original sampling was standardised: 20 to 30 0.25m2 circular quadrats along a transect, per site BUT We keep only the first 19 plots of each site (19 is the minimal number of plots across sites). Then we pooled together species detected in the 19 quadrats of a site in a given year.",
-  doi = 'https://doi.org/10.5061/dryad.763v6 | https://doi.org/10.1111/1365-2664.12516'
+
+   realm = "Terrestrial",
+   taxon = "Plants",
+
+   latitude = 41.5,
+   longitude = -88.5,
+
+   study_type = "resurvey",
+
+   data_pooled_by_authors = FALSE,
+
+   alpha_grain = 4.75,
+   alpha_grain_unit = "m2",
+   alpha_grain_type = "plot",
+   alpha_grain_comment = "19 0.25m2 circular quadrats per site",
+
+   comment = "Extracted from Larkin et al 2015 Dryad repo (https://datadryad.org/stash/dataset/doi:10.5061/dryad.763v6). Resurvey of plant communities of 41 sites in Illinois originally sampled in 1976 and resampled in 2001. Coordinates of the centre of North East Illinois.",
+   comment_standardisation = "Original sampling was standardised: 20 to 30 0.25m2 circular quadrats along a transect, per site BUT We keep only the first 19 plots of each site (19 is the minimal number of plots across sites). Then we pooled together species detected in the 19 quadrats of a site in a given year.",
+   doi = 'https://doi.org/10.5061/dryad.763v6 | https://doi.org/10.1111/1365-2664.12516'
 )]
 
 #save data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   x = ddata,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
+   row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   x = meta,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
+   row.names = FALSE
 )
 
-#Standardized Data ----
+# standardised Data ----
 
-##subsetting: We keep only the first 19 plots of each site (19 is the minimal number of plots across sites). ----
+## subsetting: We keep only the first 19 plots of each site (19 is the minimal number of plots across sites). ----
 ddata <- ddata[, .SD[1:19], by = .(year, local)]
 
 ##transformation to pa data ----
@@ -78,40 +83,39 @@ ddata[species == "astsp1", species := "Aster sp.1"]
 ddata[species == "astsp2", species := "Aster sp.2"]
 ddata[species %in% taxonomy$Code, species := taxonomy$Species[match(species, taxonomy$Code)]]
 
-##community data ----
+## community data ----
 ddata[, ":="(
-  metric = "pa",
-  unit = "pa"
+   metric = "pa",
+   unit = "pa"
 )]
 
-##meta data ----
-meta <- meta[unique(ddata[, .(dataset_id, local, regional, year)]),
-             on = .(local, regional, year)]
+## meta data ----
+meta <- meta[unique(ddata[, .(local, year)]),
+             on = .(local, year)]
 
 meta[,":="(
-  effort = 1L,
-  
-  gamma_sum_grains = 4.75 * 41,
-  gamma_sum_grains_unit = "m2",
-  gamma_sum_grains_type = "plot",
-  gamma_sum_grains_comment = " 19 0.25m5 quadrats per site * number of sites",
-  
-  gamma_bounding_box = 37499.25,
-  gamma_bounding_box_unit = "km2",
-  gamma_bounding_box_type = "administrative",
-  gamma_bounding_box_comment = "area of Illinois/4 because sites are located in 'north-eastern Illinois'",
-  
-  comment_standardisation = "Original sampling was standardised: 20 to 30 0.25m2 circular quadrats along a transect, per site BUT We keep only the first 19 plots of each site (19 is the minimal number of plots across sites). Then we pooled together species detected in the 19 quadrats of a site in a given year."
+   effort = 1L,
+
+   gamma_sum_grains = 4.75 * 41,
+   gamma_sum_grains_unit = "m2",
+   gamma_sum_grains_type = "plot",
+   gamma_sum_grains_comment = " 19 0.25m5 quadrats per site * number of sites",
+
+   gamma_bounding_box = 37499.25,
+   gamma_bounding_box_unit = "km2",
+   gamma_bounding_box_type = "administrative",
+   gamma_bounding_box_comment = "area of Illinois/4 because sites are located in 'north-eastern Illinois'",
+
+   comment_standardisation = "Original sampling was standardised: 20 to 30 0.25m2 circular quadrats along a transect, per site BUT We keep only the first 19 plots of each site (19 is the minimal number of plots across sites). Then we pooled together species detected in the 19 quadrats of a site in a given year."
 )]
-##save data ----
-dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
+## save data ----
 data.table::fwrite(
-  x = ddata,
-  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
-  row.names = FALSE
+   x = ddata,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised.csv"),
+   row.names = FALSE
 )
 data.table::fwrite(
-  x = meta,
-  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
-  row.names = FALSE
+   x = meta,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised_metadata.csv"),
+   row.names = FALSE
 )

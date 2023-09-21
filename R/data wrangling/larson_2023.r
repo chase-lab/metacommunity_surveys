@@ -13,6 +13,7 @@ ddata[, date := data.table::as.IDate(base::strptime(date, "%m/%d/%Y"))]
 ## Communities ----
 ddata[, ':='(
    dataset_id = dataset_id,
+
    regional = base::factor(c('Lake City, MN','Onalaska, WI','Bellevue, IA'))[base::match(regional, 1L:3L)],
    local = base::paste(local, sitecd, rivmile, sep = '_'),
 
@@ -92,6 +93,12 @@ ddata <- ddata[!base::grepl("^NO", species)
 ][projcd == 'M-98A'][, projcd := NULL
 ][!(regional == 3L & local == 13L & sitecd == 425L & date == '07/05/2005' & species == 'MYSP2' & !is.na(voucher))][, voucher := NULL]
 # Columns "addspp|qecode|voucher" were causing redundancy so we are good!
+
+#### Subsetting sites samples at least 10 years apart ----
+ddata <- ddata[
+   !ddata[, diff(range(year)) < 9L, by = .(regional, local)][(V1)],
+   on = .(regional, local)]
+
 ddata[, ":="(
    value = 1L,
    metric = 'pa',

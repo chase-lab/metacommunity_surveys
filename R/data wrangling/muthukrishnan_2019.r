@@ -64,9 +64,7 @@ meta[, ":="(
    alpha_grain_comment = "area of one rake sample",
 
    comment = "Extracted from Muthukrishnan and Larkin 2020 Dryad repo (https://datadryad.org/stash/dataset/doi:10.5061/dryad.15dv41nt2). Macrophytes from 212 lakes distributed in 50 US counties were sampled 1 to 11 years between 2002 and 2014. Regional is the county name and local the lake_id_rake-number.",
-   comment_standardisation = "Unknown species excluded,
-Sample_point_surveyed = no were excluded,
-A few duplicated rows were excluded",
+   comment_standardisation = "A few duplicated rows were excluded",
    doi = 'https://doi.org/10.5061/dryad.15dv41nt2 | https://doi.org/10.1111/geb.13053'
 )]
 
@@ -75,22 +73,15 @@ dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
 deleted_columns <- c("alpha_grain","survey_id","survey_date", "rake", "sample_point_surveyed")
 
 data.table::fwrite(
-   x = ddata[species != "No Vegetation Present" &
-                species != "" &
-                sample_point_surveyed == "yes",
-             !..deleted_columns],
+   x = ddata[, !..deleted_columns],
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
-   row.names = FALSE
+   row.names = FALSE, sep = ",", encoding = "UTF-8"
 )
 
 data.table::fwrite(
-   x = meta[ddata[species != "No Vegetation Present" &
-                     species != "" &
-                     sample_point_surveyed == "yes",
-                  .(regional, local, year, month, day)],
-            on = .(regional, local, year, month, day)],
+   x = meta,
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
-   row.names = FALSE
+   row.names = FALSE, sep = ",", encoding = "UTF-8"
 )
 
 
@@ -131,12 +122,16 @@ ddata <- ddata[ # data.table style join
 set.seed(42)
 ddata <- unique(ddata[ # data.table style join
    ddata[,
-         .(rake = sample(rake, min_rake_number, replace = FALSE)),
+         .(rake = sample(unique(rake), min_rake_number, replace = FALSE)),
          by = .(regional, local, year)],
    on = .(regional, local, rake, year)
 ][,
   .(regional, local, year, species, dataset_id, value, metric, unit)]
 )
+
+## Excluding sites that were not sampled at least twice 10 years apart ----
+ddata <- ddata[!ddata[, diff(range(year)) < 9L, by = .(regional, local)][(V1)],
+               on = .(regional, local)]
 
 ## meta data ----
 meta[, c("month", "day") := NULL]
@@ -156,7 +151,8 @@ meta[,":="(
 Sample_point_surveyed = no were excluded,
 A few duplicated rows were excluded
 Some lakes were sampled more than 1 time a year and a single survey was randomly selected. Empty samples were excluded.
-Sample based standardisation: Lakes with less than 6 rake samples were excluded and other lakes had 6 rake samples randomly selected and then pooled together."
+Sample based standardisation: Lakes with less than 6 rake samples were excluded and other lakes had 6 rake samples randomly selected and then pooled together.
+Sites that were not sampled at least twice 10 years apart were excluded."
 )][, gamma_sum_grains := sum(alpha_grain), by = .(regional, year)]
 
 ## gamma scale ----
@@ -177,11 +173,11 @@ meta[, ":="(
 data.table::fwrite(
    x = ddata,
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised.csv"),
-   row.names = FALSE
+   row.names = FALSE, sep = ",", encoding = "UTF-8"
 )
 
 data.table::fwrite(
    x = meta,
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised_metadata.csv"),
-   row.names = FALSE
+   row.names = FALSE, sep = ",", encoding = "UTF-8"
 )

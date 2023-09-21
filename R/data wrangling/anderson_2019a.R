@@ -25,16 +25,16 @@ ddata[, ":="(
    dataset_id = dataset_id,
 
    local = paste(local, exposure, `Tidal Height`, sep = "_"),
-   date = as.POSIXct(x = date, format = "%d-%b-%y"),
+   date = data.table::as.IDate(x = date, format = "%d-%b-%y"),
 
    metric = "abundance",
    unit = "count",
 
    exposure = NULL
 )][, ":="(
-   year = format(x = date, format = "%Y"),
-   month = format(x = date, format = "%m"),
-   day = format(x = date, format = "%d"),
+   year = data.table::year(date),
+   month = data.table::month(date),
+   day = data.table::mday(date),
    date = NULL
 )]
 
@@ -58,7 +58,8 @@ meta[, ":="(
    alpha_grain_comment = "area of a quadrat",
 
    comment = " 'In 1997 the Bamfield Marine Sciences Centre established a long-term monitoring project to collect baseline data on the distribution and abundance of macroorganisms at two intertidal sites on Wizard Islet in Barkley Sound. Both sites were resampled in 2001 and 2007, and the exposed site was resampled in 2002 and 2003. In 2009, both sites were sampled again, and a Microsoft Access database was created with comparable data from previous years (1997-2007). Data is presented here for algal cover (%), sessile invertebrate cover (%), invertebrate density, and sea star density for 2009 as well as the complete Microsoft Access database. Wizard Islet (48°51’29.5”N, 125°09’31”W) is located within the Deer Group Islands in Barkley Sound and has an area of 1.73 hectares at low tide. The sheltered site (with less wave exposure) is located on a 50m stretch of fixed rocky shore on the northeast side and is characterized by Fucus and Phyllospadix (seagrass). The exposed site is located on a 50m stretch of fixed rocky shore on the southwest side and is characterized by Egregia (feather-boa kelp), goose-necked barnacles and Alaria (brown alga). Fifteen transects were randomly selected at the sheltered site (tag numbers 7, 10, 11, 12, 15, 18, 21, 26, 34, 36, 38, 40, 42, 44, 48) and the exposed site (tag numbers 1, 3, 5, 11, 15, 17, 20, 23, 25, 32, 37, 40, 44, 46, 48). Sampling was done at tidal heights of 1, 1.5, 2, 2.5, 3 and 3.5m. In 2009 tidal height of 0.5m was not sampled due to time constraints and limited low tide series. Quadrats of 25x25cm were used for percent cover of bare rock, algae, colonial and encrusting species. Quadrats of 25x25cm were also used for counts of invertebrates with the exception of seastars which were counted in 50x50cm quadrats. To maintain consistency, all quadrats were positioned to the left and above each point on the transect (when facing away from the water).'  ",
-   comment_standardisation = "Taxon Juvenile limpet (<5mm) as excluded."
+   comment_standardisation = "Taxon Juvenile limpet (<5mm) as excluded.",
+   doi = 'https://doi.org/10.5683/SP2/VBPBFN'
 )]
 
 ## saving raw data ----
@@ -78,7 +79,14 @@ data.table::fwrite(
 ddata <- ddata[`Tidal Height` %in% c(1, 1.5, 2, 2.5, 3)]
 ddata[, local := gsub("_[123]\\.*5*", "", local)]
 ddata[, effort := length(unique(`Tidal Height`)), by = .(regional, local, year)]
-ddata <- unique(ddata[effort == 5L][, .(value = sum(value)), by = .(regional, local, year, species)]) # pooling dates together
+ddata <- unique(ddata[effort == 5L][,
+                                    .(value = sum(value)),
+                                    by = .(dataset_id, regional, local, year,
+                                           species, metric, unit)]) # pooling dates together
+
+## Excluding sites that were not sampled at least twice 10 years apart ----
+ddata <- ddata[!ddata[, diff(range(year)) < 9L, by = .(regional, local)][(V1)],
+               on = .(regional, local)]
 
 ## community data ----
 
@@ -96,8 +104,10 @@ meta[, ":="(
    gamma_bounding_box_type = "island",
    gamma_bounding_box_comment = "area of the Wizard islet given by the authors",
 
-   comment_standardisation = "Taxon Juvenile limpet (<5mm) as excluded. Only the 5 middle tidal heights kept and only samples with all of these 5 tidal heights sampled kept. Samples from these 5 quadrats were then pooled together",
-  doi = 'https://doi.org/10.5683/SP2/VBPBFN'
+   comment_standardisation = "Taxon Juvenile limpet (<5mm) as excluded.
+Only the 5 middle tidal heights kept and only samples with all of these 5 tidal heights sampled kept.
+Samples from these 5 quadrats were then pooled together.
+Samples that were not sampled at least twice 10 years apart were excluded."
 )][, gamma_sum_grains := sum(alpha_grain) / 10000L, by = .(regional, year)][regional == "Wizard", gamma_bounding_box := 1.73]
 
 ## saving standardised data ----

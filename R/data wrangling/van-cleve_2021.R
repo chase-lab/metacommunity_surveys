@@ -1,6 +1,6 @@
 dataset_id <- "van-cleve_2021"
 
-ddata <- base::readRDS("./data/raw data/van-cleve_2021/rdata.rds")
+ddata <- base::readRDS("data/raw data/van-cleve_2021/rdata.rds")
 data.table::setnames(ddata, new = tolower(colnames(ddata)))
 data.table::setnames(ddata, old = "site", new = "local")
 
@@ -119,11 +119,14 @@ ddata <- ddata[
    on = .(local, year, month, day)][, month := NULL][, day := NULL]
 
 ### Pooling all samples from a year together ----
-
 ddata <- ddata[, .(value = sum(value)),
-               by = .(dataset_id, regional, local, year, species)]
+               by = .(dataset_id, regional, local, year, species, metric, unit)]
 
-## meta data ----
+## Excluding sites that were not sampled at least twice 10 years apart ----
+ddata <- ddata[!ddata[, diff(range(year)) < 9L, by = .(regional, local)][(V1)],
+               on = .(regional, local)]
+
+## Metadata ----
 meta[, c("month","day") := NULL]
 meta <- unique(meta)
 meta <- meta[
@@ -142,7 +145,8 @@ meta[, ":="(
    gamma_bounding_box_type = "ecosystem",
    gamma_bounding_box_comment = "area of the Bonanza Creek Experimental Forest",
 
-   comment_standardisation = "Standardisation: number of sampling events per year per plot reduced to 1 and number of plots per site per year reduced to 12 then all plots from a year and site were pooled together and abundances summed"
+   comment_standardisation = "Standardisation: number of sampling events per year per plot reduced to 1 and number of plots per site per year reduced to 12 then all plots from a year and site were pooled together and abundances summed.
+Sites that were not sampled at least twice 10 years apart were excluded."
 )][, gamma_sum_grains := sum(alpha_grain), by = year]
 
 ## saving standardised data ----

@@ -71,9 +71,10 @@ meta[, ":="(
 
    data_pooled_by_authors = FALSE,
 
-   alpha_grain = NA,
+   alpha_grain = 1L,
    alpha_grain_unit = "m2",
    alpha_grain_type = "sample",
+   alpha_grain_comment = "estimated",
 
    comment = "Extracted from Josie Antonucci di Carvalho's GitHub repository https://github.com/josieantonucci/TemporalChange_PPKT_WaddenSea/blob/befbf4575dc63afdca069367b96d57be0d782779/Data/PPKT_count_WaddenSea_1999_2018.csv and from the preprint article `Temporal change in phytoplankton diversity and functional group composition` https://doi.org/10.21203/rs.3.rs-2760923/v1
    They aggregated long-term phytoplankton data from coastal stations in Germany and the Netherlands. Provided abundance values are number of individuals per litre.",

@@ -108,6 +108,10 @@ ddata <- unique(ddata[, .(dataset_id, regional, local, year, species)])
 ## Cleaning species names----
 ddata <- ddata[!species %in% c("Algae", "Total bryophyte", "Total lichen")]
 
+## Excluding sites that were not sampled at least twice 10 years apart ----
+ddata <- ddata[!ddata[, diff(range(year)) < 9L, by = .(dataset_id, regional, local)][(V1)],
+               on = .(dataset_id, regional, local)]
+
 ## Community data ----
 ddata[,":="(
    value = 1L,
@@ -137,6 +141,7 @@ meta[,":="(
 Samples with redundant observations were removed.
 sample based rarefaction: To standardise effort through time and space, we selected sites/years where at least 9 plots were sampled and when more than 9 plots were sampled, 9 were randomly selected among them.
 Then these 9 plots were pooled together and cover was turned into presence absence.
+Sites that were not sampled at least twice 10 years apart were excluded.
 Groups  "Bare ground/litter/water/rock/mud", "Gaps", "Gaps (filled)", "Rock" and "Algae", "Total bryophyte", "Total lichen" were excluded.
 dataset_id is built as countryside_survey_plants_2017_{quadrat area}_sqm.
 regional is the country

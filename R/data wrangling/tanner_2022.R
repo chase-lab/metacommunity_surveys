@@ -50,7 +50,7 @@ data.table::fwrite(
    row.names = FALSE
 )
 
-#Standardized Data ----
+#standardised Data ----
 
 ##Metadata ----
 meta[, ":="(
@@ -70,12 +70,12 @@ meta[, ":="(
 ##saving data tables ----
 data.table::fwrite(
    x = ddata,
-   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised.csv"),
    row.names = FALSE
 )
 
 data.table::fwrite(
    x = meta,
-   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised_metadata.csv"),
    row.names = FALSE
 )

@@ -13,7 +13,7 @@ ddata <- ddata[value > 0]
 ddata <- merge(ddata, env[, .(code, site, position, date)], all.y = TRUE)
 
 ## community data ----
-ddata[, date := data.table::as.IDate(date)]
+ddata[, date := data.table::as.IDate(date, format = "%Y-%m-%d")]
 ddata[, ":="(
    dataset_id = dataset_id,
 

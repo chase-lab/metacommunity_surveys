@@ -87,24 +87,28 @@ ddata[, c("longitude","latitude") := NULL]
 
 ##save data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
-                   row.names = FALSE)
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
-                   row.names = FALSE)
+data.table::fwrite(
+   x = ddata,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
+   row.names = FALSE, sep = ",", encoding = "UTF-8")
+data.table::fwrite(
+   x = meta,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
+   row.names = FALSE, sep = ",", encoding = "UTF-8")
 
 
-#Standardized data ----
+#standardised data ----
 ##meta data ----
 meta[,":="(
    effort = 1L,
-   
-   gamma_bounding_box_unit = "m2",
-   gamma_bounding_box_type = "convex-hull",
-   gamma_bounding_box_comment = "area polygon of convex-hull",
-   
+
    gamma_sum_grains_unit = "m2",
    gamma_sum_grains_type = "plot",
-   gamma_sum_grains_comment = "sampled area per year"
+   gamma_sum_grains_comment = "sampled area per year",
+
+   gamma_bounding_box_unit = "km2",
+   gamma_bounding_box_type = "convex-hull",
+   gamma_bounding_box_comment = "area polygon of convex-hull"
 )][, ":="(
    gamma_sum_grains = sum(alpha_grain),
    gamma_bounding_box = geosphere::areaPolygon(data.frame(longitude, latitude)[grDevices::chull(longitude, latitude), ]) / 10^6
@@ -112,9 +116,12 @@ meta[,":="(
 by = year]
 
 ##save data ----
-dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
-                   row.names = FALSE)
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
-                   row.names = FALSE)
+data.table::fwrite(
+   x = ddata,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised.csv"),
+   row.names = FALSE, sep = ",", encoding = "UTF-8")
+data.table::fwrite(
+   x = meta,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised_metadata.csv"),
+   row.names = FALSE, sep = ",", encoding = "UTF-8")
 

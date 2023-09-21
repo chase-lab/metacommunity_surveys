@@ -1,6 +1,6 @@
 dataset_id <- "valtonen_2018"
 
-ddata <- base::readRDS(file = paste0("./data/raw data/", dataset_id, "/ddata.rds"))
+ddata <- base::readRDS(file = paste0("data/raw data/", dataset_id, "/ddata.rds"))
 data.table::setnames(ddata, c("Site", "Year"), c("local", "year"))
 
 #Raw Data ----
@@ -58,7 +58,7 @@ data.table::fwrite(
    row.names = FALSE
 )
 
-#Standardized Data ----
+#standardised Data ----
 
 ##update meta ----
 meta[, ":="(
@@ -78,12 +78,12 @@ meta[, ":="(
 ##saving data tables ----
 data.table::fwrite(
    x = ddata,
-   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised.csv"),
    row.names = FALSE
 )
 
 data.table::fwrite(
    x = meta,
-   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised_metadata.csv"),
    row.names = FALSE
 )

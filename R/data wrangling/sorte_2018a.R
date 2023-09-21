@@ -4,7 +4,7 @@ dataset_id <- "sorte_2018a"
 ddata <- base::readRDS(file = "data/raw data/sorte_2018/ddata.rds")[taxon == "Fixed algae and invertebrates"]
 
 # Data preparation ----
-ddata[, date := data.table::as.IDate(date)
+ddata[, date := data.table::as.IDate(date, format = "%Y-%m-%d")
 ][, ":="(
    year = data.table::year(date),
    month = data.table::month(date),
@@ -127,7 +127,7 @@ ddata <- ddata[
    ddata[, .(diff(range(year))), by = .(regional, local)][V1 >= 9L],
    on = .(regional, local)] # data.table style join
 
-## we select 1 out of 8 most sampled momths ----
+## we select 1 out of 8 most sampled months ----
 ## When a site is sampled several times a year, selecting the 4 most frequently sampled month from the 8 sampled months ----
 month_order <- ddata[, data.table::uniqueN(day), by = .(local, month)][, sum(V1), by = month][order(-V1)]
 ddata[, month_order := (1L:8L)[match(month, month_order, nomatch = NULL)]]

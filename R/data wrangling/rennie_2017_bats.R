@@ -24,20 +24,20 @@ ddata[, ":="(
 
 # Coordinates ----
 coords <- data.table::as.data.table(matrix(
-   dimnames = list(c(), c('regional', 'regional_name', 'latitude', 'longitude')),
+   dimnames = list(c(), c("regional", "regional_name", "latitude", "longitude")),
    byrow = TRUE, ncol = 4L, data = c(
-      'T01', 'Drayton', '52°11`37.95"N','1°45`51.95"W',
-      'T02', 'Glensaugh', '56°54`33.36"N', '2°33`12.14"W',
-      'T03', 'Hillsborough', '54°27`12.24"N', '6° 4`41.26"W',
-      'T04', 'Moor House – Upper Teesdale', '54°41`42.15"N', '2°23`16.26"W',
-      'T05', 'North Wyke', '50°46`54.96"N', '3°55`4.10"W',
-      'T06', 'Rothamsted', '51°48`12.33"N', '0°22`21.66"W',
-      'T07', 'Sourhope', '55°29`23.47"N', '2°12`43.32"W',
-      'T08', 'Wytham', '51°46`52.86"N', '1°20`9.81"W',
-      'T09', 'Alice Holt', '51° 9`16.46"N', '0°51`47.58"W',
-      'T10', 'Porton Down', '51° 7`37.83"N', '1°38`23.46"W',
-      'T11', 'Y Wyddfa – Snowdon', '53° 4`28.38"N', '4° 2`0.64"W',
-      'T12', 'Cairngorms', '57° 6`58.84"N', '3°49`46.98"W')
+      "T01", "Drayton", "52°11`37.95'N","1°45`51.95'W",
+      "T02", "Glensaugh", "56°54`33.36'N", "2°33`12.14'W",
+      "T03", "Hillsborough", "54°27`12.24'N", "6° 4`41.26'W",
+      "T04", "Moor House – Upper Teesdale", "54°41`42.15'N", "2°23`16.26'W",
+      "T05", "North Wyke", "50°46`54.96'N", "3°55`4.10'W",
+      "T06", "Rothamsted", "51°48`12.33'N", "0°22`21.66'W",
+      "T07", "Sourhope", "55°29`23.47'N", "2°12`43.32'W",
+      "T08", "Wytham", "51°46`52.86'N", "1°20`9.81'W",
+      "T09", "Alice Holt", "51° 9`16.46'N", "0°51`47.58'W",
+      "T10", "Porton Down", "51° 7`37.83'N", "1°38`23.46'W",
+      "T11", "Y Wyddfa – Snowdon", "53° 4`28.38'N", "4° 2`0.64'W",
+      "T12", "Cairngorms", "57° 6`58.84'N", "3°49`46.98'W")
 ))
 
 ## metadata ----
@@ -96,15 +96,18 @@ ddata <- ddata[
 ddata[, month_order := (1L:4L)[match(month, c(7L, 8L, 6L, 9L), nomatch = NULL)]]
 data.table::setkey(ddata, month_order)
 
-ddata <- ddata[!is.na(month_order)][, nmonths := data.table::uniqueN(month), by = .(regional, local, year)
+ddata <- ddata[!is.na(month_order)][, nmonths := data.table::uniqueN(month),
+                                    by = .(regional, local, year)
 ][nmonths >= 3L][, nmonths := NULL]
 
 ddata <- ddata[
-   unique(ddata[, .(regional, local, year, month)])[, .SD[1L:3L], by = .(regional, local, year)],
+   unique(ddata[, .(regional, local, year, month)])[, .SD[1L:3L],
+                                                    by = .(regional, local, year)],
    on = .(regional, local, year, month)][, month_order := NULL]
 
 ## Pooling all 3 samples from a year together ----
-ddata <- ddata[, .(value = sum(value)), by = .(dataset_id, regional, local, year, metric, unit, species)]
+ddata <- ddata[, .(value = sum(value)),
+               by = .(dataset_id, regional, local, year, metric, unit, species)]
 
 ## removing surveys with no observation ----
 ddata <- ddata[value != 0L]

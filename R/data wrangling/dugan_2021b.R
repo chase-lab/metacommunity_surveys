@@ -1,14 +1,14 @@
 # dugan_2021e marine mammals
 dataset_id <- "dugan_2021b"
 
-ddata <- base::readRDS("./data/raw data/dugan_2021/rdata.rds")
+ddata <- base::readRDS("data/raw data/dugan_2021/rdata.rds")
 
 # Data preparation ----
 data.table::setnames(
    ddata,
-   old = c("MONTH", "YEAR", "SITE", "TOTAL"),
-   new = c("month", "year", "local", "value"))
-ddata[, DATE := data.table::as.IDate(DATE)]
+   old = c("DATE", "MONTH", "YEAR", "SITE", "TOTAL"),
+   new = c("date", "month", "year", "local", "value"))
+ddata[, date := data.table::as.IDate(date, format = "%Y-%m-%d")]
 
 ## delete absences  ----
 ddata <- ddata[value != 0]
@@ -21,12 +21,13 @@ ddata[, ":="(
    dataset_id = dataset_id,
    regional = "Santa Barbara Coastal LTER",
 
-   day = data.table::mday(DATE),
+   day = data.table::mday(date),
 
    species = paste(TAXON_GENUS, TAXON_SPECIES),
 
    metric = "abundance",
    unit = "count",
+
    TAXON_CLASS = NULL,
    TAXON_GENUS = NULL,
    TAXON_GROUP = NULL,
@@ -65,7 +66,7 @@ meta[, ":="(
 ##save data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
 data.table::fwrite(
-   x = ddata[,!c("TAXON_FAMILY", "DATE")],
+   x = ddata[,!c("TAXON_FAMILY", "date")],
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
    row.names = FALSE
 )
@@ -80,48 +81,61 @@ data.table::fwrite(
 # ddata <- ddata[!is.na(TAXON_FAMILY) & !TAXON_FAMILY %in% c("Delphinidae","Canidae","Hominidae")]
 ddata <- ddata[
    TAXON_FAMILY %in% c("Otariidae", "Phocidae")][
-      ddata[,
-            .(nmonth = data.table::uniqueN(month), nweek = data.table::uniqueN(DATE)),
-            by = .(local, year)][nmonth == 12L & nweek == 12L],
+      !ddata[,
+             .(nmonth = data.table::uniqueN(month), nweek = data.table::uniqueN(date)),
+             by = .(local, year)][nmonth != 12L & nweek != 12L],
       on = .(local, year)]
 
-##community data ----
-ddata[,":="(
-   value = 1L,
-   metric = "pa",
-   unit = "pa",
+ddata <- ddata[, .(value = sum(value)), by = .(dataset_id, regional, local, year,
+                                               species, metric, unit)]
 
-   month = NULL,
-   day = NULL,
-   TAXON_FAMILY = NULL,
-   DATE = NULL
-)]
+## Excluding regions years with less than 4 sites ----
+ddata <- ddata[!ddata[, data.table::uniqueN(local) < 4L, by = .(regional, year)][(V1)],
+               on = .(regional, year)]
 
-##meta data ----
-meta[,":="(
-   effort = 12L,
+## Excluding sites that were not sampled at least twice 10 years apart ----
+ddata <- ddata[!ddata[, diff(range(year)) < 9L, by = local][(V1)],
+               on = "local"]
 
-   gamma_sum_grains_unit = "m2",
-   gamma_sum_grains_type = "plot",
-   gamma_sum_grains_comment = "number of sites per year * 1200m2",
+if (nrow(ddata) != 0L) {
+   ##community data ----
+   ddata[,":="(
+      value = 1L,
+      metric = "pa",
+      unit = "pa"
+   )]
 
-   gamma_bounding_box = 6L,
-   gamma_bounding_box_unit = "km2",
-   gamma_bounding_box_type = "ecosystem",
-   gamma_bounding_box_comment = "60km long coastline between the most distant sites (measured on Google Earth) * 100m wide beach (estimated)",
+   ##meta data ----
+   meta[, c("month", "day") := NULL]
+   meta <- unique(meta[ddata[, .(regional, local, year)], on = .(regional, local, year)])
 
-   comment_standardisation = "Only taxa from Otariidae and Phocidae families were kept.
-Only sites actually sampled 12 times every year were included"
-)][, gamma_sum_grains := data.table::uniqueN(local) * 10000L, by = year]
+   meta[,":="(
+      effort = 12L,
 
-## save standardised data ----
-data.table::fwrite(
-   x = ddata,
-   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised.csv"),
-   row.names = FALSE
-)
-data.table::fwrite(
-   x = meta,
-   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised_metadata.csv"),
-   row.names = FALSE
-)
+      gamma_sum_grains_unit = "m2",
+      gamma_sum_grains_type = "plot",
+      gamma_sum_grains_comment = "number of sites per year * 1200m2",
+
+      gamma_bounding_box = 6L,
+      gamma_bounding_box_unit = "km2",
+      gamma_bounding_box_type = "ecosystem",
+      gamma_bounding_box_comment = "60km long coastline between the most distant sites (measured on Google Earth) * 100m wide beach (estimated)",
+
+      comment_standardisation = "Only taxa from Otariidae and Phocidae families were kept.
+Only sites actually sampled 12 times every year were included.
+Regions years with less than 4 sits were excluded.
+Sites that were not sampled at least twice 10 years apart were excluded."
+   )][, gamma_sum_grains := data.table::uniqueN(local) * 10000L, by = year]
+
+   ## save standardised data ----
+   data.table::fwrite(
+      x = ddata,
+      file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised.csv"),
+      row.names = FALSE
+   )
+   data.table::fwrite(
+      x = meta,
+      file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised_metadata.csv"),
+      row.names = FALSE
+   )
+}

@@ -60,12 +60,16 @@ data.table::fwrite(
 
 # Standardised data ----
 ## Standardisation ----
+ddata[, c("month", "day") := NULL]
 # "transect_ids 2019_86 and 2019_91 were excluded over uncertainty whether data are duplicated or not."
 ddata <- ddata[!transect_id %in% c("2019_86", "2019_91")][, transect_id := NULL]
 # regions with less than 4 sampled locations per year are excluded (Campeche island2013 and 2017)
 ddata <- ddata[ddata[, data.table::uniqueN(local),
                      by = regional][V1 >= 4L][, V1 := NULL],
                on = .(regional)]
+## Excluding sites that were not sampled at least twice 10 years apart ----
+ddata <- ddata[!ddata[, diff(range(year)) < 9L, by = .(regional, local)][(V1)],
+               on = .(regional, local)]
 
 ## Metadata ----
 meta[, c("month", "day") := NULL]
@@ -84,7 +88,8 @@ meta[, ":="(
    gamma_bounding_box_type = "convex-hull",
    gamma_bounding_box_comment = "coordinates provided by the authors",
 
-   comment_standardisation = "transect_ids 2019_86 and 2019_91 were excluded over uncertainty whether data are duplicated or not."
+   comment_standardisation = "transect_ids 2019_86 and 2019_91 were excluded over uncertainty whether data are duplicated or not.
+Sites that were not sampled at least twice 10 years apart were excluded."
 )][, ":="(gamma_bounding_box = geosphere::areaPolygon(data.frame(longitude, latitude)[grDevices::chull(longitude, latitude), ]) / 10^6,
           gamma_sum_grains = sum(alpha_grain)),
    by = .(regional, year)]

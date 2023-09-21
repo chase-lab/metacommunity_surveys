@@ -254,12 +254,12 @@ if (data.table::uniqueN(meta_standardised$comment) != data.table::uniqueN(meta_s
 if (anyNA(meta_standardised$comment_standardisation)) warning("Missing comment_standardisation value")
 
 ## Checking that there is only one alpha_grain value per dataset_id ----
-if (any(meta_standardised[, any(data.table::uniqueN(alpha_grain_m2) != 1L),
-                          by = .(dataset_id, regional)]$V1)) warning(paste(
-                             "Inconsistent grain in",
-                             meta_standardised[, data.table::uniqueN(alpha_grain_m2) != 1L,
-                                               by = .(dataset_id, regional)][, unique(dataset_id)]
-                          ))
+if (meta_standardised[, data.table::uniqueN(alpha_grain_m2), by = dataset_id][, any(V1 != 1L)]) warning(paste(
+   "Inconsistent grain in",
+   paste(
+      meta_standardised[, data.table::uniqueN(alpha_grain_m2), by = dataset_id][V1 != 1L, unique(dataset_id)],
+      collapse = ", ")
+))
 
 ### checking alpha_grain_type ----
 # meta[(!checklist), .(lterm = diff(range(year)), taxon = taxon, realm = realm, alpha_grain_type = alpha_grain_type), by = .(dataset_id, regional)][lterm >= 10L][taxon == "Fish" & realm == "Freshwater" & grep("lake",alpha_grain_type), unique(dataset_id)]
@@ -288,15 +288,15 @@ if (nrow(meta_standardised) != nrow(unique(dt_standardised[, .(dataset_id, regio
 ## Saving dt ----
 data.table::setcolorder(dt_standardised, c("dataset_id", "regional", "local", "year", "species", "species_original", "value", "metric", "unit"))
 
-data.table::fwrite(dt_standardised, "data/communities_standardised.csv", row.names = FALSE) # for iDiv data portal: add , na = "NA"
-
+data.table::fwrite(dt_standardised, "data/communities_standardised.csv", sep = ",", row.names = FALSE) # for iDiv data portal: add , na = "NA"
 # if (file.exists("data/references/homogenisation_dropbox_folder_path.rds")) {
 #    path_to_homogenisation_dropbox_folder <- base::readRDS(file = "data/references/homogenisation_dropbox_folder_path.rds")
-#    data.table::fwrite(dt_standardised, paste0(path_to_homogenisation_dropbox_folder, "/metacommunity-survey-raw-communities.csv"), row.names = FALSE)
+#    data.table::fwrite(dt_standardised, paste0(path_to_homogenisation_dropbox_folder, "/metacommunity-survey_communities-standardised.csv"), row.names = FALSE)
 # }
 
 
 ## Saving meta ----
-data.table::fwrite(meta_standardised, "data/metadata_standardised.csv", sep = ", ", row.names = FALSE) # for iDiv data portal: add , na = "NA"
-# if (file.exists("data/references/homogenisation_dropbox_folder_path.rds"))
-#    data.table::fwrite(meta_standardised, paste0(path_to_homogenisation_dropbox_folder, "/metacommunity-survey-metadata-raw.csv"), sep = ", ", row.names = FALSE)
+data.table::fwrite(meta_standardised, "data/metadata_standardised.csv", sep = ",", row.names = FALSE) # for iDiv data portal: add , na = "NA"
+# if (file.exists("data/references/homogenisation_dropbox_folder_path.rds")) {
+#    data.table::fwrite(meta_standardised, paste0(path_to_homogenisation_dropbox_folder, "/metacommunity-survey_metadata-standardised"), sep = ",", row.names = FALSE)
+# }

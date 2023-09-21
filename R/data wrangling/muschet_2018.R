@@ -1,18 +1,26 @@
 dataset_id <- "mushet_2018"
 
 # Loading coordinates
-coords <- read.csv("data/raw data/muschet_2017/site locations.csv", skip = 1)
-coords$Plot_name <- ifelse(nchar(coords$Plot_name) == 2, paste0(substr(coords$Plot_name, 1, 1), "0", substr(coords$Plot_name, 2, 2)), coords$Plot_name)
+coords <- data.table::fread(file = "data/raw data/muschet_2017/site locations.csv", skip = 1)
+coords[, Plot_name := data.table::fifelse(nchar(Plot_name) == 2L,
+                                          sub("(^[PT])([0-9]{1}$)", "\\10\\2", Plot_name, perl = TRUE),
+                                          Plot_name)]
+data.table::setnames(coords, c("Latitude","Longitude"), c("latitude", "longitude"))
 
-
-ddata <- data.table::fread("data/raw data/muschet_2018/muschet_2018-CLSAamphibiansCounts_v2.csv")
+ddata <- data.table::fread(
+   file = "data/raw data/muschet_2018/muschet_2018-CLSAamphibiansCounts_v2.csv",
+   sep = ",", header = TRUE)
 
 # Raw data ----
 data.table::setnames(ddata, tolower(colnames(ddata)))
 data.table::setnames(ddata, old = "wetland", new = "local")
 
 ## pooling all development stages and sex together ----
-ddata <- unique(ddata[, .(value = sum(count)), by = .(local, year, species, transect, month, day)])
+ddata <- unique(ddata[, .(value = sum(count)),
+                      by = .(local, year, species, transect, month, day)])
+
+## excluding absences ----
+ddata <- ddata[!(value == 0L & species != "NONE")]
 
 ## community data ----
 ddata[, ":="(
@@ -32,13 +40,12 @@ ddata[, ":="(
 )]
 
 ## meta data ----
-meta <- unique(ddata[, .(dataset_id, regional, local, year, month, day)])
+meta <- unique(ddata[, .(dataset_id, regional, local, year, month, day, Plot_name = sub("_.*$", "", local))])
+meta[coords, ":="(latitude = i.latitude, longitude = i.longitude), on = "Plot_name"][, Plot_name := NULL]
+
 meta[, ":="(
    taxon = "Herpetofauna",
    realm = "Freshwater",
-
-   latitude = coords$Latitude[data.table::chmatch(local, coords$Plot_name)],
-   longitude = coords$Longitude[data.table::chmatch(local, coords$Plot_name)],
 
    study_type = "ecological_sampling",
 
@@ -50,24 +57,21 @@ meta[, ":="(
    alpha_grain_comment = "5cm wide aperture of the funnel opening",
 
    comment = "Extracted from Mushet, D.M., and Solensky, M.J., 2022, Cottonwood Lake Study Area - Amphibians (ver. 2.0): U.S. Geological Survey data release, https://doi.org/10.5066/P9G8TM2S. Authors provide data sampled in the Cottonwood Lake Study Area from 1992 to 2021. METHODS: 'Amphibians and reptiles were captured over one week in May-September from 1992-2017 using amphibian funnel traps (Mushet et al. 1997). Traps were placed along three existing transects within the central vegetation zone of each CLSA wetland. Funnel traps were constructed of 1/8 inch galvanized hardware cloth and had a 5-cm aperture at the funnel opening. The funnel traps designed for use in this study have been shown to minimize injury rates (Mushet et al. 1997) and provide captured animals access to the surface. Additionally, traps were checked daily to minimize the time captured animals spent in traps. Funnel traps were set on the morning of day one and checked each morning over four subsequent days. Adult amphibians and reptiles were identified to species, and tadpoles were identified to genus.'  Taxonomic names were extracted from metadata file https://www.sciencebase.gov/catalog/item/get/599d9555e4b012c075b964a6",
-   comment_standardisation = "excluding unknown species and absences",
+   comment_standardisation = "Absences excluded but empty sites kept (species == NONE)",
    doi = 'https://doi.org/10.5066/F7X9297Q'
 )]
 
 ## Save raw data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
 data.table::fwrite(
-   x = ddata[species != "NONE" & value > 0L, !"transect"],
+   x = ddata[, !"transect"],
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
-   row.names = FALSE
+   row.names = FALSE, sep = ",", encoding = "UTF-8"
 )
 data.table::fwrite(
-   x = meta[
-      ddata[species != "NONE" & value > 0L, .(local, year, month, day)],
-      on = .(local, year, month, day)
-   ],
+   x = meta,
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
-   row.names = FALSE
+   row.names = FALSE, sep = ",", encoding = "UTF-8"
 )
 
 # standardised data ----
@@ -76,10 +80,10 @@ ddata[, local := gsub("_.$", "", local, perl = TRUE)]
 meta[, local := gsub("_.$", "", local, perl = TRUE)]
 
 ## selecting only sampling surveys that lasted the whole 4 days ----
-ddata <- ddata[ddata[, .(N = length(unique(day))), by = .(local, transect, year, month)][N == 4], on = c("local", "transect", "year", "month")]
+ddata <- ddata[ddata[, .(N = data.table::uniqueN(day)), by = .(local, transect, year, month)][N == 4], on = c("local", "transect", "year", "month")]
 
 ## selecting only months when all 3 transects were sampled.----
-ddata[, full_sample_month := length(unique(transect)) == 3L, by = .(local, year, month)]
+ddata[, full_sample_month := data.table::uniqueN(transect) == 3L, by = .(local, year, month)]
 ddata <- ddata[(full_sample_month)]
 
 ## selecting two out of the three most common months for each local//YEAR ----
@@ -94,8 +98,8 @@ seldata <- seldata[, .SD[1:2, ], by = .(local, transect, year)]
 # subsetting by using a data.table join
 ddata <- ddata[seldata, on = c("local", "transect", "year", "month")]
 
-## delete unknown species and absence values ----
-ddata <- ddata[species != "NONE" & value > 0L]
+## delete absence values ----
+ddata <- ddata[species != "NONE"]
 
 ## pooling all days, months and transects together ----
 ddata <- unique(ddata[, .(value = sum(value)),
@@ -115,7 +119,7 @@ meta[, ":="(
    gamma_sum_grains_unit = "m2",
    gamma_sum_grains_comment = "unknown number of trap per transect.",
 
-   gamma_bounding_box = geosphere::areaPolygon(coords[grDevices::chull(coords$Longitude, coords$Latitude), c("Longitude", "Latitude")]) / 10^6,
+   gamma_bounding_box = geosphere::areaPolygon(data.frame(longitude, latitude)[grDevices::chull(longitude, latitude), ]) / 10^6,
    gamma_bounding_box_unit = "km2",
    gamma_bounding_box_type = "convex-hull",
    gamma_bounding_box_comment = "area of the region computed as the convexhull covering the centres of all ponds",
@@ -127,11 +131,11 @@ meta[, ":="(
 data.table::fwrite(
    x = ddata,
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised.csv"),
-   row.names = FALSE
+   row.names = FALSE, sep = ",", encoding = "UTF-8"
 )
 
 data.table::fwrite(
    x = meta,
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised_metadata.csv"),
-   row.names = FALSE
+   row.names = FALSE, sep = ",", encoding = "UTF-8"
 )

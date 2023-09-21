@@ -66,14 +66,15 @@ meta[, ":="(
 
    data_pooled_by_authors = FALSE,
 
-   alpha_grain = NA,
-   alpha_grain_unit = NA,
-   alpha_grain_type = NA,
+   alpha_grain = 1L,
+   alpha_grain_unit = "m2",
+   alpha_grain_type = "sample",
+   alpha_grain_comment = "estimated",
 
    comment = factor("Extracted from the EDI repository Bashevkin, S.M., R. Hartman, M. Thomas, A. Barros, C.E. Burdi, A. Hennessy, T. Tempel, K. Kayfetz, K. Alstad, and C. Pien. 2023. Interagency Ecological Program: Zooplankton abundance in the Upper San Francisco Estuary from 1972-2021, an integration of 7 long-term monitoring programs ver 4. Environmental Data Initiative. https://doi.org/10.6073/pasta/8b646dfbeb625e308212a39f1e46f69b. Data are split by program and size class: 11 distinct studies."),
    comment_standardisation = factor('The original data provides information on the lifestages that were not reproduced here and individuals from the same species at different lifestages were pooled together.
-The authors note that in some samples some taxa were not sampled in sufficient numbers to give a good approwximations of their relative abundance.
-These observations are kept here. In the original data, a column called Undersampled allowed excluding these observations.
+The authors note that in some samples some taxa were not sampled in sufficient numbers to give a good approximations of their relative abundance.
+These observations are kept here. In the original data, a column called Undersampled allowed excluding these observations but it is not reproduced here for technical reasons.
 Local has the name of the Station and the number of the tow (ie. the last element of sampleid).'),
 doi = 'https://doi.org/10.6073/pasta/8b646dfbeb625e308212a39f1e46f69b'
 )]
@@ -114,13 +115,9 @@ ddata[, ":="(
 
 data.table::setkeyv(ddata, cols = c('dataset_id', 'local', 'year','month','sampleid','species'))
 
-### Keeping only sites sampled at twice least 10 years apart ----
-ddata <- ddata[
-   ddata[, diff(range(year)), by = .(dataset_id, local)][V1 >= 9L][, V1 := NULL],
-   on = .(dataset_id, local)]
-
 ### When a site is sampled several times a year, selecting the 6 most frequently sampled months from the 8 most sampled months ----
-month_order <- ddata[, data.table::uniqueN(sampleid), by = .(dataset_id, month)][, sum(V1), by = month][order(-V1)][1L:8L, month]
+month_order <- ddata[, data.table::uniqueN(sampleid),
+                     by = .(dataset_id, month)][, sum(V1), by = month][order(-V1)][1L:8L, month]
 ddata[, month_order := (1L:8L)[match(month, month_order, nomatch = NULL)]]
 data.table::setkey(ddata, month_order)
 
@@ -151,6 +148,10 @@ ddata[, effort := sum(volume), by = .(dataset_id, local, year)]
 ddata <- ddata[, .(value = sum(value)),
                by = .(dataset_id, local, year, effort, latitude, longitude, species)]
 
+## Excluding sites that were not sampled at least twice 10 years apart.
+ddata <- ddata[!ddata[, diff(range(year)) < 9L, by = .(dataset_id, local)][(V1)],
+               on = .(dataset_id, local)]
+
 ddata[, ":="(
    regional = factor("Upper San Francisco Estuary"),
 
@@ -169,9 +170,9 @@ meta <- meta[
 
 meta[, ":="(
    gamma_sum_grains = NA,
-   gamma_sum_grains_unit = NA,
-   gamma_sum_grains_type = NA,
-   gamma_sum_grains_comment = NA,
+   gamma_sum_grains_unit = "m2",
+   gamma_sum_grains_type = "sample",
+   gamma_sum_grains_comment = "sum of estimated areas sampled per year and region",
 
    gamma_bounding_box_unit = "km2",
    gamma_bounding_box_type = "convex-hull",
@@ -181,10 +182,10 @@ meta[, ":="(
       'Keeping only observations that were not undersampled.
 The original data provides information on the lifestages that were not reproduced
 here and individuals from the same species at different lifestages were pooled together.
-Keeping only sites sampled twice at least 10 years apart.
 When a site is sampled several times a year, selecting the 6 most frequently sampled months from the 8 most sampled months.
 When a site is sampled more than once a month, selecting the first visit.
-Pooling all samples from a year together')
+Pooling all samples from a year together.
+Keeping only sites sampled twice at least 10 years apart.')
 )][, ":="(
    gamma_bounding_box = geosphere::areaPolygon(data.frame(na.omit(longitude), na.omit(latitude))[grDevices::chull(na.omit(longitude), na.omit(latitude)), ]) / 10^6),
    by = .(dataset_id, year)]
@@ -196,15 +197,15 @@ data.table::setkey(ddata, dataset_id)
 data.table::setkey(meta, dataset_id)
 dataset_ids <- unique(meta$dataset_id)
 
-for (dataset_id in dataset_ids) {
+for (dataset_id_i in dataset_ids) {
    data.table::fwrite(
-      x = ddata[dataset_id],
-      file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised.csv"),
+      x = ddata[dataset_id_i],
+      file = paste0("data/wrangled data/", dataset_id_i, "/", dataset_id_i, "_standardised.csv"),
       row.names = FALSE
    )
    data.table::fwrite(
-      x = meta[dataset_id],
-      file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised_metadata.csv"),
+      x = meta[dataset_id_i],
+      file = paste0("data/wrangled data/", dataset_id_i, "/", dataset_id_i, "_standardised_metadata.csv"),
       row.names = FALSE
    )
 }

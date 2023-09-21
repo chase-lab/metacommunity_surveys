@@ -69,12 +69,12 @@ meta[, ":="(
 ## saving raw data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
 data.table::fwrite(
-   x = ddata[species != "", !c("total_trap_nights", "captures")],
+   x = ddata[, !c("total_trap_nights", "captures")],
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
    row.names = FALSE
 )
 data.table::fwrite(
-   x = meta[!ddata[species == ""], on = .(regional, local, year)],
+   x = meta,
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
    row.names = FALSE
 )
@@ -113,7 +113,11 @@ ddata[sample_size > min_sample_size,
       by = .(year, regional, local)]
 ddata <- ddata[, c("sample_size", "total_trap_nights", "month") := NULL][!is.na(value)]
 
-## meta ----
+## Excluding sites that were not sampled at least twice 10 years apart ----
+ddata <- ddata[!ddata[, diff(range(year)) < 9L, by = .(regional, local)][(V1)],
+               on = .(regional, local)]
+
+## Metadata ----
 meta[, month := NULL]
 meta <- unique(meta)
 meta <- meta[
@@ -136,7 +140,8 @@ meta[, ":="(
 Standartisation to achieve same Effort:
 One month per year was selected.
 Samples with less than 10 individuals were excluded.
-All samples were resampled down to the number of individuals found in the sample with the lowest effort: 72 trap nights, 11 individuals"
+All samples were resampled down to the number of individuals found in the sample with the lowest effort: 72 trap nights, 11 individuals.
+Sites that were not sampled at least twice 10 years apart were excluded."
 )][, gamma_sum_grains := sum(alpha_grain), by = year]
 
 ## save data

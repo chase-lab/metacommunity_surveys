@@ -34,8 +34,6 @@ meta[, ":="(
    realm = "Marine",
    taxon = "Fish",
 
-   effort = 1L,
-
    study_type = "ecological_sampling",
 
    data_pooled_by_authors = FALSE,
@@ -106,6 +104,9 @@ meta <- unique(meta[
    on = .(regional, local, year)])
 
 meta[, ":="(
+
+   effort = 1L,
+
    gamma_sum_grains_unit = "m2",
    gamma_sum_grains_type = "transect",
    gamma_sum_grains_comment = "number of transects per year per region * 50m2",

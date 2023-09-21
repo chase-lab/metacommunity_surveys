@@ -82,6 +82,10 @@ ddata[, ":="(
 )]
 
 ## Metadata ----
+meta[, local := stringi::stri_extract_first_regex(local, "^[0-9]+(?=_)")]
+meta <- unique(meta[unique(ddata[, .(regional, local, year)]),
+             on = .(regional, local, year)])
+
 meta[, ":="(
    effort = 1L,
 

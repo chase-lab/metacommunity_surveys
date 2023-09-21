@@ -5,8 +5,7 @@ ddata <- base::readRDS("data/raw data/lightfoot_2022/rdata.rds")
 
 # Fix any interval or ratio columns mistakenly read in as nominal and nominal columns read as numeric or dates read as strings
 # attempting to convert ddata$date dateTime string to R date structure (date or POSIXct)
-tmpDateFormat <- "%Y-%m-%d"
-tmp1date <- data.table::as.IDate(ddata$date, format = tmpDateFormat)
+tmp1date <- data.table::as.IDate(ddata$date, format = "%Y-%m-%d")
 # Keep the new dates only if they all converted correctly
 if (length(tmp1date) == length(tmp1date[!is.na(tmp1date)])) {ddata$date <- tmp1date } else {print("Date conversion failed for ddata$date. Please inspect the data and do the date conversion yourself.")}
 rm(tmpDateFormat, tmp1date)
@@ -43,8 +42,7 @@ ddata[, ":="(
 
    metric = "abundance",
    unit = "count"
-)]
-
+)][species == "NONE", species := NA_character_]
 
 # metadata ----
 meta <- unique(ddata[, .(dataset_id, regional, local, year, month, day)])
@@ -58,8 +56,6 @@ meta[, ":="(
    study_type = "ecological_sampling", #two possible values, or NA if not sure
 
    data_pooled_by_authors = FALSE,
-   data_pooled_by_authors_comment = NA,
-   sampling_years = NA,
 
    alpha_grain = pi*(15/2)^2,  #size/area of individual trap
    alpha_grain_unit = "cm2", #"acres", "ha", "km2", "m2", "cm2"
@@ -74,16 +70,14 @@ meta[, ":="(
 ##save data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
 data.table::fwrite(
-   x = ddata[species != "NONE", !c("date","site", "plot", "pit")],
+   x = ddata[, !c("date","site", "plot", "pit")],
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
-   row.names = FALSE
+   row.names = FALSE, sep = ",", encoding = "UTF-8"
 )
 data.table::fwrite(
-   x = meta[
-      ddata[species != "NONE", .(local, year, month, day)],
-      on = .(local, year, month, day)],
+   x = meta,
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
-   row.names = FALSE
+   row.names = FALSE, sep = ",", encoding = "UTF-8"
 )
 
 #standardised Data ----
@@ -94,7 +88,7 @@ ddata <- ddata[!year %in% 2005L:2006L]
 ddata <- ddata[!is.na(plot)] #remove NA, I6-unknown location in site M-RABB
 ddata <- ddata[!(site == 'SAND' & plot == 'C') &
                   !(site == 'RABB' & plot == 'C') &
-                  !(site == 'IBPE' & plot == 'C')] # remove plots uncomplete in time - reduce to 1 plot
+                  !(site == 'IBPE' & plot == 'C')] # remove plots incomplete in time - reduce to 1 plot
 
 ## resample individuals, based on the total abundance in the smallest sampling effort ----
 ### computing effort ----
@@ -113,20 +107,23 @@ ddata <- ddata[species != "NONE"]
 ### computing min total abundance for the local/year where the effort is the smallest ----
 ddata[, sample_size := sum(value), by = .(local, year)]
 min_sample_size <- ddata[effort == min(effort), min(sample_size)]
+ddata[, effort := NULL]
 
 ### resampling ----
 ddata <- ddata[sample_size >= 10L]
-source("./R/functions/resampling.r")
+source("R/functions/resampling.r")
 set.seed(42)
 ddata[sample_size > min_sample_size, value := resampling(species, value, min_sample_size), by = .(local, year)]
 ddata[sample_size < min_sample_size, value := resampling(species, value, min_sample_size, replace = TRUE), by = .(local, year)]
 
-ddata <- ddata[!is.na(value)]
+ddata <- ddata[!is.na(value)][, sample_size := NULL]
 
 ##meta data ----
-meta <- meta[unique(ddata[, .(local, year)]),
-             on = .(local, year)]
-meta[,":="(
+meta[, c("month", "day") := NULL]
+meta <- unique(meta[unique(ddata[, .(local, year)]),
+             on = .(local, year)])
+
+meta[, ":="(
    effort = 14L, # Effort is the minimal number of sampling operations ie the number of pitfall traps * the number of dates per local per year
 
    gamma_bounding_box = 120L, #size of biggest common scale can be different values for different areas per region
@@ -148,12 +145,12 @@ Samples with less than 10 individuals were excluded"
 
 ##save standardiseddata ----
 data.table::fwrite(
-   x = ddata[, !"sample_size"],
+   x = ddata,
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised.csv"),
-   row.names = FALSE
+   row.names = FALSE, sep = ",", encoding = "UTF-8"
 )
 data.table::fwrite(
    x = meta,
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised_metadata.csv"),
-   row.names = FALSE
+   row.names = FALSE, sep = ",", encoding = "UTF-8"
 )

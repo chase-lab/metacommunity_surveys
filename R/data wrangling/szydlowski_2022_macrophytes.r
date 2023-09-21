@@ -1,7 +1,7 @@
 dataset_id <- "szydlowski_2022_macrophytes"
 source("R/functions/resampling.r")
 
-ddata <- base::readRDS(file = "./data/raw data/szydlowski_2022_macrophytes/rdata.rds")
+ddata <- base::readRDS(file = "data/raw data/szydlowski_2022_macrophytes/rdata.rds")
 
 # Raw Data ----
 ## Melting species ----
@@ -42,7 +42,7 @@ lake_names <- c("Allequash Lake" = "AL", "High Lake" = "HI", "Little John Lake" 
 ddata[, ":="(
    dataset_id = dataset_id,
 
-   date = data.table::as.IDate(date),
+   date = data.table::as.IDate(date, format = "%Y-%m-%d"),
 
    regional = "Vilas County, Wisconsin",
    local = paste(names(lake_names)[match(local, lake_names)], sector, sep = "_"),
@@ -102,10 +102,10 @@ ddata[, ":="(latitude = mean(latitude), longitude = mean(longitude)),
 ## selecting samples with comparable effort ----
 min_sample_number <- 4L
 ddata <- ddata[, effort := data.table::uniqueN(sector),
-                             by = .(local, year)][effort >= min_sample_number]
+               by = .(local, year)][effort >= min_sample_number]
 set.seed(42)
 ddata <- ddata[
-   ddata[, .(sector = sample(sector, min_sample_number, replace = FALSE)),
+   ddata[, .(sector = sample(unique(sector), min_sample_number, replace = FALSE)),
          by = .(local, year)],
    on = .(local, year, sector)]
 
@@ -115,10 +115,14 @@ ddata <- ddata[, .(value = sum(value), latitude = mean(latitude),
                by = .(dataset_id, regional, local, year, species, metric, unit)]
 
 ##meta ----
-meta[, c("month","day","latitude","longitude") := NULL]
+meta[, c("month","day") := NULL]
 meta <- unique(meta)
-meta <- meta[unique(ddata[, .(local, latitude, longitude, year)]),
-             on = .(local, year)]
+meta <- unique(meta[
+   unique(ddata[, .(local, year)]),
+   ":="(latitude = mean(latitude),
+        longitude = mean(longitude)),
+   on = .(local, year)
+])
 
 meta[, ":="(
    effort = 4L,

@@ -1,7 +1,7 @@
 dataset_id <- "willig_2010"
 
 ddata <- data.table::fread(
-  file = "./data/raw data/willig_2010/LFDPSnailCaptures.csv",
+  file = "data/raw data/willig_2010/LFDPSnailCaptures.csv",
   sep = ",", header = TRUE, drop = c("UNKNOWN", "TOTABU", "COMMENTS")
 )
 data.table::setnames(ddata, new = tolower(colnames(ddata)))
@@ -115,7 +115,11 @@ ddata <- ddata[
 ddata <- ddata[, .(value = sum(value)),
                by = .(dataset_id, regional, local, year, species, metric, unit)]
 
-## metadata ----
+## Excluding sites that were not sampled at least twice 10 years apart ----
+ddata <- ddata[!ddata[, diff(range(year)) < 9L, by = .(regional, local)][(V1)],
+               on = .(regional, local)]
+
+## Metadata ----
 meta[, c("month","day") := NULL]
 meta <- unique(meta)
 meta <- meta[unique(ddata[, .(local, year)]),
@@ -135,7 +139,8 @@ meta[, ":="(
 
   comment_standardisation = "We want months with 2 or more runs.
 We select 3 out of 4 most sampled momths.
-Pooling all samples from a year together"
+Pooling all samples from a year together.
+Sites that were not sampled at least twice 10 years apart were excluded."
 )][, gamma_sum_grains := sum(alpha_grain), by = year]
 
 ##saving data tables ----

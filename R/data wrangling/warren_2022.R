@@ -8,7 +8,9 @@ ddata <- unique(ddata)
 #unique site-code entries in spatial data
 spatial <- unique(spatial, by = "site_code")
 #combine spatial and observational data
-ddata[spatial, ":="(regional = location_type, latitude = i.lat, longitude = i.long), on = "site_code"]
+ddata[spatial,
+      ":="(regional = location_type, latitude = i.lat, longitude = i.long),
+      on = "site_code"]
 
 # data preparation ----
 data.table::setnames(
@@ -25,18 +27,22 @@ ddata[, survey_date := data.table::as.IDate(survey_date)][, ":="(
 
 # Raw data ----
 ## community data ----
-# many duplicated rows after deletion of columns due to identifying information in deleted columns
-# in standardised data the sum is build of duplicated rows for summing values for different distance, direction and  detection  method and
-ddata <- ddata[!is.na(value)]
+ddata <- ddata[
+   !ddata[is.na(value)],
+   on = .(regional, survey_id, local, survey_date, time_start, time_end, observer)
+]
 
 ddata[, ":="(
    dataset_id = dataset_id,
 
+   site = local,
+   local = paste(local, observer, distance, seen, heard, direction,
+                 time_start, time_end, sep = "_"),
+
    metric = "abundance",
    unit = "count",
 
-   local = paste(local, observer, distance, seen, heard, direction, time_start, time_end, sep = "_"),
-
+   observer = NULL,
    survey_id = NULL,
    survey_date = NULL,
    time_start = NULL,
@@ -56,11 +62,13 @@ ddata[, ":="(
 # pooling observations ----
 ddata <- ddata[,
                .(value = sum(value)),
-               by = .(dataset_id, regional, local, latitude, longitude,
-                      year, month, day, observer, species, metric, unit)]
+               by = .(dataset_id, regional, site, local, latitude, longitude,
+                      year, month, day, species, metric, unit)]
 
 ## meta ----
-meta <- unique(ddata[, .(dataset_id, regional, local, year, month, day, latitude, longitude)])
+meta <- unique(ddata[, .(dataset_id, regional, site, local,
+                         year, month, day,
+                         latitude, longitude)])
 meta[, ":="(
    taxon = "Birds",
    realm = "Terrestrial",
@@ -75,40 +83,34 @@ meta[, ":="(
    alpha_grain_comment = "Open Radius sampling of birds seen or heard",
 
    comment = "Long term bird survey of greater Phoenix metropolitan area. Each bird survey location is visited independently by three birders who count all birds seen or heard within a 15-minute window. The frequency of surveys has varied through the life of the project. The first year of the project (2000) was generally a pilot year in which each site was visited approximately twice by a varying number of birders. The monitoring became more formalized beginning in 2001, and each site was visited in each of four seasons by three birders. The frequency of visits was reduced to three seasons in 2005, and to two season (spring, winter) beginning in 2006.",
-   comment_standardisation = "local is built as site_code, observer, distance, seen, heard, direction, time_start, time_end",
-   doi = 'https://doi.org/10.6073/pasta/1d54aead11fc7ccf43e889fe1863aa81'
+   comment_standardisation = "local is built as site_code, observer, distance, seen, heard, direction, time_start, time_end.
+Samples with NA in the value column were excluded.",
+doi = 'https://doi.org/10.6073/pasta/1d54aead11fc7ccf43e889fe1863aa81'
 )]
-
 
 ## save data sets----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
 data.table::fwrite(
-   x = ddata[, !c("observer", "longitude", "latitude")],
+   x = ddata[, !c("site", "longitude", "latitude")],
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
    row.names = FALSE
 )
 data.table::fwrite(
-   x = meta,
+   x = meta[, !"site"],
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
    row.names = FALSE
 )
 
 # Standardised Data ----
 
-## Removing sector name from local column ----
-ddata[, local := sub("_.*$", "", local, FALSE, TRUE)]
-meta[, local := sub("_.*$", "", local, FALSE, TRUE)]
+## Removing sector name from local column but keeping observer name ----
+ddata[, local := site][, site := NULL]
+meta[, local := site][, site := NULL]
 
 ## effort standardisation ----
-# When one site as sampled twice in the same day by two different observers, delete the day
-ddata <- ddata[
-   !ddata[, data.table::uniqueN(observer), by = .(regional, local, year,month, day)][V1 != 1L],
-   on = .(regional, local, year,month, day)
-][, observer := NULL]
-
 ddata <- ddata[
    !ddata[(regional == "ESCA" | regional == "riparian") & month == "12" & year == "2003"],
-   on = c("year", "regional", "local")]
+   on = .(year, month, regional, local)]
 
 ## When a site is sampled several times a year, selecting the 3 most frequently sampled month from the 4 sampled months ----
 month_order <- ddata[, data.table::uniqueN(day), by = .(local, month)][, sum(V1), by = month][order(-V1)]
@@ -118,23 +120,30 @@ data.table::setkey(ddata, month_order)
 # Some years have less than 3 months so these year/local have to be excluded
 ddata <- ddata[
    !ddata[, data.table::uniqueN(month), by = .(regional, local, year)][V1 < 3L],
-on = .(regional, local, year)]
+   on = .(regional, local, year)]
 
 ddata <- ddata[
-   unique(ddata[, .(regional, local, year, month)])[, .SD[1L:3L], by = .(regional, local, year)],
+   unique(ddata[, .(regional, local, year, month)])[, .SD[1L:3L],
+                                                    by = .(regional, local, year)],
    on = .(regional, local, year, month)][, month_order := NULL]
 
 ## When a site is sampled twice a month, selecting the first visit ----
 ddata <- ddata[
-   unique(ddata[, .(regional, local, year, month, day)])[, .SD[1L], by = .(regional, local, year, month)],
+   unique(ddata[, .(regional, local, year, month, day)])[, .SD[1L],
+                                                         by = .(regional, local, year, month)],
    on = .(regional, local, year, month, day)][, month := NULL][, day := NULL]
 
 ### Pooling all samples from a year together ----
-ddata[, ":="(latitude = mean(latitude), longitude = mean(longitude)), by = .(regional, local)]
+ddata[, ":="(latitude = mean(latitude), longitude = mean(longitude)),
+      by = .(regional, local)]
 ddata <- ddata[, .(value = sum(value)),
                by = .(dataset_id, regional, local, latitude, longitude, year, species, metric, unit)]
 
-# meta ----
+## Excluding sites that were not sampled at least twice 10 years apart ----
+ddata <- ddata[!ddata[, diff(range(year)) < 9L, by = .(regional, local)][(V1)],
+               on = .(regional, local)]
+
+## Metadata ----
 meta[, c("month","day","latitude","longitude") := NULL]
 meta <- unique(meta)
 meta <- meta[
@@ -152,7 +161,11 @@ meta[, ":="(
    gamma_sum_grains_type = "plot",
    gamma_sum_grains_comment = "sampled area per year",
 
-   comment_standardisation = "reducing dataset to one sampling event per year in same season. reducing to one observer per sampling event per year. removing NA in bird_count. Summing bird_counts for different direction, condition and distance to one abundance value"
+   comment_standardisation = "Reducing dataset to one sampling event per year in same season.
+Samples with NA in the value column were excluded.
+Summing bird_counts for different direction, condition and distance to one abundance value.
+Sites that were not sampled at least twice 10 years apart were excluded.
+local is built as site_code, observer"
 )][, ":="(
    gamma_sum_grains = sum(alpha_grain),
    gamma_bounding_box = geosphere::areaPolygon(data.frame(longitude, latitude)[grDevices::chull(longitude, latitude), ]) / 10^6
@@ -171,4 +184,3 @@ data.table::fwrite(
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised_metadata.csv"),
    row.names = FALSE
 )
-

@@ -6,7 +6,8 @@ data.table::setnames(ddata, old = "PROPORTION", new = "value")
 #Raw Data ----
 ## community data  ----
 ddata[, SURVEY_DATE := data.table::as.IDate(SURVEY_DATE, format = "%d-%b-%y")]
-ddata[, ":="(month = data.table::month(SURVEY_DATE),
+ddata[, ":="(year = as.integer(year),
+             month = data.table::month(SURVEY_DATE),
              day = data.table::mday(SURVEY_DATE))]
 
 ddata[, ":="(
@@ -62,6 +63,10 @@ data.table::fwrite(
 )
 
 #standardised data ----
+## Excluding sites that were not sampled at least twice 10 years apart ----
+ddata <- ddata[!ddata[, diff(range(year)) < 9L, by = .(regional, local)][(V1)],
+               on = .(regional, local)]
+
 ddata[, c("month","day") := NULL]
 ddata[, value := as.integer(value)][, ":="(
    value = 1L,
@@ -84,6 +89,10 @@ meta[,":="(
    gamma_bounding_box_unit = "km2",
    gamma_bounding_box_type = "administrative",
    gamma_bounding_box_comment = "ecological zone area is unknown so gamma has been set to the country",
+
+   comment_standardisation = "regional is an ecoregion (eg Westerly lowlands (England), Uplands (Wales))
+local is a SQUARE_ID.
+Sites that were not sampled at least twice 10 years apart were excluded.",
 
    COUNTRY = NULL
 )][, gamma_sum_grains := data.table::uniqueN(local), by = .(regional, year)]

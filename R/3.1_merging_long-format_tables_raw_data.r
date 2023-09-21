@@ -32,8 +32,8 @@ meta_raw <- data.table::rbindlist(lst_metadata_raw, fill = TRUE)
 
 ## Checking data ----
 source("R/functions/check_indispensable_variables.r")
-check_indispensable_variables(dt_raw, column_names_template_community_raw[as.logical(template_community_raw[, 2])])
-check_indispensable_variables(meta_raw, column_names_template_metadata_raw[as.logical(template_metadata_raw[, 2])])
+check_indispensable_variables(dt_raw, column_names_template_community_raw[as.logical(template_community_raw[, 2])]) # countryside_survey_invertebrates_2017, mushet_2018 & wardle_2014_plants have empty plots
+check_indispensable_variables(meta_raw, column_names_template_metadata_raw[as.logical(template_metadata_raw[, 2])]) # russell-smith_2017_trees: missing only one latitude value
 
 if (anyNA(dt_raw$year)) warning(paste("missing _year_ value in ", unique(dt_raw[is.na(year), dataset_id]), collapse = ", "))
 if (anyNA(meta_raw$year)) warning(paste("missing _year_ value in ", unique(meta_raw[is.na(year), dataset_id]), collapse = ", "))
@@ -42,15 +42,16 @@ if (dt_raw[, any(is.na(regional) | regional == "")]) warning(paste("missing _reg
 if (dt_raw[, any(is.na(local) | local == "")])
    warning(paste("missing _local_ value in ", unique(dt_raw[is.na(local) | local == "", dataset_id]), collapse = ", "))
 if (dt_raw[, any(is.na(species) | species == "")])
-   warning(paste("missing _species_ value in ", unique(dt_raw[is.na(species) | species == "", dataset_id]), collapse = ", "))
+   warning(paste("missing _species_ value in ", paste(unique(dt_raw[is.na(species) | species == "", dataset_id]), collapse = ", "))) # lightfoot_2022, muschet_2018, muthukrishnan_2019 and the 3 wardle data sets have empty samples.
 if (dt_raw[, any(is.na(value) | value == "" | value < 0)])
-   warning(paste("missing _value_ value in ", unique(dt_raw[is.na(value) | value == "" | value < 0, dataset_id]), collapse = ", "))
+   warning(paste("missing _value_ value in ", paste(unique(dt_raw[is.na(value) | value == "" | value < 0, dataset_id]), collapse = ", ")))
 if (dt_raw[, any(is.na(metric) | metric == "")])
-   warning(paste("missing _metric_ value in ", unique(dt_raw[is.na(metric) | metric == "", dataset_id]), collapse = ", "))
-if (dt_raw[, any(is.na(unit) | unit == "")]) warning(paste("missing _unit_ value in ", unique(dt_raw[is.na(unit) | unit == "", dataset_id]), collapse = ", "))
+   warning(paste("missing _metric_ value in ", paste(unique(dt_raw[is.na(metric) | metric == "", dataset_id]), collapse = ", ")))
+if (dt_raw[, any(is.na(unit) | unit == "")]) warning(paste("missing _unit_ value in ", paste(unique(dt_raw[is.na(unit) | unit == "", dataset_id]), collapse = ", ")))
 
 ### Counting the study cases ----
-dt_raw[, .(nsites = data.table::uniqueN(.SD)), .SDcols = c('regional', 'local'), by = .(dataset_id)][order(nsites, decreasing = TRUE)]
+dt_raw[, .(nsites = data.table::uniqueN(.SD)), .SDcols = c('regional', 'local'),
+       by = .(dataset_id)][order(nsites, decreasing = TRUE)]
 
 ## Ordering ----
 # data.table::setcolorder(dt, intersect(column_names_template, colnames(dt)))
@@ -192,9 +193,10 @@ if (any(!unique(meta_raw$taxon) %in% c("Fish", "Invertebrates", "Plants", "Birds
                       by = dataset_id]$dataset_id), collapse = ", ")))
 
 ### checking encoding ----
-for (i in seq_along(lst_metadata_raw))
+try(for (i in seq_along(lst_metadata_raw))
    if (any(!unlist(unique(apply(lst_metadata_raw[[i]][, c("local", "regional", "comment")], 2L, Encoding))) %in% c("UTF-8", "unknown")))
       warning(paste0("Encoding issue in ", listfiles_metadata_raw[i]))
+)
 
 ### checking year values ----
 if (!all(data.table::between(x = meta_raw$year, lower = 1500, upper = 2023)))
@@ -233,12 +235,12 @@ if (data.table::uniqueN(meta_raw$comment) != data.table::uniqueN(meta_raw$datase
 if (anyNA(meta_raw$comment_standardisation)) warning("Missing comment_standardisation value")
 
 ## Checking that there is only one alpha_grain value per dataset_id ----
-if (any(meta_raw[, any(data.table::uniqueN(alpha_grain_m2) != 1L), by = .(dataset_id, regional)]$V1)) warning(paste(
+if (meta_raw[, data.table::uniqueN(alpha_grain_m2), by = dataset_id][, any(V1 != 1L)]) warning(paste(
    "Inconsistent grain in",
    paste(
-      meta_raw[, data.table::uniqueN(alpha_grain_m2) != 1L, by = .(dataset_id, regional)][, unique(dataset_id)],
+      meta_raw[, data.table::uniqueN(alpha_grain_m2), by = dataset_id][V1 != 1L, unique(dataset_id)],
       collapse = ", ")
-))
+)) # Magnuson: alpha is the size of each lake.
 
 ### checking alpha_grain_type ----
 # meta[(!checklist), .(lterm = diff(range(year)), taxon = taxon, realm = realm, alpha_grain_type = alpha_grain_type), by = .(dataset_id, regional)][lterm >= 10L][taxon == "Fish" & realm == "Freshwater" & grep("lake",alpha_grain_type), unique(dataset_id)]
@@ -252,9 +254,9 @@ data.table::setcolorder(meta_raw, base::intersect(column_names_template_metadata
 
 ## Checking that all data sets have both community and metadata data ----
 if (length(base::setdiff(unique(dt_raw$dataset_id), unique(meta_raw$dataset_id))) > 0L) warning("Incomplete community or metadata tables")
-if (any(meta_raw[, .N, by = .(dataset_id, regional, local, year)][, N != 1L])) warning(
-   paste("Several values per local year in metadata of data sets:",
-         paste(meta_raw[, .N, by = .(dataset_id, regional, local, year)][N != 1L][, unique(dataset_id)], collapse = ", ")))
+# if (any(meta_raw[, .N, by = .(dataset_id, regional, local, year, month, day)][, N != 1L])) warning(
+#    paste("Several values per local year in metadata of data sets:",
+#          paste(meta_raw[, .N, by = .(dataset_id, regional, local, year, month, day)][N != 1L][, unique(dataset_id)], collapse = ", ")))
 if (nrow(meta_raw) != nrow(unique(meta_raw[, .(dataset_id, regional, local, year, month, day)]))) warning("Redundant rows in meta")
 if (nrow(meta_raw) != nrow(unique(dt_raw[, .(dataset_id, regional, local, year, month, day)]))) warning("Discrepancies between dt and meta")
 
@@ -266,12 +268,12 @@ data.table::fwrite(dt_raw, "data/communities_raw.csv", row.names = FALSE) # for 
 
 # if (file.exists("data/references/homogenisation_dropbox_folder_path.rds")) {
 #    path_to_homogenisation_dropbox_folder <- base::readRDS(file = "data/references/homogenisation_dropbox_folder_path.rds")
-#    data.table::fwrite(dt_raw, paste0(path_to_homogenisation_dropbox_folder, "/metacommunity-survey-raw-communities.csv"), row.names = FALSE)
+#    data.table::fwrite(dt_raw, paste0(path_to_homogenisation_dropbox_folder, "/metacommunity-survey_communities-raw.csv"), row.names = FALSE)
 # }
 
 
 ## Saving meta ----
 data.table::fwrite(meta_raw, "data/metadata_raw.csv", sep = ",", row.names = FALSE)  # for iDiv data portal: add , na = "NA"
 # if (file.exists("data/references/homogenisation_dropbox_folder_path.rds")) {
-#    data.table::fwrite(meta_raw, paste0(path_to_homogenisation_dropbox_folder, "/metacommunity-survey-metadata-raw.csv"), sep = ",", row.names = FALSE)
+#    data.table::fwrite(meta_raw, paste0(path_to_homogenisation_dropbox_folder, "/metacommunity-survey_metadata-raw.csv"), sep = ",", row.names = FALSE)
 # }

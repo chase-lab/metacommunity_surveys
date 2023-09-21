@@ -21,15 +21,14 @@ tax <- read.table(
 
 
 ## Coordinates
-coords <- read.csv("data/raw data/muschet_2017/site locations.csv", skip = 1)
-coords$Plot_name <- ifelse(nchar(coords$Plot_name) == 2, paste0(substr(coords$Plot_name, 1, 1), "0", substr(coords$Plot_name, 2, 2)), coords$Plot_name)
+coords <- data.table::fread(file = "data/raw data/muschet_2017/site locations.csv", skip = 1)
+coords[, Plot_name := data.table::fifelse(nchar(Plot_name) == 2L,
+                                          paste0(substr(Plot_name, 1, 1), "0", substr(Plot_name, 2, 2)),
+                                          Plot_name)]
+data.table::setnames(coords, c("Latitude","Longitude"), c("latitude", "longitude"))
 
 ## Reading insect counts ----
 ddata <- base::readRDS("data/raw data/muschet_2017/rdata.rds")
-
-## Deleting duplicated rows ----
-# eg YEAR 2008 MONTH 3 WETLAND P01 TRANSECT E VEGZONE OW is twice with different species abundances
-ddata <- ddata[!duplicated(ddata[, .(WETLAND, YEAR, MONTH, TRANSECT, VEGZONE)])]
 
 ##melting species ----
 ddata <- data.table::melt(ddata,
@@ -38,12 +37,18 @@ ddata <- data.table::melt(ddata,
                           na.rm = TRUE
 )
 
-##exclude empty values ----
-ddata <- ddata[!value %in% c("0", "D", "")]
+##exclude absences ----
+ddata <- ddata[!value %in% c("0", "")]
 
 data.table::setnames(ddata,
                      old = c("WETLAND","YEAR","MONTH"),
                      new = c("local", "year", "month"))
+
+## Deleting samples with duplicated observations ----
+# eg YEAR 2008 MONTH 3 WETLAND P01 TRANSECT E VEGZONE OW is twice with different species abundances
+ddata <- ddata[
+   !ddata[, .N, by = .(local, VEGZONE, TRANSECT, year, month, species)][N != 1L],
+   on = .(local, VEGZONE, TRANSECT, year, month)]
 
 #Raw Data ----
 ##community data ----
@@ -61,32 +66,32 @@ ddata[, ":="(
 )]
 
 ##meta data ----
-meta <- unique(ddata[, .(dataset_id, regional, local, year, month)])
+meta <- unique(ddata[, .(dataset_id, regional, local, year, month, Plot_name = sub("_.*$", "", local))])
+meta[coords, ":="(latitude = i.latitude, longitude = i.longitude), on = "Plot_name"][, Plot_name := NULL]
+
 meta[, ":="(
    taxon = "Invertebrates",
    realm = "Freshwater",
-
-   latitude = coords$Latitude[match(local, coords$Plot_name)],
-   longitude = coords$Longitude[match(local, coords$Plot_name)],
 
    study_type = "ecological_sampling",
 
    data_pooled_by_authors = FALSE,
 
-   alpha_grain = NA,
-   alpha_grain_unit = NA,
-   alpha_grain_type = "ecosystem",
-   alpha_grain_comment = "wetland area unknown",
+   alpha_grain = 1L,
+   alpha_grain_unit = "m2",
+   alpha_grain_type = "sample",
+   alpha_grain_comment = "estimated",
 
    comment = "Extracted from Mushet, D.M., Euliss, N.H., Jr., and Solensky, M.J. 2017, Cottonwood Lake Study Area - Invertebrate Counts, U.S. Geological Survey data release, https://doi.org/10.5066/F7BK1B77. Authors provide data sampled in the Cottonwood Lake Study Area from 1992 to 2015. Methods: 'Aquatic macroinvertebrates were collected each month (April-September) from all wetlands at Cottonwood Lake Study Area containing water using vertically oriented funnel traps (Swanson 1978). Sampling was stratified to provide separate estimates of invertebrate biomass and abundance in all major vegetative zones of each wetland. Samples were collected at random locations along the 3 established transects in each wetland that were established earlier and used to collect other biotic and abiotic data (LaBaugh et al. 1987). The length of each vegetation zone as bisected by transects was measured and a computer-generated set of random numbers used to identify sample points for the collection of invertebrate samples in each vegetative zone. One sample was collected from each major vegetative zone from each transect. Data consist of counts by taxa.'  Taxonomic names were extracted from metadata file https://www.sciencebase.gov/catalog/item/get/599d9555e4b012c075b964a6",
-   comment_standardisation = "empty values: 0 and NA were excluded",
-   doi = 'https://doi.org/10.5066/F7BK1B77'
+   comment_standardisation = "Absences: 0 and NA were excluded but empty samples ('D') were kept.
+Samples with duplicated observations were excluded.",
+doi = 'https://doi.org/10.5066/F7BK1B77'
 )]
 
 ## save raw data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
 data.table::fwrite(
-   x = ddata[,!c("TRANSECT","VEGZONE")],
+   x = ddata[, !c('TRANSECT','VEGZONE')],
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
    row.names = FALSE
 )
@@ -101,11 +106,11 @@ data.table::fwrite(
 ddata[, local := gsub("_.*$", "", local, perl = TRUE)]
 meta[, local := gsub("_.*$", "", local, perl = TRUE)]
 
-## selecting only months when all 3 transects were sampled ----
-ddata[, full_sample_month := length(unique(TRANSECT)), by = .(local, year, month)]
+# selecting only months when all 3 transects were sampled ----
+ddata[, full_sample_month := data.table::uniqueN(TRANSECT), by = .(local, year, month)]
 ddata <- ddata[full_sample_month == 3L]
 ##selecting only wetlands/years where all 6 months were sampled ----
-ddata[, nmonth := length(unique(month)), by = .(local, year)]
+ddata[, nmonth := data.table::uniqueN(month), by = .(local, year)]
 ddata <- ddata[nmonth == 6L]
 
 # # selecting the first two months for each local//year
@@ -118,33 +123,42 @@ ddata <- ddata[nmonth == 6L]
 #
 # ddata[, .N / sum(grepl("\\.", value)), by = .(year, local, TRANSECT, VEGZONE)]
 
+## exclude dry pond samples: value == D ----
+ddata <- ddata[value != "D"][, value := as.numeric(value)]
+
 ## pooling all months, TRANSECTs and VEGZONEs together
-ddata <- unique(ddata[, .(value = sum(as.numeric(value))),
+ddata <- unique(ddata[, .(value = sum(value)),
                       by = .(dataset_id, regional, local, year, species, metric, unit)])
 
-## exclude dry pond samples: value == D ----
-ddata <- ddata[!value %in% c("D")]
+## Excluding sites that were not sampled at least twice 10 years apart ----
+ddata <- ddata[!ddata[, diff(range(year)) < 9L, by = .(regional, local)][(V1)],
+               on = .(regional, local)]
 
 ## meta data ----
-meta <- meta[unique(ddata[, .(local, year)]),
-             on = .(local, year)]
+meta[, month := NULL]
+meta <- unique(meta[unique(ddata[, .(local, year)]),
+                    on = .(local, year)])
 
 meta[,":="(
    effort = 6L,
 
-   gamma_sum_grains = NA,
    gamma_sum_grains_type = "sample",
    gamma_sum_grains_unit = "m2",
-   gamma_sum_grains_comment = "unknown number of trap per transect.",
+   gamma_sum_grains_comment = "estimated sampled area per year",
 
-   gamma_bounding_box = geosphere::areaPolygon(coords[grDevices::chull(coords$Longitude, coords$Latitude), c("Longitude", "Latitude")]) / 1000000,
    gamma_bounding_box_unit = "km2",
    gamma_bounding_box_type = "convex-hull",
    gamma_bounding_box_comment = "area of the region computed as the convexhull covering the centres of all ponds",
 
-   comment_standardisation = "To ensure standard effort, we kept only wetlands and years that were sampled in all 3 transects in each of the 6 months. Then, samples from all transects and vegetative zones of a site, of all months of a year were pooled together.Empty values: 0 and NA and values of D resembling dry ponds were excluded"
-
-)]
+   comment_standardisation = "Samples with duplicated observations were excluded.
+To ensure standard effort, we kept only wetlands and years that were sampled in all 3 transects in each of the 6 months.
+Then, samples from all transects and vegetative zones of a site, of all months of a year were pooled together.
+Empty values: 0 and NA and values of D dry ponds were excluded.
+Sites that were not sampled at least twice 10 years apart were excluded."
+)][, ":="(
+   gamma_sum_grains = sum(alpha_grain),
+   gamma_bounding_box = geosphere::areaPolygon(data.frame(longitude, latitude)[grDevices::chull(longitude, latitude), ]) / 10^6),
+   by = year]
 
 ## save standardised data ----
 data.table::fwrite(
@@ -157,4 +171,3 @@ data.table::fwrite(
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised_metadata.csv"),
    row.names = FALSE
 )
-

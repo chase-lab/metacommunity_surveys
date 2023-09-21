@@ -5,7 +5,7 @@ dataset_id <- "keith_2017"
 ### https://datacommons.anu.edu.au/DataCommons/rest/display/anudc:5778
 ###Login for Australian National University needed. Data accessible after login without further requests.
 
-datapath <- "./data/raw data/keith_2017/kuhs_rnp_vegetation_floristics_1990-2014_p583t1043.csv"
+datapath <- "data/raw data/keith_2017/kuhs_rnp_vegetation_floristics_1990-2014_p583t1043.csv"
 ddata <- data.table::fread(datapath)
 
 #Raw Data----
@@ -64,7 +64,7 @@ data.table::fwrite(
   row.names = FALSE
 )
 
-#Standardized Data----
+#standardised Data----
 
 ##meta data----
 meta[,":="(
@@ -86,11 +86,11 @@ meta[,":="(
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
 data.table::fwrite(
   x = ddata,
-  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised.csv"),
   row.names = FALSE
 )
 data.table::fwrite(
   x = meta,
-  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
+  file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised_metadata.csv"),
   row.names = FALSE
 )

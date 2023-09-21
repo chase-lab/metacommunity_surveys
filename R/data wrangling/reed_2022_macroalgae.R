@@ -33,14 +33,14 @@ ddata <- ddata[TAXON_KINGDOM == "Plantae"]
 ##community data ----
 ddata[, ":="(
    dataset_id = dataset_id,
-   
+
    local = paste(local, TRANSECT, sep = "_"),
-   
+
    metric = "pa",
    unit = "pa",
-   
+
    regional = "Santa Barbara Channel",
-   
+
    DATE = NULL,
    MONTH = NULL,
    TRANSECT = NULL,
@@ -68,20 +68,20 @@ ddata[, ":="(
 
 meta <- unique(ddata[, .(dataset_id, year, regional, local, latitude, longitude)])
 meta[, ":="(
-   
+
    realm = "Marine",
    taxon = "Marine plants",
-   
+
    study_type = "ecological_sampling",
-   
+
    data_pooled_by_authors = FALSE,
-   
+
    alpha_grain_unit = "m2",
-   
+
    alpha_grain = 40L * 2L,
    alpha_grain_type = "transect",
    alpha_grain_comment = " fixed plots i.e. 40 m x 2 m transects",
-   
+
    comment = "These data are part of a larger collection of ongoing data sets that describe the temporal and spatial dynamics of kelp forest communities in the Santa Barbara Channel. Dataset split in different scripts by fish, invertebrate and macroalgae. Macroalgae defined as members of taxon_kingdom = plantae.
    Data on the abundance (density or percent cover) and size of ~250 species of reef associated macroalgae, invertebrates and fishes, substrate type and bottom topography are collected annually (one visit per year per transect between July and October) by divers in the summer within fixed plots (i.e. 40 m x 2 m transects) at 11 sites (n = 2 to 8 transects per site) that have historically supported giant kelp (Macrocystis pyrifera). Species-specific relationships between size (or percent cover) and mass developed for the region are used to covert abundance data to common metrics of mass (e.g., wet, dry, de-calcified dry) to facilitate analyses of community dynamics involving all species. Data collection began in 2000 and is ongoing.",
    comment_standardisation = "percent_coverage, WM_GM2, DM_GM2, SFDM, AFDM and density pooled together and translated to presence absence data.",
@@ -95,22 +95,22 @@ dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
 data.table::fwrite(
    x = ddata,
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
-   row.names = FALSE)
+   row.names = FALSE, sep = ",", encoding = "UTF-8")
 data.table::fwrite(
    x = meta,
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
-   row.names = FALSE)
-#Standardized data ----
+   row.names = FALSE, sep = ",", encoding = "UTF-8")
+#standardised data ----
 ##meta data ----
 meta[, ":="(
-   gamma_bounding_box_unit = "m2",
-   gamma_bounding_box_type = "convex-hull",
-   gamma_bounding_box_comment = "area polygon of convex-hull",
-   
    gamma_sum_grains_unit = "m2",
    gamma_sum_grains_type = "plot",
    gamma_sum_grains_comment = "sampled area per year",
-   
+
+   gamma_bounding_box_unit = "km2",
+   gamma_bounding_box_type = "convex-hull",
+   gamma_bounding_box_comment = "area polygon of convex-hull",
+
    effort = 1L
 )][, ":="(
    gamma_sum_grains = sum(alpha_grain),
@@ -120,12 +120,11 @@ by = year]
 
 
 ##save data ----
-dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
 data.table::fwrite(
    x = ddata,
-   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
-   row.names = FALSE)
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised.csv"),
+   row.names = FALSE, sep = ",", encoding = "UTF-8")
 data.table::fwrite(
    x = meta,
-   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
-   row.names = FALSE)
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised_metadata.csv"),
+   row.names = FALSE, sep = ",", encoding = "UTF-8")

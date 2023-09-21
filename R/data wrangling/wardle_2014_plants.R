@@ -58,13 +58,14 @@ meta[, ":="(
 
    data_pooled_by_authors = TRUE,
    data_pooled_by_authors_comment = "spatial pooling: percent of coverage in an area occupying 2.5 m radius around six traps on each trapping grid and have been aggregated to grid level data",
+   sampling_years = year,
 
    alpha_grain = 6 * pi * 2.5^2,
    alpha_grain_unit = "m2",
    alpha_grain_type = "plot",
    alpha_grain_comment = "percent of coverage in an area occupying 2.5 m radius around six traps on each trapping grid and have been aggregated to grid level data",
 
-   comment = "Data manually downloaded via https://datacommons.anu.edu.au/DataCommons/rest/display/anudc:5755 for national university of australia. The authors estimated percent coverage in an area occupying 2.5 m radius around six traps on each plot and have been aggregated to plot level data. Regional in this dataset is defined as the Simpson desert where the whole experiment is located and local is defined as grid_name",
+   comment = "Data manually downloaded via https://datacommons.anu.edu.au/DataCommons/rest/display/anudc:5755 for national university of australia. The authors estimated percent coverage in an area occupying 2.5 m radius around six traps on each plot and have been aggregated to plot level data. Regional in this dataset is defined as the Simpson desert where the whole experiment is located and local is defined as site_name _ grid_name.",
    comment_standardisation = "Samples with duplicated observations were removed.",
    doi = 'http://doi.org/10.25911/5c13171d944fe'
 )]
@@ -104,6 +105,10 @@ ddata <- ddata[
 ## Pooling all samples from a year together ----
 ddata <- ddata[, .(species = unique(species)), by = .(dataset_id, regional, local, year, metric, unit)]
 
+## Excluding sites that were not sampled at least twice 10 years apart ----
+ddata <- ddata[!ddata[, diff(range(year)) < 9L, by = .(regional, local)][(V1)],
+               on = .(regional, local)]
+
 ddata[, ":="(
    value = 1L,
    metric = "pa",
@@ -134,7 +139,8 @@ meta[, ":="(
 Converted percent of cover into presence absence.
 Exclude rows with NA values for percent coverage.
 Exclude percent coverage of dead plants.
-When a site is sampled several times a year, selecting the 1 most frequently sampled months from the 6 most sampled months."
+When a site is sampled several times a year, selecting the 1 most frequently sampled months from the 6 most sampled months.
+Sites that were not sampled at least twice 10 years apart were excluded."
 )][, gamma_sum_grains := sum(alpha_grain), by = .(regional, year)]
 
 # save data -----

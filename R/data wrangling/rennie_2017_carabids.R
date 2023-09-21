@@ -1,12 +1,12 @@
-dataset_id <- 'rennie_2017_carabids'
+dataset_id <- "rennie_2017_carabids"
 
 ddata <- base::readRDS(file = "data/raw data/rennie_2017_carabids/rdata.rds")
 data.table::setnames(x = ddata,
-                     new = c('regional','plot','date','local','value','species'))
+                     new = c("regional","plot","date","local","value","species"))
 
 # Raw data ----
 ## Community data ----
-ddata[, date := data.table::as.IDate(date, format = '%d-%b-%y')]
+ddata[, date := data.table::as.IDate(date, format = "%d-%b-%y")]
 
 ## Pooling individuals from the same trap and day ----
 ddata <- ddata[, .(value = sum(value)),
@@ -15,7 +15,7 @@ ddata <- ddata[, .(value = sum(value)),
 ddata[, ":="(
    dataset_id = dataset_id,
 
-   local = as.factor(paste(plot, local, sep = '_')),
+   local = as.factor(paste(plot, local, sep = "_")),
 
    year  = data.table::year(date),
    month = data.table::month(date),
@@ -27,27 +27,27 @@ ddata[, ":="(
 
 # Coordinates ----
 coords <- data.table::as.data.table(matrix(
-   dimnames = list(c(), c('regional', 'regional_name', 'latitude', 'longitude')),
+   dimnames = list(c(), c("regional", "regional_name", "latitude", "longitude")),
    byrow = TRUE, ncol = 4L, data = c(
-      'T01', 'Drayton', '52°11`37.95"N','1°45`51.95"W',
-      'T02', 'Glensaugh', '56°54`33.36"N', '2°33`12.14"W',
-      'T03', 'Hillsborough', '54°27`12.24"N', '6° 4`41.26"W',
-      'T04', 'Moor House – Upper Teesdale', '54°41`42.15"N', '2°23`16.26"W',
-      'T05', 'North Wyke', '50°46`54.96"N', '3°55`4.10"W',
-      'T06', 'Rothamsted', '51°48`12.33"N', '0°22`21.66"W',
-      'T07', 'Sourhope', '55°29`23.47"N', '2°12`43.32"W',
-      'T08', 'Wytham', '51°46`52.86"N', '1°20`9.81"W',
-      'T09', 'Alice Holt', '51° 9`16.46"N', '0°51`47.58"W',
-      'T10', 'Porton Down', '51° 7`37.83"N', '1°38`23.46"W',
-      'T11', 'Y Wyddfa – Snowdon', '53° 4`28.38"N', '4° 2`0.64"W',
-      'T12', 'Cairngorms', '57° 6`58.84"N', '3°49`46.98"W')
+      "T01", "Drayton", "52°11`37.95'N","1°45`51.95'W",
+      "T02", "Glensaugh", "56°54`33.36'N", "2°33`12.14'W",
+      "T03", "Hillsborough", "54°27`12.24'N", "6° 4`41.26'W",
+      "T04", "Moor House – Upper Teesdale", "54°41`42.15'N", "2°23`16.26'W",
+      "T05", "North Wyke", "50°46`54.96'N", "3°55`4.10'W",
+      "T06", "Rothamsted", "51°48`12.33'N", "0°22`21.66'W",
+      "T07", "Sourhope", "55°29`23.47'N", "2°12`43.32'W",
+      "T08", "Wytham", "51°46`52.86'N", "1°20`9.81'W",
+      "T09", "Alice Holt", "51° 9`16.46'N", "0°51`47.58'W",
+      "T10", "Porton Down", "51° 7`37.83'N", "1°38`23.46'W",
+      "T11", "Y Wyddfa – Snowdon", "53° 4`28.38'N", "4° 2`0.64'W",
+      "T12", "Cairngorms", "57° 6`58.84'N", "3°49`46.98'W")
 ))
 
 # metadata ----
 meta <- unique(ddata[, .(dataset_id, regional, plot, local, year, month, day)])
 meta[coords,
      ":="(latitude = i.latitude, longitude = i.longitude),
-     on = 'regional']
+     on = "regional"]
 
 meta[, ":="(
    taxon = "Invertebrates",
@@ -66,18 +66,18 @@ meta[, ":="(
 
    comment = "Data were downloaded from https://doi.org/10.5285/8385f864-dd41-410f-b248-028f923cb281. Authors assessed Carabid community composition with pitfall traps. The local scale is a pitfall trap and its name is constituted as LCODE_TRAP. Site coordinates were extracted from IG_dataStructure.rtf found in the Supporting documentation.",
    comment_standardisation = "none needed",
-   doi = 'https://doi.org/10.5285/8385f864-dd41-410f-b248-028f923cb281'
+   doi = "https://doi.org/10.5285/8385f864-dd41-410f-b248-028f923cb281"
 )]
 
 ## Saving raw data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
 data.table::fwrite(
-   x = ddata[value != 0L & !species %in% c('XX', '', 'UU'), !c("date","plot")],
+   x = ddata[value != 0L & !species %in% c("XX", "", "UU"), !c("date","plot")],
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
    row.names = FALSE, sep = ",", encoding = "UTF-8"
 )
 data.table::fwrite(
-   x = meta[unique(ddata[value != 0L & !species %in% c('XX', '', 'UU'), .(regional, local, year)]), on = .(regional, local, year), !"plot"],
+   x = meta[unique(ddata[value != 0L & !species %in% c("XX", "", "UU"), .(regional, local, year)]), on = .(regional, local, year), !"plot"],
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
    row.names = FALSE, sep = ",", encoding = "UTF-8"
 )
@@ -106,7 +106,7 @@ ddata <- ddata[
 ddata <- ddata[, .(value = sum(value)), by = .(dataset_id, regional, plot, local, year, metric, unit, species)]
 
 ## removing empty traps ----
-ddata <- ddata[value != 0L & !species %in% c('XX', '', 'UU')]
+ddata <- ddata[value != 0L & !species %in% c("XX", "", "UU")]
 
 ## Keeping only sites sampled at least twice 10 years apart ----
 ddata <- ddata[

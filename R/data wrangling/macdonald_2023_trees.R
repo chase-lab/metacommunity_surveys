@@ -78,8 +78,14 @@ data.table::fwrite(
 
 
 # Standardised data ----
+## Excluding sites that were not sampled at least twice 10 years apart ----
+ddata <- ddata[!ddata[, diff(range(year)) < 9L, by = .(regional, local)][(V1)],
+               on = .(regional, local)]
 
 ## Metadata ----
+meta <- meta[unique(ddata[, .(regional, local, year)]),
+             on = .(regional, local, year)]
+
 meta[, ":="(
    effort = 1L,
 
@@ -90,8 +96,10 @@ meta[, ":="(
 
    gamma_bounding_box = 1L,
    gamma_bounding_box_unit = "ha",
-   gamma_bounding_box_type = "plot",
-   gamma_bounding_box_comment = "each region is a 1ha permanent plot split into 400 5*5m quadrats"
+   gamma_bounding_box_type = "ecosystem",
+   gamma_bounding_box_comment = "each region is a 1ha permanent plot split into 400 5*5m quadrats",
+
+   comment_standardisation = "Sites that were not sampled at least twice 10 years apart were excluded."
 )]
 
 ## Saving standardised data ----

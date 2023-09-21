@@ -57,7 +57,10 @@ data.table::fwrite(
 
 ## data selection ----
 ### Keeping only sites sampled at twice least 10 years apart ----
-ddata <- ddata[ddata[, diff(range(year)), by = local][V1 >= 9L][, V1 := NULL], on = 'local']
+ddata <- ddata[
+   ddata[, diff(range(year)),
+         by = local][V1 >= 9L][, V1 := NULL],
+   on = 'local']
 
 ### When a site is sampled twice a year, selecting the most frequently sampled month ----
 ddata[, order_month := order(table(month), decreasing = TRUE)[match(month, 1:12)]]
@@ -76,8 +79,8 @@ ddata <- ddata[
 
 ## Metadata ----
 meta[, c("month", "day") := NULL]
-meta <- meta[unique(ddata[, .(local, year)]),
-             on = .(local, year)]
+meta <- unique(meta[unique(ddata[, .(local, year)]),
+                    on = .(local, year)])
 
 meta[, ":="(
    effort = 1L,

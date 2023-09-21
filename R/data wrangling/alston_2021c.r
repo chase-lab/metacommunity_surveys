@@ -1,6 +1,6 @@
 dataset_id <- "alston_2021c"
 # understory plants - UNDERSTORY_LGQUAD_2008-2019.csv
-ddata <- base::readRDS("./data/raw data/alston_2021c/rdata.rds")
+ddata <- base::readRDS("data/raw data/alston_2021c/rdata.rds")
 
 # Raw data ----
 ## melting species ----
@@ -23,6 +23,7 @@ ddata[, ":="(
    dataset_id = dataset_id,
    local = paste0(plot, local),
 
+   year = as.integer(year),
    month = c(2L, 2L, 3L, 4L, 9L, 10L, 11L)[data.table::chmatch(month, c("February", "february", "March" , "April", "September", "October", "November"))],
 
    value = 1L,
@@ -78,15 +79,23 @@ ddata <- ddata[grepl("OPEN", local)]
 # some sites are sampled once a year, others, twice.
 
 # 2009 was sampled in both spring and autumn, 2019 was sampled in spring only so we keep only spring surveys for all sites
-ddata <- ddata[month %in% c(2L, 3L, 4L)]
+# No pooling needed
+ddata <- ddata[month %in% c(2L, 3L, 4L)][, month := NULL]
 
 ## cleaning species lists ----
 ## Authors' warning: delete trees (e.g., Acacia spp. and Boscia angustifolia) and other overstory species (e.g., Opuntia stricta and Euphorbia sp.)
-species_list <- grep(x = species_list, pattern = "Acacia|Boscia_angustifolia|Euphorbia|Opuntia_stricta|Unknown|unknown", value = TRUE, invert = TRUE)
+species_list <- grep(
+   x = species_list, value = TRUE, invert = TRUE,
+   pattern = "Acacia|Boscia_angustifolia|Euphorbia|Opuntia_stricta|Unknown|unknown")
 ddata <- ddata[species %in% species_list]
 
+## Excluding sites that were not sampled at least twice 10 years apart.
+ddata <- ddata[!ddata[, diff(range(year)) < 9L, by = .(regional, local)][(V1)],
+               on = .(regional, local)]
+
 ## Metadata ----
-meta <- unique(meta[ddata[, .(dataset_id, regional, local, year)], on = .(regional, local, year)])
+meta[, month := NULL]
+meta <- unique(meta[ddata[, .(regional, local, year)], on = .(regional, local, year)])
 
 meta[, ":="(
    effort = 1L,
@@ -99,12 +108,14 @@ meta[, ":="(
    gamma_bounding_box_type = "convex-hull",
    gamma_bounding_box_comment = "coordinates provided by the authors",
 
-   comment_standardisation = "only open plots i.e. control treatment are included here. Only spring surveys are included here because 2009 and 2019 have spring in common. Tree species are excluded as recommended by the authors. Cover turned into presence absence"
+   comment_standardisation = "only open plots i.e. control treatment are included here. Only spring surveys are included here because 2009 and 2019 have spring in common.
+Tree species are excluded as recommended by the authors.
+Excluding sites that were not sampled at least twice 10 years apart.
+Cover turned into presence absence"
 )][, ":="(
    gamma_sum_grains = sum(alpha_grain),
    gamma_bounding_box = geosphere::areaPolygon(data.frame(longitude, latitude)[grDevices::chull(longitude, latitude), ]) / 10^6
-   ), by = .(year, regional)
-]
+), by = .(year, regional)]
 
 ## saving standardised data ----
 data.table::fwrite(

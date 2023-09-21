@@ -18,15 +18,19 @@ if (FALSE) {
 
 # Raw data ----
 data.table::setnames(
-   ddata,
-   c("Year", "Site_Name", "Location", "Longitude", "Latitude", "Species", "Mollusc_Count", "Quadrat_Area"),
-   c("year", "regional", "local", "longitude", "latitude", "species", "value", "alpha_grain")
+   x = ddata,
+   old = c("Year", "Site_Name", "Location", "Longitude", "Latitude", "Species",
+           "Mollusc_Count", "Quadrat_Area"),
+   new = c("year", "regional", "local", "longitude", "latitude", "species",
+           "value", "alpha_grain")
 )
 ddata[regional == "", regional := paste0("GCE", Site)]
 
+ddata <- ddata[!is.na(alpha_grain)]
+
 ## communities ----
 ddata[, ":="(
-   dataset_id = dataset_id,
+   dataset_id = factor(paste(dataset_id, "grain", alpha_grain, "m2", sep = "_")),
 
    metric = "abundance",
    unit = "count",
@@ -58,60 +62,58 @@ meta[, ":="(
 
    alpha_grain_unit = "m2",
    alpha_grain_type = "quadrat",
-   alpha_grain_comment = "area of a a single quadrat",
+   alpha_grain_comment = "area of a single quadrat",
 
    comment = "Data were downloaded from DOI:10.6073/pasta/651d603e2930d7ff608d7325230418e8 . METHODS: 'This data set includes long-term observational data on mollusc species abundance and size distribution at 10 Georgia Coastal Ecosystems marsh sites used for annual plant and invertebrate population monitoring. Infaunal and epifaunal molluscs were hand-collected from within quadrats of known area in mid-marsh and creekbank zones (n = 4 quadrats per zone) at all sites annually in October' also see: https://gce-lter.marsci.uga.edu/public/app/dataset_details.asp?accession=INV-GCES-1610",
    comment_standardisation = "Rows with quadrat_area = NA or quadrat_area having a very rare value were excluded.",
    doi = 'https://doi.org/10.6073/pasta/651d603e2930d7ff608d7325230418e8'
 )]
 
-meta_0.25 <- meta[alpha_grain == 0.25]
-meta_0.5 <- meta[alpha_grain == 0.5]
-
 ddata[, c("latitude","longitude") := NULL]
 
-## splitting and saving into 2 studies because 2 sampling gears were used ----
-drop_col_community <-  "alpha_grain"
-drop_col_metadata <-  "effort"
+## splitting and saving into several studies because several sampling gears were used ----
+data.table::setkey(ddata, dataset_id)
+data.table::setkey(meta, dataset_id)
+dataset_ids <- unique(meta$dataset_id)
 
-### 0.25 m2
-dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(
-   x = ddata[alpha_grain == 0.25, !..drop_col_community],
-   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_0.25_raw.csv"),
-   row.names = FALSE
-)
-data.table::fwrite(
-   x = meta_0.25[, !..drop_col_metadata],
-   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_0.25_raw_metadata.csv"),
-   row.names = FALSE
-)
-### 0.5 m2
-dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(
-   x = ddata[alpha_grain == 0.5, !..drop_col_community],
-   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_0.5_raw.csv"),
-   row.names = FALSE
-)
-data.table::fwrite(
-   x = meta_0.5[, !..drop_col_metadata],
-   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_0.5_raw_metadata.csv"),
-   row.names = FALSE
-)
-
+for (dataset_id_i in dataset_ids) {
+   dir.create(paste0("data/wrangled data/", dataset_id_i), showWarnings = FALSE)
+   data.table::fwrite(
+      x = ddata[dataset_id_i, !"alpha_grain"],
+      file = paste0("data/wrangled data/", dataset_id_i, "/", dataset_id_i, "_raw.csv"),
+      row.names = FALSE
+   )
+   data.table::fwrite(
+      x = meta[dataset_id_i, !"effort"],
+      file = paste0("data/wrangled data/", dataset_id_i, "/", dataset_id_i, "_raw_metadata.csv"),
+      row.names = FALSE
+   )
+}
 
 # Standardised data ----
 ## data selection ----
-ddata <- ddata[alpha_grain == 0.5]
+ddata <- ddata[alpha_grain == 0.5][, alpha_grain := NULL]
 ## excluding empty sites ----
 ddata <- ddata[value != 0L]
 
-## excluding regions/years with less than 4 locations with observed mollusks. data.table style join ----
-ddata <- ddata[ddata[, .(n_locations = length(unique(local))), by = .(year, regional)][n_locations >= 4L], on = c("year", "regional")]
+## excluding regions/years with less than 4 locations with observed mollusks. ----
+ddata <- ddata[
+   !ddata[, .(n_locations = data.table::uniqueN(local)),
+          by = .(dataset_id, year, regional)][n_locations < 4L],
+   on = .(dataset_id, year, regional)]
+
+## Excluding sites that were not sampled at least twice 10 years apart.
+ddata <- ddata[
+   !ddata[, diff(range(year)) < 9L,
+          by = .(dataset_id, regional, local)][(V1)],
+   on = .(dataset_id, regional, local)]
 
 ## metadata ----
 ### subsetting original meta with standardised ddata ----
-meta <- meta[ddata[,.(regional, local, year)], on = .(regional, local, year)]
+meta <- unique(meta[
+   ddata[,.(dataset_id, regional, local, year)],
+   on = .(dataset_id, regional, local, year)])
+
 ### updating extent values ----
 meta[, ":="(
    gamma_sum_grains_unit = "m2",
@@ -122,21 +124,28 @@ meta[, ":="(
    gamma_bounding_box_type = "convex-hull",
    gamma_bounding_box_comment = "coordinates provided by the authors",
 
-   comment_standardisation = "Only quadrats of 0.5m2 were kept. We excluded regions/years with less than 4 locations with observed molluscs."
+   comment_standardisation = "We excluded regions/years with less than 4 locations with observed molluscs.
+We excluded sites that were not sampled twice at least 10 years apart."
 )][, ":="(
    gamma_sum_grains = sum(alpha_grain),
    gamma_bounding_box = geosphere::areaPolygon(data.frame(longitude, latitude)[grDevices::chull(longitude, latitude), ]) / 10^6),
-   by = .(regional, year)]
+   by = .(dataset_id, regional, year)]
 
 ## saving standardised data ----
-dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(
-   x = ddata,
-   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standadised.csv"),
-   row.names = FALSE
-)
-data.table::fwrite(
-   x = meta,
-   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standadised_metadata.csv"),
-   row.names = FALSE
-)
+data.table::setkey(ddata, dataset_id)
+data.table::setkey(meta, dataset_id)
+dataset_ids <- unique(meta$dataset_id)
+
+for (dataset_id_i in dataset_ids) {
+   data.table::fwrite(
+      x = ddata[dataset_id_i],
+      file = paste0("data/wrangled data/", dataset_id_i, "/", dataset_id_i, "_standardised.csv"),
+      row.names = FALSE
+   )
+   data.table::fwrite(
+      x = meta[dataset_id_i],
+      file = paste0("data/wrangled data/", dataset_id_i, "/", dataset_id_i, "_standardised_metadata.csv"),
+      row.names = FALSE
+   )
+}
+

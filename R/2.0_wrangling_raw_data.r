@@ -1,5 +1,5 @@
 # Wrangle raw data
-base::dir.create("./data/wrangled data", showWarnings = FALSE)
+base::dir.create("data/wrangled data", showWarnings = FALSE)
 library(tictoc)
 
 for (script_path in list.files(path = "R/data wrangling", full.names = TRUE)) {

@@ -28,11 +28,11 @@ ddata[, ":="(
    month = data.table::month(date),
    day = data.table::mday(date),
 
-   visit = NULL,
-   date = NULL,
-
    metric = "abundance",
-   unit = "count"
+   unit = "count",
+
+   visit = NULL,
+   date = NULL
 )]
 
 ## cleaning: deleting samples with duplicated rows ----
@@ -99,11 +99,11 @@ ddata[, ":="(
    month = data.table::month(date),
    day = data.table::mday(date),
 
-   visit = NULL,
-   date = NULL,
-
    metric = "abundance",
-   unit = "count"
+   unit = "count",
+
+   visit = NULL,
+   date = NULL
 )]
 
 ## cleaning: deleting samples with duplicated rows ----
@@ -118,8 +118,6 @@ ddata <- ddata[
    on = .(regional, local)
 ]
 
-## Only one sample per year
-# ddata[, data.table::uniqueN(.SD), by = .(regional, local, year), .SDcols = c("month", "day")][, any(V1 != 1L)]
 ddata[, c("month","day") := NULL]
 
 ## meta data ----

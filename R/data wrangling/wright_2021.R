@@ -1,12 +1,12 @@
 dataset_id <- "wright_2021"
 
 ddata <- data.table::fread(
-   file = "./data/raw data/wright_2021/SEVBeeData2002-2019.csv",
+   file = "data/raw data/wright_2021/SEVBeeData2002-2019.csv",
    sep = ",", quote = '"', header = TRUE,
    drop = "direction"
 )
 taxo <- data.table::fread(
-   file = "./data/raw data/wright_2021/SEVBeeSpeciesList2002-2019.csv",
+   file = "data/raw data/wright_2021/SEVBeeSpeciesList2002-2019.csv",
    sep = ",", quote = '"', header = TRUE,
    select = c("code", "genus", "species", "author")
 )
@@ -75,8 +75,8 @@ meta[, ":="(
 
    data_pooled_by_authors = FALSE,
 
-   latitude = c(34.3364, 34.3329, 34.3362)[data.table::chmatch(regional, c("plains grasslands", "desert shrubland", "desert grassland"))],
-   longitude = c(-106.6345, -106.7358, -106.7212)[data.table::chmatch(regional, c("plains grasslands", "desert shrubland", "desert grassland"))],
+   latitude = c(34.3364, 34.3329, 34.3362)[data.table::chmatch(regional, c("plain grasslands", "desert shrubland", "desert grassland"))],
+   longitude = c(-106.6345, -106.7358, -106.7212)[data.table::chmatch(regional, c("plain grasslands", "desert shrubland", "desert grassland"))],
 
    alpha_grain = pi * (1.4 / 2)^2,
    alpha_grain_unit = "m2",
@@ -159,7 +159,7 @@ meta[, ":="(
    gamma_sum_grains_type = "sample",
    gamma_sum_grains_comment = "sum of trap areas per site",
 
-   gamma_bounding_box = c(800L * 800L, 1400L * 400L, 1000L * 600L)[data.table::chmatch(regional, c("plains grasslands", "desert shrubland", "desert grassland"))],
+   gamma_bounding_box = c(800L * 800L, 1400L * 400L, 1000L * 600L)[data.table::chmatch(regional, c("plain grasslands", "desert shrubland", "desert grassland"))],
    # gamma_bounding_box = 930, # 230 000 acres area of the Sevilleta National Wildlife Refuge
    gamma_bounding_box_unit = "m2",
    gamma_bounding_box_type = "box",

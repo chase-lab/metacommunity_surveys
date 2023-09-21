@@ -66,15 +66,22 @@ data.table::fwrite(
 
 # standardised data ----
 ## Community data ----
-#### Subsetting sites samples at least 10 years apart
-ddata <- ddata[
-   !ddata[, diff(range(year)) < 9L, by = local][(V1)],
-   on = 'local']
-### excluding locations/regions with less than 4 sites/local scale samples.
+ddata[, c("month", "day") := NULL]
+
+### excluding locations/regions with less than 4 sites/local scale samples ----
 ddata <- ddata[
    !ddata[, data.table::uniqueN(local) < 4L, by = .(regional)][(V1)],
    on = 'regional']
 
+ddata <- ddata[value != 0L]
+
+ddata <- ddata[, .(value = sum(value)), by = .(dataset_id, regional, local, year,
+                                               species, metric, unit)]
+
+#### Subsetting sites samples at least 10 years apart ----
+ddata <- ddata[
+   !ddata[, diff(range(year)) < 9L, by = local][(V1)],
+   on = 'local']
 
 ## metadata ----
 meta[, c("month", "day") := NULL]

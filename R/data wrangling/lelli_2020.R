@@ -1,8 +1,8 @@
 dataset_id <- "lelli_2020"
 
-coordinates <- base::readRDS("./data/raw data/lelli_2020/coordinates.rds")
-historical <- data.table::fread(file = paste0("./data/raw data/", dataset_id, "/historical.csv"), sep = ",", header = TRUE)
-resurvey <- data.table::fread(file = paste0("./data/raw data/", dataset_id, "/resurvey.csv"), sep = ",", header = TRUE)
+coordinates <- base::readRDS("data/raw data/lelli_2020/coordinates.rds")
+historical <- data.table::fread(file = paste0("data/raw data/", dataset_id, "/historical.csv"), sep = ",", header = TRUE)
+resurvey <- data.table::fread(file = paste0("data/raw data/", dataset_id, "/resurvey.csv"), sep = ",", header = TRUE)
 
 #Raw Data ----
 ##melting sites ----
@@ -73,7 +73,7 @@ data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_
                    row.names = FALSE
 )
 
-#Standardized Data----
+#standardised Data----
 ##meta data ----
 meta[,":="(
   effort = 1L,
@@ -91,9 +91,9 @@ meta[,":="(
 
 ##save data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized.csv"),
+data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised.csv"),
                    row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardized_metadata.csv"),
+data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised_metadata.csv"),
                    row.names = FALSE
 )

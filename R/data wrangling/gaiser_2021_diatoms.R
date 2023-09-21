@@ -24,6 +24,7 @@ ddata[, ":="(year = data.table::year(obs_date),
 ## Communities ----
 ddata[, ":="(
    dataset_id = dataset_id,
+
    regional = "Florida Coastal Everglades LTER",
    local = paste(local, primary_sampling_unit, sep = "_"),
 
@@ -35,7 +36,7 @@ ddata[, ":="(
 
 ## Metadata ----
 ### Coordinate conversion ----
-meta <- unique(ddata[, .(dataset_id, regional, local, year, longitude, latitude)])
+meta <- unique(ddata[, .(dataset_id, regional, local, year, month, day, longitude, latitude)])
 meta[longitude == -9999L | latitude == -9999L, c('longitude', 'latitude') := NA_integer_]
 
 coords <- stats::na.omit(meta)
@@ -94,11 +95,7 @@ data.table::fwrite(
 #    stringi_extract = ddata[, local3 := stringi::stri_extract_first_regex(local, ".*(?=_)")],
 #    base_gsub = ddata[, local4 := base::gsub("_.*", "", local)])
 ddata[, local := stringi::stri_extract_first_regex(local, ".*(?=_)")]
-
-### Keeping only sites sampled at twice least 10 years apart ----
-ddata <- ddata[
-   ddata[, diff(range(year)), by = local][V1 >= 9L][, V1 := NULL],
-   on = 'local']
+meta[, local := stringi::stri_extract_first_regex(local, ".*(?=_)")]
 
 ## When a site is sampled several times a year, selecting the 1 most frequently sampled month from the 4 sampled months ----
 month_order <- ddata[, data.table::uniqueN(obs_date), by = month][, sum(V1), by = month][order(-V1)]
@@ -112,14 +109,29 @@ ddata <- ddata[
 ## When a site is sampled twice a month, selecting the first visit ----
 ddata <- ddata[
    unique(ddata[, .(local, year, month, obs_date)])[, .SD[1L], by = .(local, year, month)],
-   on = .(local, year, month, obs_date)][, month := NULL][, obs_date := NULL]
+   on = .(local, year, month, obs_date)][, month := NULL][, obs_date := NULL][, day := NULL]
 
 ## When a site is sampled twice a day, select the first draw ----
 ddata <- ddata[
    unique(ddata[, .(local, year, primary_sampling_unit)])[, .SD[1L], by = .(local, year)],
    on = .(local, year, primary_sampling_unit)][, primary_sampling_unit := NULL]
 
+### Keeping only sites sampled at twice least 10 years apart ----
+ddata <- ddata[
+   !ddata[, diff(range(year)), by = local][V1 < 9L],
+   on = 'local']
+
 ## Metadata ----
+meta[, c("month","day") := NULL]
+meta <- unique(meta)
+meta <- meta[unique(ddata[, .(local, year)]),
+             on = .(local, year)]
+meta[, ":="(
+   latitude = mean(latitude, na.rm = TRUE),
+   longitude = mean(longitude, na.rm = TRUE)
+), by = .(regional, local)]
+meta <- unique(meta)
+
 meta[, ":="(
    effort = 1L,
 

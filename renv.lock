@@ -1,6 +1,6 @@
 {
   "R": {
-    "Version": "4.2.3",
+    "Version": "4.3.1",
     "Repositories": [
       {
         "Name": "CRAN",
@@ -38,18 +38,18 @@
     },
     "KernSmooth": {
       "Package": "KernSmooth",
-      "Version": "2.23-20",
+      "Version": "2.23-22",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
         "R",
         "stats"
       ],
-      "Hash": "8dcfa99b14c296bc9f1fd64d52fd3ce7"
+      "Hash": "2fecebc3047322fa5930f74fae5de70f"
     },
     "MASS": {
       "Package": "MASS",
-      "Version": "7.3-58.1",
+      "Version": "7.3-60",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -60,7 +60,7 @@
         "stats",
         "utils"
       ],
-      "Hash": "762e1804143a332333c054759f89a706"
+      "Hash": "a56a6365b3fa73293ea8d084be0d9bb0"
     },
     "R6": {
       "Package": "R6",
@@ -220,7 +220,7 @@
     },
     "class": {
       "Package": "class",
-      "Version": "7.3-21",
+      "Version": "7.3-22",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -229,11 +229,11 @@
         "stats",
         "utils"
       ],
-      "Hash": "8ae0d4328e2eb3a582dfd5391a3663b7"
+      "Hash": "f91f6b29f38b8c280f2b9477787d4bb2"
     },
     "classInt": {
       "Package": "classInt",
-      "Version": "0.4-7",
+      "Version": "0.4-10",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -245,7 +245,7 @@
         "graphics",
         "stats"
       ],
-      "Hash": "9c04a89713e4c4f9c0f3bf9ef928f852"
+      "Hash": "f5a40793b1ae463a7ffb3902a95bf864"
     },
     "cli": {
       "Package": "cli",
@@ -1038,13 +1038,16 @@
     "renv": {
       "Package": "renv",
       "Version": "1.0.2",
-      "OS_type": null,
+      "Source": "Repository",
       "Repository": "CRAN",
-      "Source": "Repository"
+      "Requirements": [
+        "utils"
+      ],
+      "Hash": "4b22ac016fe54028b88d0c68badbd061"
     },
     "rgdal": {
       "Package": "rgdal",
-      "Version": "1.5-32",
+      "Version": "1.6-7",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -1056,7 +1059,7 @@
         "stats",
         "utils"
       ],
-      "Hash": "7e8f18c3a55c90a44ea05e0620c05a7e"
+      "Hash": "10b777236c9e7855bc9dea8e347e30b7"
     },
     "rlang": {
       "Package": "rlang",
@@ -1107,7 +1110,7 @@
     },
     "sf": {
       "Package": "sf",
-      "Version": "1.0-8",
+      "Version": "1.0-14",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -1126,7 +1129,7 @@
         "units",
         "utils"
       ],
-      "Hash": "153da622b27630793858f24436bc0871"
+      "Hash": "e2111252a76984ca50bf8d6314348681"
     },
     "shiny": {
       "Package": "shiny",
@@ -1174,7 +1177,7 @@
     },
     "sp": {
       "Package": "sp",
-      "Version": "1.5-0",
+      "Version": "2.0-0",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -1187,7 +1190,7 @@
         "stats",
         "utils"
       ],
-      "Hash": "2a118bdd2db0a301711e0a9e3e3206d5"
+      "Hash": "2551981e6f85d59c81652bf654d6c3ca"
     },
     "stringi": {
       "Package": "stringi",
@@ -1240,8 +1243,8 @@
       "Package": "tabulizer",
       "Version": "0.2.2",
       "Source": "GitHub",
-      "Remotes": "ropensci/tabulizerjars",
       "RemoteType": "github",
+      "Remotes": "ropensci/tabulizerjars",
       "RemoteHost": "api.github.com",
       "RemoteRepo": "tabulizer",
       "RemoteUsername": "ropensci",
@@ -1369,14 +1372,14 @@
     },
     "units": {
       "Package": "units",
-      "Version": "0.8-0",
+      "Version": "0.8-4",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
         "R",
         "Rcpp"
       ],
-      "Hash": "6c374b265ba437f8d384ec7a313edd96"
+      "Hash": "e0fbcea25008a7540c83c2c294135de0"
     },
     "urltools": {
       "Package": "urltools",

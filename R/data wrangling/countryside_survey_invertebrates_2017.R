@@ -68,6 +68,10 @@ ddata <- ddata[
    on = .(regional, local, year)
 ]
 
+## Excluding sites that were not sampled at least twice 10 years apart ----
+ddata <- ddata[!ddata[, diff(range(year)) < 9L, by = .(regional, local)][(V1)],
+               on = .(regional, local)]
+
 ### cleaning species names? ----
 # ddata[, sum(grepl("ae$", species)) / data.table::uniqueN(species), by = .(regional, local, year)]
 
@@ -90,7 +94,8 @@ meta[,":="(
    gamma_bounding_box_type = "administrative",
    gamma_bounding_box_comment = "ecological zone area is unknown so gamma has been set to the country",
 
-   comment_standardisation = "Samples with NA abundance values were excluded.",
+   comment_standardisation = "Samples with NA abundance values were excluded.
+Sites that were not sampled at least twice 10 years apart were excluded.",
 
    COUNTRY = NULL
 )][, gamma_sum_grains := sum(alpha_grain), by = .(regional, year)]

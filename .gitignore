@@ -13,6 +13,11 @@ data/metadata.csv
 data/metadata_raw.csv
 data/metadata_standardised.csv
 
+data/communities_raw.csv.gz
+data/communities_standardised.csv.gz
+data/metadata_raw.csv.gz
+data/metadata_standardised.csv.gz
+
 data/communities_09_07_2023.csv
 data/metadata_09_07_2023.csv
 

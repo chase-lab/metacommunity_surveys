@@ -93,7 +93,7 @@ meta[, ":="(
 
    gamma_bounding_box = 1L,
    gamma_bounding_box_unit = "ha",
-   gamma_bounding_box_type = "plot",
+   gamma_bounding_box_type = "ecosystem",
    gamma_bounding_box_comment = "each region is a 1ha permanent plot split into 400 5*5m quadrats",
    comment_standardisation = "percent cover provided by the authors turned into presence absence. Cover of the following categories were excluded Dead_trees, Fine_DWD, Lich, Mineral, Trail, Pine_cones."
 )][, gamma_sum_grains := sum(alpha_grain), by = .(regional, year)]
