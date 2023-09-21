@@ -7,7 +7,7 @@ ddata <- data.table::fread(
 ddata[, species := paste(genus, species)]
 
 ##exclude: unknown lichen, moss, liverwort, rock, bare ground, no data, litter ----
-ddata <- ddata[!grepl(pattern = "No data|rock| litter|ground", x = species, ignore.case = TRUE)]
+ddata <- ddata[!grepl(pattern = "rock| litter|ground", x = species, ignore.case = TRUE)]
 ddata_standardised <- data.table::copy(ddata)
 
 ## Pool alive and dead individuals ----
@@ -43,10 +43,10 @@ meta[, ":="(
    latitude = "36°54'S",
    longitude =  "147°18'E",
 
-   alpha_grain = 900L,
-   alpha_grain_unit = "m2",
+   alpha_grain = pi * (4 / 2) ^ 2,
+   alpha_grain_unit = "mm2",
    alpha_grain_type = "plot",
-   alpha_grain_comment = "Approximate Area of Pretty Valley plots in m2 given by the authors",
+   alpha_grain_comment = "Area of 1 4mm diameter steel nail used per point",
 
    comment = "Extracted from: https://datacommons.anu.edu.au/DataCommons/rest/display/anudc:5886?layout=def:display, data saved at raw data/wahren_2016, data download only possible with login, download not scripted",
    comment_standardisation = "Local is built as site _ transect _ point
@@ -68,7 +68,7 @@ data.table::fwrite(
 )
 
 #Standardised Data ----
-ddata <- ddata_standardised[status == "L"][, status := NULL]
+ddata <- ddata_standardised[grepl("OUT", site) & status == "L"][, status := NULL]
 
 ##exclude: unknown lichen, moss, liverwort, rock, bare ground, no data, litter ----
 ddata <- ddata[!grepl(pattern = "no data|unknown", x = species, ignore.case = TRUE)]
@@ -125,24 +125,25 @@ meta[, ":="(
    latitude = "36°54'S",
    longitude =  "147°18'E",
 
-   alpha_grain = 900L,
-   alpha_grain_unit = "m2",
-   alpha_grain_type = "plot",
-   alpha_grain_comment = "Approximate Area of Pretty Valley plots in m2 given by the authors",
-
    effort = 10L,
+
+   alpha_grain = 10L,
+   alpha_grain_unit = "m2",
+   alpha_grain_type = "transect",
+   alpha_grain_comment = "Approximate area of Pretty Valley transects as given by the authors",
 
    gamma_sum_grains_unit = "m2",
    gamma_sum_grains_type = "plot",
-   gamma_sum_grains_comment = "Sum area of the two plots",
+   gamma_sum_grains_comment = "Sum area of the transects per year",
 
-   gamma_bounding_box = 0.2,
-   gamma_bounding_box_unit = "ha",
+   gamma_bounding_box = 900L,
+   gamma_bounding_box_unit = "m2",
    gamma_bounding_box_type = "ecosystem",
-   gamma_bounding_box_comment = "area provided by the authors",
+   gamma_bounding_box_comment = "plot area provided by the authors",
 
    comment = "Extracted from: https://datacommons.anu.edu.au/DataCommons/rest/display/anudc:5886?layout=def:display, data saved at raw data/wahren_2016, data download only possible with login, download not scripted",
    comment_standardisation = "Unidentified species and rock covers were excluded.
+PV_IN_G the site inside the enclosure was not kept.
 Transect-years with less than 10 points were excluded.
 Transect-years with more than 10 points, random selection of 10 points.",
    doi = 'https://doi.org/10.25911/5c3ff778936da'

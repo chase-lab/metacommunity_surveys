@@ -41,7 +41,7 @@ ddata[, ":="(
    secchi_ft = NULL,
    depth_ft = NULL,
    vegetation_common_name = NULL
-)]
+)][species %in% c("", "No Vegetation Present"), ":="(species = "NONE", value = 0L)]
 
 ddata <- unique(ddata) # some rows are duplicated, only record_num differs.
 
@@ -89,8 +89,7 @@ data.table::fwrite(
 # standardised data ----
 
 ## exclude unknown species and unsurveyed sample points  ----
-ddata <- ddata[species != "No Vegetation Present" &
-                  species != "" &
+ddata <- ddata[species != "NONE" &
                   sample_point_surveyed == "yes"]
 
 ## Change of local name to remove the rake number ----
@@ -111,12 +110,13 @@ ddata <- ddata[
    on = .(regional, local)]
 
 ## delete lakes from counties (regional scale) where there is only one lake ----
-# ddata <- ddata[ddata[, length(unique(survey_id)), by = .(regional, year)][(V1 >= 4L)], on = .(regional, year)]
+# ddata <- ddata[!ddata[, data.table::uniqueN(survey_id) < 4L, by = .(regional, year)][(V1)],on = .(regional, year)]
 
 ## randomly subsampling an equal number of rakes in all lakes ----
 min_rake_number <- 6L
 ddata <- ddata[ # data.table style join
-   ddata[, .(n_rake_samples = data.table::uniqueN(rake)), by = .(regional, local, year)][n_rake_samples >= min_rake_number, .(regional, local, year)],
+   ddata[, .(n_rake_samples = data.table::uniqueN(rake)),
+         by = .(regional, local, year)][n_rake_samples >= min_rake_number, .(regional, local, year)],
    on = .(regional, local, year)]
 
 set.seed(42)

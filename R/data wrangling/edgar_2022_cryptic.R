@@ -71,13 +71,13 @@ data.table::fwrite(
 ### subsetting ----
 ### Subsetting sites samples at least 10 years apart
 ddata <- ddata[
-   ddata[, diff(range(year)) >= 9L, by = local][(V1)][, local],
-   on = 'local']
+   !ddata[, diff(range(year)) < 9L, by = .(regional, year)][(V1)],
+   on = .(regional, year)]
 
 ### subsetting locations/regions with 4 sites/local scale samples or more.
 ddata <- ddata[
-   ddata[, data.table::uniqueN(local) >= 4L, by = .(regional)][(V1)][, regional],
-   on = 'regional']
+   !ddata[, data.table::uniqueN(local) < 4L, by = .(regional, year)][(V1)],
+   on = .(regional, year)]
 # subsetting one sample per year from the most sampled months
 month_order <- table(unique(ddata[,.(regional, local, year, month, survey_date)])$month)
 ddata <- ddata[

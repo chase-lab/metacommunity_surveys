@@ -64,12 +64,14 @@ ddata[, c("month", "day") := NULL]
 # "transect_ids 2019_86 and 2019_91 were excluded over uncertainty whether data are duplicated or not."
 ddata <- ddata[!transect_id %in% c("2019_86", "2019_91")][, transect_id := NULL]
 # regions with less than 4 sampled locations per year are excluded (Campeche island2013 and 2017)
-ddata <- ddata[ddata[, data.table::uniqueN(local),
-                     by = regional][V1 >= 4L][, V1 := NULL],
-               on = .(regional)]
+ddata <- ddata[
+   !ddata[, data.table::uniqueN(local) < 4L,
+          by = .(regional, year)][(V1)],
+   on = .(regional, year)]
 ## Excluding sites that were not sampled at least twice 10 years apart ----
-ddata <- ddata[!ddata[, diff(range(year)) < 9L, by = .(regional, local)][(V1)],
-               on = .(regional, local)]
+ddata <- ddata[
+   !ddata[, diff(range(year)) < 9L, by = .(regional, local)][(V1)],
+   on = .(regional, local)]
 
 ## Metadata ----
 meta[, c("month", "day") := NULL]

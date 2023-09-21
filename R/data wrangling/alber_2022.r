@@ -99,8 +99,8 @@ ddata <- ddata[value != 0L]
 ## excluding regions/years with less than 4 locations with observed mollusks. ----
 ddata <- ddata[
    !ddata[, .(n_locations = data.table::uniqueN(local)),
-          by = .(dataset_id, year, regional)][n_locations < 4L],
-   on = .(dataset_id, year, regional)]
+          by = .(dataset_id, regional, year)][n_locations < 4L],
+   on = .(dataset_id, regional, year)]
 
 ## Excluding sites that were not sampled at least twice 10 years apart.
 ddata <- ddata[

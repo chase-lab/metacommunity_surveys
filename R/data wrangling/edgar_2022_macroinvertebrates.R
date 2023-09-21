@@ -25,7 +25,7 @@ ddata[, ':='(
 
    metric = 'abundance',
    unit = 'count'
-)]
+)][ species == "No species found", ":="(species = "NONE", value = 0L)]
 
 
 ## Metadata ----
@@ -68,12 +68,13 @@ data.table::fwrite(
 ## Community data ----
 ddata[, c("month", "day") := NULL]
 
+### excluding sites with abnormal null values
+ddata <- ddata[!ddata[value == 0L], on = .(regional, local, year)]
+
 ### excluding locations/regions with less than 4 sites/local scale samples ----
 ddata <- ddata[
-   !ddata[, data.table::uniqueN(local) < 4L, by = .(regional)][(V1)],
-   on = 'regional']
-
-ddata <- ddata[value != 0L]
+   !ddata[, data.table::uniqueN(local) < 4L, by = .(regional, year)][(V1)],
+   on = .(regional, year)]
 
 ddata <- ddata[, .(value = sum(value)), by = .(dataset_id, regional, local, year,
                                                species, metric, unit)]
@@ -101,6 +102,7 @@ meta[, ":="(
    gamma_bounding_box_comment = "coordinates provided by the authors",
 
    comment_standardisation = "Abundances of individual observations of different sizes were pooled together by species.
+Samples containing abnormal values were excluded.
 Only regions with at least 4 sites sampled at least 10 years appart."
 )][, ":="(gamma_bounding_box = geosphere::areaPolygon(data.frame(longitude, latitude)[grDevices::chull(longitude, latitude), ]) / 10^6,
           gamma_sum_grains = sum(alpha_grain)),

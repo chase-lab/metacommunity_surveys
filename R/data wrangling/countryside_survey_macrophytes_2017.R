@@ -22,7 +22,8 @@ ddata[, ":="(
    LC07 = NULL,
    LC07_NUM = NULL,
    COUNTY07 = NULL
-)]
+)][species == "No species entered",
+   species := data.table::fifelse(value == 0, "NONE", NA)]
 
 ##meta data ----
 meta <- unique(ddata[, .(dataset_id, COUNTRY, regional, local, year, month, day)])
@@ -63,6 +64,9 @@ data.table::fwrite(
 )
 
 #standardised data ----
+### excluding samples with abnormal null values
+ddata <- ddata[!ddata[value == 0L], on = .(regional, local, year)]
+
 ## Excluding sites that were not sampled at least twice 10 years apart ----
 ddata <- ddata[!ddata[, diff(range(year)) < 9L, by = .(regional, local)][(V1)],
                on = .(regional, local)]
@@ -92,6 +96,7 @@ meta[,":="(
 
    comment_standardisation = "regional is an ecoregion (eg Westerly lowlands (England), Uplands (Wales))
 local is a SQUARE_ID.
+Samples containing abnormal values were excluded.
 Sites that were not sampled at least twice 10 years apart were excluded.",
 
    COUNTRY = NULL

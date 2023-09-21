@@ -71,8 +71,8 @@ data.table::fwrite(
 ### subsetting locations/regions with 4 sites/local scale samples or more.
 ddata <- ddata[
    !ddata[, data.table::uniqueN(local) < 4L,
-         by = regional][(V1)],
-   on = .(regional)
+         by = .(regional, year)][(V1)],
+   on = .(regional, year)
 ]
 
 # subsetting one sample per year from the most sampled months
