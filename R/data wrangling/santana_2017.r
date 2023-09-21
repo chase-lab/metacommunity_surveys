@@ -1,4 +1,3 @@
-
 dataset_id <- "santana_2017"
 ddata <- base::readRDS(file = paste0("data/raw data/", dataset_id, "/ddata.rds"))
 
@@ -16,9 +15,14 @@ ddata <- data.table::melt(
 ddata <- ddata[value > 0]
 
 ## community data ----
+ddata[date == "April 1996", date := "13 April 1996"][, date := data.table::as.IDate(date, format = "%d %B %Y")]
 ddata[, ":="(
    dataset_id = dataset_id,
+
    regional = paste("SPA Castro Verde", Farmland_area),
+
+   month = data.table::month(date),
+   day = data.table::mday(date),
 
    metric = "abundance",
    unit = "count",
@@ -31,7 +35,7 @@ ddata[, ":="(
 
 ## meta data ----
 
-meta <- unique(ddata[, .(dataset_id, regional, local, year)])
+meta <- unique(ddata[, .(dataset_id, regional, local, year, month, day)])
 meta[, ":="(
    realm = "Terrestrial",
    taxon = "Birds",
@@ -67,6 +71,8 @@ data.table::fwrite(
 )
 
 # Standardised Data ----
+ddata[, c("month","day") := NULL]
+meta[, c("month","day") := NULL]
 
 ## meta data ----
 meta <- meta[unique(ddata[, .(local, regional, year)]),

@@ -29,8 +29,11 @@ ddata[regional == "", regional := paste0("GCE", Site)]
 ddata <- ddata[!is.na(alpha_grain)]
 
 ## communities ----
-ddata[, ":="(
+ddata[, Date := data.table::as.IDate(Date, format = "%Y-%m-%d")][, ":="(
    dataset_id = factor(paste(dataset_id, "grain", alpha_grain, "m2", sep = "_")),
+
+   month = data.table::month(Date),
+   day = data.table::mday(Date),
 
    metric = "abundance",
    unit = "count",
@@ -48,7 +51,7 @@ ddata[, ":="(
 )]
 
 ## metadata ----
-meta <- unique(ddata[, .(dataset_id, regional, local, year, latitude, longitude, alpha_grain)])
+meta <- unique(ddata[, .(dataset_id, regional, local, year, month, day, latitude, longitude, alpha_grain)])
 meta[, ":="(
    taxon = "Invertebrates",
    realm = "Terrestrial",
@@ -91,6 +94,9 @@ for (dataset_id_i in dataset_ids) {
 }
 
 # Standardised data ----
+ddata[, c("month","day") := NULL]
+meta[, c("month","day") := NULL]
+
 ## data selection ----
 ddata <- ddata[alpha_grain == 0.5][, alpha_grain := NULL]
 ## excluding empty sites ----

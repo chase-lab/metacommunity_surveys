@@ -22,7 +22,7 @@ ddata[, ":="(
 )]
 
 ## meta data ----
-meta <- unique(ddata[, .(dataset_id, regional, local, latitude, longitude, year)])
+meta <- unique(ddata[, .(dataset_id, regional, local, latitude, longitude, year, month, day)])
 
 meta[, ":="(
    taxon = "Invertebrates",
@@ -58,8 +58,11 @@ data.table::fwrite(
 )
 
 # Standardised Data ----
+ddata[, c("month", "day") := NULL]
+meta[, c("month", "day") := NULL]
+
 ## selecting sites sampled at least twice with at least 10 years in between using a data.table style joint ----
-ddata <- ddata[ddata[, diff(range(unique(year))), by = local][V1 >= 9L, local], on = "local"]
+ddata <- ddata[!ddata[, diff(range(year)) < 9L, by = local][(V1)], on = "local"]
 
 ## resampling ----
 source("R/functions/resampling.r")

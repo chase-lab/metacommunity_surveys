@@ -14,8 +14,8 @@ if (!file.exists("data/raw data/countryside_survey_invertebrates_2017/rdata.rds"
    ), fill = TRUE, use.names = TRUE, idcol = FALSE)
 
    data.table::setnames(ddata,
-                        old = c("YEAR", "SQUARE", "EZ_DESC_07", "NAME", "ABUNDANCE"),
-                        new = c("year", "local", "regional", "species", "value"))
+                        old = c("YEAR", "SAMPLE_DATE", "SQUARE", "EZ_DESC_07", "NAME", "ABUNDANCE"),
+                        new = c("year", "date", "local", "regional", "species", "value"))
 
    base::dir.create("data/raw data/countryside_survey_invertebrates_2017", showWarnings = FALSE)
    base::saveRDS(

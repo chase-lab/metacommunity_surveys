@@ -5,10 +5,10 @@ data.table::setnames(ddata, old = "PROPORTION", new = "value")
 
 #Raw Data ----
 ## community data  ----
-ddata[, SURVEY_DATE := data.table::as.IDate(SURVEY_DATE, format = "%d-%b-%y")]
+ddata[, date := data.table::as.IDate(date, format = "%d-%b-%y")]
 ddata[, ":="(year = as.integer(year),
-             month = data.table::month(SURVEY_DATE),
-             day = data.table::mday(SURVEY_DATE))]
+             month = data.table::month(date),
+             day = data.table::mday(date))]
 
 ddata[, ":="(
    dataset_id = dataset_id,
@@ -18,7 +18,7 @@ ddata[, ":="(
 
    YEAR = NULL,
    SITE_ID = NULL,
-   SURVEY_DATE = NULL,
+   date = NULL,
    LC07 = NULL,
    LC07_NUM = NULL,
    COUNTY07 = NULL

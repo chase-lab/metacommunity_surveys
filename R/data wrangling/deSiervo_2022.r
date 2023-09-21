@@ -1,6 +1,6 @@
 dataset_id <- "deSiervo_2022"
 
-ddata <- base::readRDS("data/raw data/deSiervo_2022/.rdata.rds")
+ddata <- base::readRDS("data/raw data/deSiervo_2022/rdata.rds")
 
 ##Raw Data ----
 ##pooling life stages: canopy, seedling and sapling

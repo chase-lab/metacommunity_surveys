@@ -1,25 +1,35 @@
 dataset_id <- "reed_2022_invertebrate"
-datapath <- "data/raw data/reed_2022/rdata.rds"
-ddata <- base::readRDS(datapath)
+
+ddata <- base::readRDS("data/raw data/reed_2022/rdata.rds")
 
 #Raw data ----
-##spatial info ----
-
-spatial <- data.table::data.table("SITE" = ddata[,unique(SITE)])
+##spatial ----
+spatial <- data.table::data.table("SITE" = unique(ddata$SITE))
 spatial[, ":="(
-   latitude = parzer::parse_lat(c("34' 23.545' N","34' 25.340' N","34' 27.533' N","34' 23.660' N","34' 24.827' N","34' 24.170' N","34' 28.127' N","34' 24.007' N","34' 28.312' N", "34' 02.664' N","34' 03.518' N" )),
-
-   longitude = parzer::parse_lon(c("119' 32.628' W","119' 57.176' W","120' 20.006' W","119' 43.800' W","119' 49.344' W","119' 51.472' W", "120' 07.285' W", "119' 44.663' W", "120' 08.663' W","119' 42.908' W","119' 45.458' W" ))
+   latitude = parzer::parse_lat(c(
+      "34' 23.545' N", "34' 25.340' N", "34' 27.533' N", "34' 23.660' N",
+      "34' 24.827' N", "34' 24.170' N", "34' 28.127' N", "34' 24.007' N",
+      "34' 28.312' N", "34' 02.664' N", "34' 03.518' N")),
+   longitude = parzer::parse_lon(c(
+      "119' 32.628' W", "119' 57.176' W", "120' 20.006' W", "119' 43.800' W",
+      "119' 49.344' W", "119' 51.472' W", "120' 07.285' W", "119' 44.663' W",
+      "120' 08.663' W", "119' 42.908' W", "119' 45.458' W"))
 )]
-##merge spatial to ddata ----
+## merge spatial to ddata ----
 ddata <- ddata[spatial, on = "SITE"]
 
-##sum percent_coverage, WM_GM2, DM_GM2, SFDM, AFDM and density measurement collecting all pa info ----
-ddata[, value := sum(PERCENT_COVER, DENSITY, WM_GM2, DM_GM2, SFDM, AFDM,  na.rm = TRUE), by = c("SITE", "TRANSECT", "SP_CODE", "YEAR")]
+## converting date ----
+ddata[, DATE := data.table::as.IDate(DATE, format = "%Y-%m-%d")][, day := data.table::mday(DATE)]
+
+## sum percent_coverage, WM_GM2, DM_GM2, SFDM, AFDM and density measurement collecting all pa info ----
+ddata[, value := sum(PERCENT_COVER, DENSITY, WM_GM2, DM_GM2, SFDM, AFDM,  na.rm = TRUE), by = c("SITE", "TRANSECT", "SP_CODE", "YEAR", "MONTH", "day")]
 ddata <- ddata[value > 0, value := 1L][value != 0]
 
 ##rename cols ----
-data.table::setnames(ddata, c("YEAR", "SITE", "SCIENTIFIC_NAME"), c("year", "local", "species"))
+data.table::setnames(
+   x = ddata,
+   old = c("YEAR", "MONTH", "SITE", "SCIENTIFIC_NAME"),
+   new = c("year", "month", "local", "species"))
 
 ##split dataset ----
 #group invertebrate
@@ -37,7 +47,6 @@ ddata[, ":="(
    regional = "Santa Barbara Channel",
 
    DATE = NULL,
-   MONTH = NULL,
    TRANSECT = NULL,
    TAXON_KINGDOM = NULL,
    TAXON_PHYLUM = NULL,
@@ -61,7 +70,9 @@ ddata[, ":="(
 
 ##meta data ----
 
-meta <- unique(ddata[, .(dataset_id, year, regional, local, latitude, longitude)])
+meta <- unique(ddata[, .(dataset_id, year, regional, local,
+                         latitude, longitude,
+                         month, day)])
 meta[, ":="(
 
    realm = "Marine",
@@ -98,6 +109,9 @@ data.table::fwrite(
 
 
 #standardised data ----
+ddata[, c("month", "day") := NULL]
+meta[, c("month", "day") := NULL]
+
 ##meta data ----
 meta[,":="(
    effort = 1L,

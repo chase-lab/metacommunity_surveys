@@ -19,12 +19,18 @@ spatial[, ":="(
 ##merge spatial to ddata ----
 ddata <- ddata[spatial, on = "SITE"]
 
-##sum percent_coverage, WM_GM2, DM_GM2, SFDM, AFDM and density measurement collecting all pa info ----
-ddata[, value := sum(PERCENT_COVER, DENSITY, WM_GM2, DM_GM2, SFDM, AFDM,  na.rm = TRUE), by = c("SITE", "TRANSECT", "SP_CODE", "YEAR")]
+## converting date ----
+ddata[, DATE := data.table::as.IDate(DATE, format = "%Y-%m-%d")][, day := data.table::mday(DATE)]
+
+## sum percent_coverage, WM_GM2, DM_GM2, SFDM, AFDM and density measurement collecting all pa info ----
+ddata[, value := sum(PERCENT_COVER, DENSITY, WM_GM2, DM_GM2, SFDM, AFDM,  na.rm = TRUE), by = c("SITE", "TRANSECT", "SP_CODE", "YEAR", "MONTH", "day")]
 ddata <- ddata[value > 0, value := 1L][value != 0]
 
 ##rename cols ----
-data.table::setnames(ddata, c("YEAR", "SITE", "SCIENTIFIC_NAME"), c("year", "local", "species"))
+data.table::setnames(
+   x = ddata,
+   old = c("YEAR", "MONTH", "SITE", "SCIENTIFIC_NAME"),
+   new = c("year", "month", "local", "species"))
 
 ##split dataset: ----
 #group macroalgae
@@ -42,7 +48,6 @@ ddata[, ":="(
    regional = "Santa Barbara Channel",
 
    DATE = NULL,
-   MONTH = NULL,
    TRANSECT = NULL,
    TAXON_KINGDOM = NULL,
    TAXON_PHYLUM = NULL,
@@ -66,7 +71,9 @@ ddata[, ":="(
 
 ##meta data ----
 
-meta <- unique(ddata[, .(dataset_id, year, regional, local, latitude, longitude)])
+meta <- unique(ddata[, .(dataset_id, year, regional, local,
+                         latitude, longitude,
+                         month, day)])
 meta[, ":="(
 
    realm = "Marine",
@@ -100,7 +107,11 @@ data.table::fwrite(
    x = meta,
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
    row.names = FALSE, sep = ",", encoding = "UTF-8")
+
 #standardised data ----
+ddata[, c("month", "day") := NULL]
+meta[, c("month", "day") := NULL]
+
 ##meta data ----
 meta[, ":="(
    gamma_sum_grains_unit = "m2",

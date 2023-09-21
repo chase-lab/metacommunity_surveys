@@ -2,9 +2,9 @@
 dataset_id <- "countryside_survey_invertebrates_2017"
 ddata <- base::readRDS(file = "data/raw data/countryside_survey_invertebrates_2017/rdata.rds")
 
-ddata[, SAMPLE_DATE := data.table::as.IDate(SAMPLE_DATE, format = "%d-%b-%y")]
-ddata[, ":="(month = data.table::month(SAMPLE_DATE),
-             day = data.table::mday(SAMPLE_DATE))]
+ddata[, date := data.table::as.IDate(date, format = "%d-%b-%y")]
+ddata[, ":="(month = data.table::month(date),
+             day = data.table::mday(date))]
 
 # Raw Data ----
 ## community data ----
@@ -19,7 +19,7 @@ ddata[, ":="(
    LC07 = NULL,
    LC07_NUM = NULL,
    COUNTY07 = NULL,
-   SAMPLE_DATE = NULL
+   date = NULL
 )]
 
 ## Meta data ----

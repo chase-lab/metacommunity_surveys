@@ -26,7 +26,7 @@ ddata[, month := stringi::stri_extract_first_regex(
    str = month_year,
    pattern = "[A-Z][a-z]{1,3}")
 ][, month_year := NULL
-][, month := (2L:12L)[data.table::chmatch(month, c("Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"))]]
+][, month := (1L:12L)[data.table::chmatch(month, c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"))]]
 
 ##community data ----
 ddata[, species := as.character(species)][, ":="(

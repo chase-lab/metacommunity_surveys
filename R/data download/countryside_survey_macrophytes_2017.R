@@ -10,8 +10,8 @@ if (!file.exists("data/raw data/countryside_survey_macrophytes_2017/rdata.rds"))
    ), use.names = TRUE, idcol = TRUE)
 
    data.table::setnames(ddata,
-                        old = c(".id", "SQUARE", "EZ_DESC_07", "PLANT_NAME"),
-                        new = c("year", "local", "regional", "species"))
+                        old = c(".id","SURVEY_DATE", "SQUARE", "EZ_DESC_07", "PLANT_NAME"),
+                        new = c("year", "date", "local", "regional", "species"))
 
    base::dir.create("data/raw data/countryside_survey_macrophytes_2017", showWarnings = FALSE)
    base::saveRDS(
