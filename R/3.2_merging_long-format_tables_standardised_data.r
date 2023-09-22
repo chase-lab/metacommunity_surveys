@@ -38,7 +38,8 @@ if (anyNA(meta_standardised$year)) warning(paste("missing _year_ value in ", uni
 if (dt_standardised[metric == "pa", any(value != 1)]) warning(paste("abnormal presence absence value in ", unique(dt_standardised[value != 1, dataset_id]), collapse = ", "))
 if (dt_standardised[, any(is.na(regional) | regional == "")]) warning(paste("missing _regional_ value in ", unique(dt_standardised[is.na(regional) | regional == "", dataset_id]), collapse = ", "))
 if (dt_standardised[, any(is.na(local) | local == "")]) warning(paste("missing _local_ value in ", unique(dt_standardised[is.na(local) | local == "", dataset_id]), collapse = ", "))
-if (dt_standardised[, any(is.na(species) | species == "")]) warning(paste("missing _species_ value in ", unique(dt_standardised[is.na(species) | species == "", dataset_id]), collapse = ", "))
+if (dt_standardised[, any(is.na(species) | species == "")]) warning(paste("missing _species_ value in ",
+                                                                          paste(unique(dt_standardised[is.na(species) | species == "", dataset_id]), collapse = ", ")))
 if (dt_standardised[, any(is.na(value) | value == "" | value <= 0)]) warning(paste("missing _value_ value in ", unique(dt_standardised[is.na(value) | value == "" | value <= 0, dataset_id]), collapse = ", "))
 if (dt_standardised[, any(is.na(metric) | metric == "")]) warning(paste("missing _metric_ value in ", unique(dt_standardised[is.na(metric) | metric == "", dataset_id]), collapse = ", "))
 if (dt_standardised[, any(is.na(unit) | unit == "")]) warning(paste("missing _unit_ value in ", unique(dt_standardised[is.na(unit) | unit == "", dataset_id]), collapse = ", "))
@@ -226,13 +227,12 @@ if (any(meta_standardised[, data.table::uniqueN(paste(range(year), collapse = "-
                           by = .(dataset_id, regional)]$V1 != 1L)) warning("all local scale sites were not sampled for the same years and timepoints has to be consistent with years")
 
 ### checking study_type ----
-if (any(!meta_standardised$study_type %in% c("ecological_sampling", "resurvey")))
-   warning(
-      paste(
-         "study_type has to be either 'ecological_sampling' or 'resurvey', see: ",
-         paste(meta_standardised[!study_type  %in% c("ecological_sampling", "resurvey"), unique(dataset_id)], collapse = ", ")
-      )
+if (any(!meta_standardised$study_type %in% c("ecological_sampling", "resurvey"))) warning(
+   paste(
+      "study_type has to be either 'ecological_sampling' or 'resurvey', see: ",
+      paste(meta_standardised[!study_type  %in% c("ecological_sampling", "resurvey"), unique(dataset_id)], collapse = ", ")
    )
+)
 
 ### checking effort ----
 unique(meta_standardised[effort == "unknown" | is.na(effort), .(dataset_id, effort)])

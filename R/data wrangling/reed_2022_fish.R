@@ -1,6 +1,6 @@
 dataset_id <- "reed_2022_fish"
-datapath <- "data/raw data/reed_2022/rdata.rds"
-ddata <- base::readRDS(datapath)
+
+ddata <- base::readRDS("data/raw data/reed_2022/rdata.rds")
 
 #Raw data ----
 ##spatial ----
@@ -22,30 +22,26 @@ ddata[spatial, on = "SITE", ':='(latitude = i.latitude, longitude = i.longitude)
 ## converting date ----
 ddata[, DATE := data.table::as.IDate(DATE, format = "%Y-%m-%d")][, day := data.table::mday(DATE)]
 
-## sum percent_coverage, WM_GM2, DM_GM2, SFDM, AFDM and density measurement collecting all pa info ----
-ddata[, value := sum(PERCENT_COVER, DENSITY, WM_GM2, DM_GM2, SFDM, AFDM,  na.rm = TRUE), by = c("SITE", "TRANSECT", "SP_CODE", "YEAR", "MONTH", "day")]
-ddata <- ddata[value > 0, value := 1L][value != 0]
-
-##rename cols ----
-data.table::setnames(
-   x = ddata,
-   old = c("YEAR", "MONTH", "SITE", "SCIENTIFIC_NAME"),
-   new = c("year", "month", "local", "species"))
-
 ##split dataset: ----
 ##group fish ----
 ddata <- ddata[TAXON_CLASS == "Elasmobranchii" | TAXON_CLASS == "Actinopterygii"]
 
+##rename cols ----
+data.table::setnames(
+   x = ddata,
+   old = c("YEAR", "MONTH", "SITE", "SCIENTIFIC_NAME", "DENSITY"),
+   new = c("year", "month", "local", "species", "value"))
+
 ## community ----
+ddata <- ddata[value != 0]
 ddata[, ":="(
    dataset_id = dataset_id,
 
+   regional = "Santa Barbara Channel",
    local = paste(local, TRANSECT, sep = "_"),
 
-   metric = "pa",
-   unit = "pa",
-
-   regional = "Santa Barbara Channel",
+   metric = "density",
+   unit = "unknown",
 
    DATE = NULL,
    TRANSECT = NULL,
@@ -89,7 +85,7 @@ meta[, ":="(
 
    comment = "These data are part of a larger collection of ongoing data sets that describe the temporal and spatial dynamics of kelp forest communities in the Santa Barbara Channel. Dataset split in different scripts by fish, invertebrate and algae. Fish defined as members of taxon_class = Elasmobranchii or Actinopterygii.
    Data on the abundance (density or percent cover) and size of ~250 species of reef associated macroalgae, invertebrates and fishes, substrate type and bottom topography are collected annually (one visit per year per transect between July and October) by divers in the summer within fixed plots (i.e. 40 m x 2 m transects) at 11 sites (n = 2 to 8 transects per site) that have historically supported giant kelp (Macrocystis pyrifera). Species-specific relationships between size (or percent cover) and mass developed for the region are used to covert abundance data to common metrics of mass (e.g., wet, dry, de-calcified dry) to facilitate analyses of community dynamics involving all species. Data collection began in 2000 and is ongoing.",
-   comment_standardisation = "percent_coverage, WM_GM2, DM_GM2, SFDM, AFDM and density pooled together and translated to presence absence data.",
+   comment_standardisation = "none needed",
    doi = 'https://doi.org/10.6073/pasta/f2d0beb83ce7ed6949364ac28df790ea'
 )]
 

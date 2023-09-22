@@ -24,7 +24,6 @@ ddata[, ":="(
    day = data.table::mday(date),
 
    value = 1L,
-
    metric = "pa",
    unit = "pa"
 )][, c("site", "tr", "point", "date") := NULL]
@@ -43,8 +42,8 @@ meta[, ":="(
    latitude = "36°54'S",
    longitude =  "147°18'E",
 
-   alpha_grain = pi * (4 / 2) ^ 2,
-   alpha_grain_unit = "mm2",
+   alpha_grain = pi * (.4 / 2) ^ 2,
+   alpha_grain_unit = "cm2",
    alpha_grain_type = "plot",
    alpha_grain_comment = "Area of 1 4mm diameter steel nail used per point",
 

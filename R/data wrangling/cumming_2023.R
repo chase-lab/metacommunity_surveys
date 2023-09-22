@@ -18,7 +18,8 @@ ddata[, ':='(
 )][!is.na(scientificName), species := scientificName][, scientificName := NULL]
 
 ## Metadata ----
-meta <- unique(ddata[, .(dataset_id, regional, local, year, month, day, latitude = decimalLatitude, longitude = decimalLongitude)])
+meta <- unique(ddata[, .(dataset_id, regional, local, year, month, day,
+                         latitude = decimalLatitude, longitude = decimalLongitude)])
 meta[, ":="(
    taxon = "Fish",
    realm = "Marine",

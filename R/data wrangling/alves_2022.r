@@ -3,29 +3,24 @@ dataset_id <- "alves_2022"
 ddata <- base::readRDS(file = "data/raw data/alves_2022/rdata.rds")
 
 # Raw data ----
-ddata <- ddata[ Cover != 0 ][, Cover := NULL]
 ddata <- unique(ddata[ !General.Type %in% c("Substrate", "Dead", "Equipment",
                                             "Fish", "Rubble", "Sand.sediment",
                                             "Unknown", "Water", "N.c", "CTB")
 ][, Specific.Type := NULL])
 
-data.table::setnames(ddata, new = c("year", "local", "transect",
-                                    "species", "General.Type"))
+data.table::setnames(ddata,
+                     old = c("Year", "Image.Code", "ID", "Cover"),
+                     new = c("year", "local", "species", "value"))
 
 ## communities ----
 ddata[, ":="(
    dataset_id = dataset_id,
    regional = "Belizean Barrier Reef",
 
-   local = paste(sep = "-", local, transect),
-
    species = sub(pattern = ".", replacement = " ", x = species, fixed = TRUE),
 
-   value = 1L,
-   metric = "pa",
-   unit = "pa",
-
-   transect = NULL
+   metric = "cover",
+   unit = "percent"
 )]
 
 ## coordinates ----
@@ -34,7 +29,7 @@ data.table::setDT(coords)
 coords[, c("longitude", "latitude", "z") := do.call(rbind.data.frame, geometry)]
 
 ## metadata ----
-meta <- unique(ddata[, .(dataset_id, regional, local, year,
+meta <- unique(ddata[, .(dataset_id, regional, Site, Transect, local, year,
                          Name = sub(pattern = "-.*$", replacement = "", x = local))])
 meta[coords, ":="(
    latitude = i.latitude,
@@ -64,22 +59,34 @@ meta[, ":="(
 ## Saving raw data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
 data.table::fwrite(
-   x = ddata[, !"General.Type"],
+   x = ddata[value != 0, !c("Site", "Transect", "General.Type")],
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
    row.names = FALSE
 )
 data.table::fwrite(
-   x = meta,
+   x = unique(meta[ddata[value != 0 ], on = .(local, year), !c("Site", "Transect")]),
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
    row.names = FALSE
 )
 
 # Standardised data ----
-ddata <- ddata[General.Type == "Coral"][, General.Type := NULL]
-
 ## Standardisation of effort ----
-# For each site, exclude transects sampled only once, then randomly select one transect. data.table style join
-ddata[, c("regional", "local") := data.table::tstrsplit(local, "-", fixed = TRUE)]
+### Sample based standardisation ----
+# Resampling 14 pictures in all transects
+ddata <- ddata[
+   ddata[, .(local = sample(unique(local), 14L, replace = FALSE)), by = .(Site, Transect, year)],
+   on = .(Site, Transect, year, local)][value != 0L]
+
+ddata[, regional := Site][, Site := NULL]
+ddata[, local := Transect][, Transect := NULL]
+
+ddata[, ":="(
+   value = 1L,
+   metric = "pa",
+   unit = "pa"
+)]
+
+ddata <- unique(ddata[General.Type == "Coral"][, General.Type := NULL])
 
 ## Excluding region-years with less than 4 transects/local ----
 ddata <- ddata[
@@ -92,7 +99,8 @@ ddata <- ddata[
    on = .(regional, local)]
 
 ## metadata ----
-meta[, c("regional", "local") := data.table::tstrsplit(local, "-", fixed = TRUE)]
+meta[, regional := Site][, Site := NULL]
+meta[, local := Transect][, Transect := NULL]
 meta <- unique(unique(meta)[ddata[, .(regional, local, year)],
                             on = .(regional, local, year)])
 
@@ -112,6 +120,7 @@ meta[, ":="(
 Only Coral is kept.
 Regional is an island/site.
 local is a transect.
+Transects that had 15 pictures taken where resampled down to 14 pictures.
 Transects that were not sampled at least twice at least 10 years apart were excluded."
 )][, gamma_sum_grains := sum(alpha_grain), by = .(regional, year)]
 

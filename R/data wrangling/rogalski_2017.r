@@ -3,7 +3,7 @@ dataset_id <- "rogalski_2017"
 
 ddata <- base::readRDS(paste0("data/raw data/", dataset_id, "/ddata.rds"))
 
-data.table::setnames(ddata, old = 1L, new = "local")
+data.table::setnames(ddata, old = "Lake", new = "local")
 
 #Raw Data ----
 ##melting species ----
@@ -13,7 +13,7 @@ ddata <- data.table::melt(ddata,
                           na.rm = TRUE
 )
 
-ddata <- ddata[value > 0]
+ddata <- ddata[value != 0]
 
 ## community data ----
 ddata[, ":="(
@@ -21,11 +21,8 @@ ddata[, ":="(
 
    regional = "Connecticut",
 
-   year = trunc(year),
-
-   value = 1L,
-   metric = "pa",
-   unit = "pa"
+   metric = "density",
+   unit = "unknown"
 )]
 
 ## coordinates ----
@@ -73,6 +70,12 @@ data.table::fwrite(
 # Standardised Data ----
 ddata <- ddata[species != "Unknown_eggs_dryg-1"]
 
+ddata[, ":="(
+   value = 1L,
+   metric = "pa",
+   unit = "pa"
+)]
+
 ## meta data ----
 meta <- meta[unique(ddata[, .(local, year)]),
              on = .(local, year)]
@@ -83,13 +86,14 @@ meta[, ":="(
    gamma_sum_grains_type = "sample",
    gamma_sum_grains_comment = "sample/alpha_grain is one single sediment core per lake (local). gamma_sum_grains is the sum of sediment core 'slices' per year",
 
-   gamma_bounding_box = geosphere::areaPolygon(coords[grDevices::chull(coords$longitude, coords$latitude), c("longitude", "latitude")]) / 10^6,
+   gamma_bounding_box = geosphere::areaPolygon(data.frame(longitude, latitude)[grDevices::chull(longitude, latitude), ]) / 10^6,
    gamma_bounding_box_unit = "km2",
    gamma_bounding_box_type = "convex-hull",
    gamma_bounding_box_comment = "area covering the 4 lakes",
 
-   comment_standardisation = "Taxa that were not identified (ie 'unknown') were excluded."
-)][, gamma_sum_grains := pi * (0.125^2) * length(unique(local)), by = .(regional, year)]
+   comment_standardisation = "Taxa that were not identified (ie 'unknown') were excluded.
+Density turned into presence absence"
+)][, gamma_sum_grains := sum(pi * (0.125^2)), by = .(regional, year)]
 
 
 ## save standardised data ----

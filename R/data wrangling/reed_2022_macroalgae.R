@@ -1,6 +1,6 @@
 dataset_id <- "reed_2022_macroalgae"
-datapath <- "data/raw data/reed_2022/rdata.rds"
-ddata <- base::readRDS(datapath)
+
+ddata <- base::readRDS("data/raw data/reed_2022/rdata.rds")
 
 #Raw data ----
 ##spatial info ----
@@ -22,30 +22,26 @@ ddata <- ddata[spatial, on = "SITE"]
 ## converting date ----
 ddata[, DATE := data.table::as.IDate(DATE, format = "%Y-%m-%d")][, day := data.table::mday(DATE)]
 
-## sum percent_coverage, WM_GM2, DM_GM2, SFDM, AFDM and density measurement collecting all pa info ----
-ddata[, value := sum(PERCENT_COVER, DENSITY, WM_GM2, DM_GM2, SFDM, AFDM,  na.rm = TRUE), by = c("SITE", "TRANSECT", "SP_CODE", "YEAR", "MONTH", "day")]
-ddata <- ddata[value > 0, value := 1L][value != 0]
-
-##rename cols ----
-data.table::setnames(
-   x = ddata,
-   old = c("YEAR", "MONTH", "SITE", "SCIENTIFIC_NAME"),
-   new = c("year", "month", "local", "species"))
-
 ##split dataset: ----
 #group macroalgae
 ddata <- ddata[TAXON_KINGDOM == "Plantae"]
 
+##rename cols ----
+data.table::setnames(
+   x = ddata,
+   old = c("YEAR", "MONTH", "SITE", "SCIENTIFIC_NAME", "PERCENT_COVER"),
+   new = c("year", "month", "local", "species", "value"))
+
 ##community data ----
+ddata <- ddata[value != 0]
 ddata[, ":="(
    dataset_id = dataset_id,
 
+   regional = "Santa Barbara Channel",
    local = paste(local, TRANSECT, sep = "_"),
 
-   metric = "pa",
-   unit = "pa",
-
-   regional = "Santa Barbara Channel",
+   metric = "cover",
+   unit = "percent",
 
    DATE = NULL,
    TRANSECT = NULL,
@@ -70,12 +66,10 @@ ddata[, ":="(
 )]
 
 ##meta data ----
-
 meta <- unique(ddata[, .(dataset_id, year, regional, local,
                          latitude, longitude,
                          month, day)])
 meta[, ":="(
-
    realm = "Marine",
    taxon = "Marine plants",
 
@@ -91,7 +85,7 @@ meta[, ":="(
 
    comment = "These data are part of a larger collection of ongoing data sets that describe the temporal and spatial dynamics of kelp forest communities in the Santa Barbara Channel. Dataset split in different scripts by fish, invertebrate and macroalgae. Macroalgae defined as members of taxon_kingdom = plantae.
    Data on the abundance (density or percent cover) and size of ~250 species of reef associated macroalgae, invertebrates and fishes, substrate type and bottom topography are collected annually (one visit per year per transect between July and October) by divers in the summer within fixed plots (i.e. 40 m x 2 m transects) at 11 sites (n = 2 to 8 transects per site) that have historically supported giant kelp (Macrocystis pyrifera). Species-specific relationships between size (or percent cover) and mass developed for the region are used to covert abundance data to common metrics of mass (e.g., wet, dry, de-calcified dry) to facilitate analyses of community dynamics involving all species. Data collection began in 2000 and is ongoing.",
-   comment_standardisation = "percent_coverage, WM_GM2, DM_GM2, SFDM, AFDM and density pooled together and translated to presence absence data.",
+   comment_standardisation = "none needed",
    doi = 'https://doi.org/10.6073/pasta/f2d0beb83ce7ed6949364ac28df790ea'
 )]
 
@@ -114,6 +108,8 @@ meta[, c("month", "day") := NULL]
 
 ##meta data ----
 meta[, ":="(
+   effort = 1L,
+
    gamma_sum_grains_unit = "m2",
    gamma_sum_grains_type = "plot",
    gamma_sum_grains_comment = "sampled area per year",
@@ -122,7 +118,7 @@ meta[, ":="(
    gamma_bounding_box_type = "convex-hull",
    gamma_bounding_box_comment = "area polygon of convex-hull",
 
-   effort = 1L
+   comment_standardisation = "percent_coverage translated to presence absence data."
 )][, ":="(
    gamma_sum_grains = sum(alpha_grain),
    gamma_bounding_box = geosphere::areaPolygon(data.frame(longitude, latitude)[grDevices::chull(longitude, latitude), ]) / 10^6

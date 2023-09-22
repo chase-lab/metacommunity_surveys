@@ -17,10 +17,8 @@ ddata[, ":="(
    dataset_id = dataset_id,
    regional = "Gawel transects",
 
-   value = 1L,
-   metric = "pa",
-   unit = "pa"
-)][, ":="(
+   metric = "abundance",
+   unit = "count",
 
    local_year = NULL
 )]
@@ -75,6 +73,15 @@ data.table::fwrite(
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
    row.names = FALSE
 )
+
+# Standardised data ----
+ddata <- ddata[value != "x"]
+ddata[, ":="(
+   value = 1L,
+   metric = "pa",
+   unit = "pa"
+)]
+meta[, comment_standardisation := "Abundance scores turned into presence absence"]
 
 # saving standardised data ----
 data.table::fwrite(

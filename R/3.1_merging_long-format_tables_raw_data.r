@@ -37,7 +37,8 @@ check_indispensable_variables(meta_raw, column_names_template_metadata_raw[as.lo
 
 if (anyNA(dt_raw$year)) warning(paste("missing _year_ value in ", unique(dt_raw[is.na(year), dataset_id]), collapse = ", "))
 if (anyNA(meta_raw$year)) warning(paste("missing _year_ value in ", unique(meta_raw[is.na(year), dataset_id]), collapse = ", "))
-if (dt_raw[metric == "pa", any(value != 1)]) warning(paste("abnormal presence absence value in ", unique(dt_raw[value != 1, dataset_id]), collapse = ", "))
+if (dt_raw[metric == "pa", any(value != 1)]) warning(paste("abnormal presence absence value in ",
+                                                           paste(unique(dt_raw[value != 1, dataset_id]), collapse = ", ")))
 if (dt_raw[, any(is.na(regional) | regional == "")]) warning(paste("missing _regional_ value in ", unique(dt_raw[is.na(regional) | regional == "", dataset_id]), collapse = ", "))
 if (dt_raw[, any(is.na(local) | local == "")])
    warning(paste("missing _local_ value in ", unique(dt_raw[is.na(local) | local == "", dataset_id]), collapse = ", "))

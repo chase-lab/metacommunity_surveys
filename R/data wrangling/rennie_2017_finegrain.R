@@ -57,15 +57,17 @@ meta[, ":="(
    doi = 'https://doi.org/10.5285/b98efec8-6de0-4e0c-85dc-fe4cdf01f086'
 )]
 
+ddata[, plot := NULL]
+
 ## Saving raw data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
 data.table::fwrite(
-   x = ddata[value != 0L, !"plot"],
+   x = ddata,
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
    row.names = FALSE
 )
 data.table::fwrite(
-   x = meta[unique(ddata[value != 0L, .(regional, local, year)]), on = .(regional, local, year), !"plot"],
+   x = meta[, !"plot"],
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
    row.names = FALSE
 )
@@ -95,17 +97,17 @@ meta[, ":="(
 )][, ":="(
    gamma_sum_grains = sum(alpha_grain),
    gamma_bounding_box = data.table::uniqueN(plot) * 10L * 10L),
-   by = .(regional, year)]
+   by = .(regional, year)][, plot := NULL]
 
 
 ## Saving standardised data ----
 data.table::fwrite(
-   x = ddata[, !"plot"],
+   x = ddata,
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised.csv"),
    row.names = FALSE
 )
 data.table::fwrite(
-   x = meta[, !"plot"],
+   x = meta,
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised_metadata.csv"),
    row.names = FALSE
 )

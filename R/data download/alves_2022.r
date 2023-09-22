@@ -6,12 +6,12 @@ if (!file.exists("data/raw data/alves_2022/rdata.rds")) {
       destfile = "data/cache/alves_2021_Long.Master.Species.Groups.csv"
    )
 
-   dir.create("data/raw data/alves_2022")
+   dir.create("data/raw data/alves_2022", showWarnings = FALSE)
    base::saveRDS(
       object = unique(
          data.table::fread(
             file = "data/cache/alves_2021_Long.Master.Species.Groups.csv",
-            drop = c("V1","File.Name","Image.Code"),
+            drop = c("V1","File.Name"),
             sep = ",", header = TRUE, colClasses = list(factor = c("Site", "ID"))
          )
       ),

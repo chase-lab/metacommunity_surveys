@@ -8,31 +8,32 @@ data.table::setnames(ddata, 1, "section")
 ddata <- data.table::melt(ddata,
                           id.vars = c("section", "species", "layer")
 )
-ddata[, c("period", "local") := data.table::tstrsplit(variable, " ")]
+ddata[, c("period", "site") := data.table::tstrsplit(variable, " ")]
 
-##transforming pa values to readable form ----
-ddata[, value := data.table::fifelse(value == "." | is.na(value), 0L, 1L)]
+## Excluding absences ----
+ddata <- ddata[!(is.na(value) | value == ".")]
 
 ##community data ----
 ddata[, ":="(
    dataset_id = dataset_id,
 
    regional = "Klinec forest",
-   local = paste0("s", local,"_", section, "_", layer),
+   local = paste0("s", site, "_", layer),
 
-   year = c(1957L, 2015L, 2015L)[match(period, c("historical", "modern", "modern\n"))],
+   year = c(1957L, 2015L, 2015L)[data.table::chmatch(period, c("historical", "modern", "modern\n"))],
 
-   metric = "pa",
-   value = 1L,
-   unit = "pa",
+   metric = "Braun-Blanquet scale",
+   unit = "score",
 
+   section = NULL,
+   layer = NULL,
    period = NULL,
    variable = NULL
 )]
 
 ##meta data ----
 
-meta <- unique(ddata[, .(dataset_id, regional, local, year)])
+meta <- unique(ddata[, .(dataset_id, regional, site, local, year)])
 meta[, ":="(
    realm = "Terrestrial",
    taxon = "Plants",
@@ -48,35 +49,35 @@ meta[, ":="(
    alpha_grain_unit = "m2",
    alpha_grain_type = "sample",
 
-   comment = "Extracted from supplementary material Table 1 in Vojik and Boublik 2018 (https://doi.org/10.1007/s11258-018-0831-5). Historical vegetation records of the Klinec forest, Czech Republic, were made in 1957. In 2015, M Vojik resampled the same 29 plots of 500m2 each using the same methodology. Local is here a description of site, tree level and section ",
-   comment_standardisation = "None needed",
+   comment = "Extracted from supplementary material Table 1 in Vojik and Boublik 2018 (https://doi.org/10.1007/s11258-018-0831-5). Historical vegetation records of the Klinec forest, Czech Republic, were made in 1957. In 2015, M Vojik resampled the same 29 plots of 500m2 each using the same methodology.",
+   comment_standardisation = "Local is here a description of site, tree level and section ",
    doi = 'https://doi.org/10.1007/s11258-018-0831-5'
 )]
 
 ##saving data tables ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
 data.table::fwrite(
-   x = ddata[, !c("section", "layer")],
+   x = ddata[, !"site"],
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
    row.names = FALSE
 )
 
 data.table::fwrite(
-   x = meta,
+   x = meta[, !"site"],
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
    row.names = FALSE
 )
 
 #Standaradized Data ----
 
-##pooling values of different layers----
-ddata <- ddata[, .(value = sum(value)), by = .(local, species, section, regional, year, dataset_id, metric, unit)]
-ddata <- ddata[value != 0]
+## pooling values of different layers and turning cover into presence absence ----
+ddata <- ddata[, .(species = unique(species), value = 1L),
+               by = .(dataset_id, regional, local = site, year, metric, unit)]
 
 ##meta data ----
-
-meta <- meta[unique(ddata[, .(local, year)]),
-             on = .(local, year)]
+meta[, local := site][, site := NULL]
+meta <- unique(meta)[unique(ddata[, .(local, year)]),
+                     on = .(local, year)]
 
 meta[, ":="(
    effort = 1L,
@@ -92,14 +93,13 @@ meta[, ":="(
    gamma_bounding_box_comment = "area provided by the authors",
 
    comment = "Extracted from supplementary material Table 1 in Vojik and Boublik 2018 (https://doi.org/10.1007/s11258-018-0831-5). Historical vegetation records of the Klinec forest, Czech Republic, were made in 1957. In 2015, M Vojik resampled the same 29 plots of 500m2 each using the same methodology.",
-   comment_standardisation = "tree, shrub and herb layers pooled together"
+   comment_standardisation = "Braun-Blanquet ccover turned into rpesence absence
+tree, shrub and herb layers pooled together"
 )]
-
-ddata[, section := NULL]
 
 ##saving data tables ----
 data.table::fwrite(
-   x = ddata[, !c("section")],
+   x = ddata,
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised.csv"),
    row.names = FALSE
 )
