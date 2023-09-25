@@ -104,9 +104,12 @@ for (dataset_id_i in dataset_ids) {
 ## data standardisation ----
 ### Keeping only sites that were not undersampled ----
 ddata <- ddata_standardised[(!undersampled)][, undersampled := NULL]
+
 ## Community data ----
 ddata[, ":="(
    dataset_id = as.factor(paste(dataset_id, source, sizeclass, sep = "_")),
+
+   value = as.integer(value * volume),
 
    replicate = NULL,
    source = NULL,
@@ -138,7 +141,6 @@ ddata <- ddata[
    on = .(dataset_id, local, year, month, sampleid)][, month := NULL][, sampleid := NULL]
 
 ### Pooling all samples from a year together ----
-
 ddata[,
       ':='(latitude = mean(latitude), longitude = mean(longitude)),
       by = .(dataset_id, local)]
@@ -148,9 +150,36 @@ ddata[, effort := sum(volume), by = .(dataset_id, local, year)]
 ddata <- ddata[, .(value = sum(value)),
                by = .(dataset_id, local, year, effort, latitude, longitude, species)]
 
-## Excluding sites that were not sampled at least twice 10 years apart.
+### Excluding sites that were not sampled at least twice 10 years apart ----
 ddata <- ddata[!ddata[, diff(range(year)) < 9L, by = .(dataset_id, local)][(V1)],
                on = .(dataset_id, local)]
+
+### Individual based rarefaction to account for varying volume ----
+## computing min total abundance for the local/year where the effort is the smallest ----
+ddata[, sample_size := sum(value), by = .(dataset_id, local, year)]
+
+## deleting samples with less than 10 individuals
+ddata <- ddata[sample_size >= 10L]
+min_sample_size <- ddata[i = ddata[, .(effort = min(effort)), by = dataset_id],
+                         on = .(dataset_id, effort),
+                         j = .(min_sample_size = min(sample_size)),
+                         by = dataset_id]
+
+## resampling abundances down to the minimal total abundance observed among the surveys with the minimal effort
+source("R/functions/resampling.r")
+ddata[, species := as.character(species)]
+set.seed(42)
+for (i in seq_len(nrow(min_sample_size))) {
+   ddata[dataset_id == min_sample_size[i, dataset_id] & sample_size > min_sample_size[i, min_sample_size],
+         value := resampling(species, value, min_sample_size[i, min_sample_size]),
+         by = .(local, year)]
+
+   ddata[dataset_id == min_sample_size[i, dataset_id] & sample_size < min_sample_size[i, min_sample_size],
+         value := resampling(species, value, min_sample_size[i, min_sample_size], replace = TRUE),
+         by = .(local, year)]
+}
+ddata <- ddata[!is.na(value)]
+
 
 ddata[, ":="(
    regional = factor("Upper San Francisco Estuary"),
@@ -167,7 +196,7 @@ meta <- unique(meta)
 meta <- meta[
    unique(ddata[, .(dataset_id, local, year, effort, latitude, longitude)]),
    on = .(dataset_id, local, year)]
-
+meta[, effort := min(effort), by = dataset_id]
 meta[, ":="(
    gamma_sum_grains = NA,
    gamma_sum_grains_unit = "m2",
@@ -185,7 +214,11 @@ here and individuals from the same species at different lifestages were pooled t
 When a site is sampled several times a year, selecting the 6 most frequently sampled months from the 8 most sampled months.
 When a site is sampled more than once a month, selecting the first visit.
 Pooling all samples from a year together.
-Keeping only sites sampled twice at least 10 years apart.')
+Keeping only sites sampled twice at least 10 years apart.
+CPUEs multiplied by volume to get abundances (rounded if few cases)
+Since the volume sampled varies, we standardised by randomly sampling the minimal number of individuals found in the smallest sample per dataset_id (source _ sizeclass) in every other community.
+This resampling sometimes reduced the specific richness compared to the full observed sample.
+In rare cases, larger samples had fewer individuals and we resampled with replacement to get to the target number of individuals.')
 )][, ":="(
    gamma_bounding_box = geosphere::areaPolygon(data.frame(na.omit(longitude), na.omit(latitude))[grDevices::chull(na.omit(longitude), na.omit(latitude)), ]) / 10^6),
    by = .(dataset_id, year)]
