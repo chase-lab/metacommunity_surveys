@@ -1,84 +1,145 @@
 # perry_2023
 dataset_id <- 'perry_2023'
 
-ddata <- base::readRDS('data/raw data/perry_2023/rdata.rds')
+ddata <- unique(base::readRDS('data/raw data/perry_2023/rdata.rds'))
 data.table::setnames(ddata, tolower(colnames(ddata)))
+data.table::setnames(ddata,
+                     old = c("lab", "stationcode", "organisms_per_ml", "name"),
+                     new = c("regional", "local", "value", "species"))
 
-
-# subsetting data for equal number of visits per year + good quality ----
-ddata[, year := base::format(sampledate, '%Y')][, month := base::format(sampledate, '%m')]
-## When there are 2 dates per month, select one ----
-# data.table style join
-ddata <- ddata[
-   ddata[qualitycheck == 'Good'][, .(sampledate = sampledate[1L]), by = .(lab, year, month, stationcode)],
-   on = .(lab, year, month, stationcode, sampledate)
-]
-
-## selecting 10 samples in sites/years with 11 or 12 samples ----
-ddata[, order_month := order(table(month), decreasing = TRUE)[base::match(month, 1L:12L)]]
-data.table::setorder(ddata, lab, stationcode, year, order_month)
-ddata <- ddata[
-   unique(ddata[, .(lab, stationcode, year, month)])[, .SD[1L:10L], by = .(lab, stationcode, year)],
-   on = .(lab, stationcode, year, month)
-] # (data.table style join)
-
-# Pooling monthly samples together ----
-ddata <- ddata[,.(value = mean(organisms_per_ml), latitude = unique(latitude), longitude = unique(longitude)),
-               by = .(year, regional = lab, local = stationcode, species = name)][!is.na(species)]
-
-
-# communities ----
+# raw data ----
+## Communities ----
 ddata[, ":="(
    dataset_id = dataset_id,
-   regional = as.factor(paste('Sacramento-San Joaquin Bay-Delta', regional, sep = '_ ')),
+
+   regional = as.factor(paste('Sacramento-San Joaquin Bay-Delta', regional, sep = ' ')),
+
+   year = data.table::year(sampledate),
+   month = data.table::month(sampledate),
+   day = data.table::mday(sampledate),
 
    metric = "density",
    unit = "individuals per mL"
 )]
 
-# metadata ----
-meta <- unique(ddata[, .(dataset_id, regional, local, year, latitude, longitude)])
+# Pooling densities from 'Good' and 'Fragmented' observations
+ddata_standardised <- data.table::copy(ddata)
+ddata <- ddata[, .(value = sum(value)),
+               by = .(dataset_id, regional, local, latitude, longitude,
+                      year, month, day, species, metric, unit)]
+
+## Metadata ----
+meta <- unique(ddata[, .(dataset_id, regional, local, year, month, day, latitude, longitude)])
 
 meta[, ":="(
    taxon = "Invertebrates", # Phytoplankton
    realm = "Freshwater",
 
    study_type = "ecological_sampling",
-   effort = 10L,
 
    data_pooled_by_authors = FALSE,
-   data_pooled_by_authors_comment = NA,
-   sampling_years = NA,
 
-   alpha_grain = NA_integer_,
-   alpha_grain_unit = NA_character_,
-   alpha_grain_type = NA_character_,
-   alpha_grain_comment = NA_character_,
+   alpha_grain = NA,
+   alpha_grain_unit = NA,
+   alpha_grain_type = NA,
+   alpha_grain_comment = NA,
 
-   gamma_sum_grains_unit = NA_character_,
-   gamma_sum_grains_type = NA_character_,
-   gamma_sum_grains_comment = NA_character_,
+   comment = "Extracted from Perry, S.E., T. Brown, and V. Klotz. 2023. Interagency Ecological Program: Phytoplankton monitoring in the Sacramento-San Joaquin Bay-Delta, collected by the Environmental Monitoring Program, 2008-2021 ver 1. Environmental Data Initiative. https://doi.org/10.6073/pasta/389ea091f8af4597e365d8b8a4ff2a5a (Accessed 2023-02-23). METHODS: 'Phytoplankton samples are collected with a submersible pump or a Van Dorn sampler from a water depth of one meter (approximately three feet) below the water surface.' density vlues were retrieved from column 'organisms_per_mL' LOCAL is a stationcode and REGIONAL is the whole Sacramento-San Joaquin Bay-Delta with a split depending on the lab in charge of identifying algae organisms.",
+   comment_standardisation = "In some samples, one species was observed and considered 'Good' quality observations and it was also observed in a 'Fragmented' state. When this happened, we pooled densities together.",
+   doi = 'https://doi.org/10.6073/pasta/044ee4a506ef1860577a990e20ea4305'
+)]
+
+ddata[, c('latitude','longitude') := NULL]
+
+## Saving raw data ----
+base::dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
+data.table::fwrite(
+   x = ddata,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
+   row.names = FALSE
+)
+data.table::fwrite(
+   x = meta,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
+   row.names = FALSE
+)
+
+# Standardised data ----
+
+## subsetting data for equal number of visits per year + good quality ----
+## When there are 2 dates per month, select one ----
+# data.table style join
+ddata <- ddata_standardised[
+   ddata_standardised[qualitycheck == 'Good'][,
+                                              .(sampledate = sampledate[1L]),
+                                              by = .(regional, year, month, local)],
+   on = .(regional, year, month, local, sampledate)
+]
+
+### selecting 10 samples in sites/years with 11 or 12 samples ----
+ddata[, order_month := order(table(month), decreasing = TRUE)[base::match(month, 1L:12L)]]
+data.table::setorder(ddata, regional, local, year, order_month)
+ddata <- ddata[
+   unique(ddata[, .(regional, local, year, month)])[, .SD[1L:10L], by = .(regional, local, year)],
+   on = .(regional, local, year, month)
+] # (data.table style join)
+
+month_order <- ddata[, data.table::uniqueN(sampledate), by = .(regional, year, month)][, sum(V1), by = month][order(-V1)][1L:12L, month]
+ddata[, month_order := (1L:12L)[match(month, month_order, nomatch = NULL)]]
+data.table::setkey(ddata, month_order)
+
+ddata <- ddata[!is.na(month_order)][, nmonths := data.table::uniqueN(month),
+                                    by = .(regional, local, year)][nmonths >= 10L][, nmonths := NULL]
+
+ddata <- ddata[
+   unique(ddata[,
+                .(regional, local, year, month)])[, .SD[1L:10L],
+                                                  by = .(regional, local, year)],
+   on = .(regional, local, year, month), nomatch = NULL][, month_order := NULL]
+
+## Pooling monthly samples together ----
+ddata <- ddata[, .(value = mean(value)),
+               by = .(dataset_id, year, regional, local,
+                      species, metric, unit)][!is.na(species)]
+
+## Excluding sites that were not sampled at least twice 10 years apart ----
+ddata <- ddata[!ddata[, diff(range(year)) < 9L, by = .(regional, local)][(V1)],
+               on = .(regional, local)]
+
+## Metadata ----
+meta[, c("month", "day") := NULL]
+meta <- unique(meta)
+meta <- meta[unique(ddata[, .(regional, local, year)]),
+             on = .(regional, local, year)]
+
+meta[, ":="(
+   effort = 10L,
+
+   gamma_sum_grains = NA,
+   gamma_sum_grains_unit = NA,
+   gamma_sum_grains_type = NA,
+   gamma_sum_grains_comment = NA,
 
    gamma_bounding_box_unit = "km2",
    gamma_bounding_box_type = "convex-hull",
    gamma_bounding_box_comment = "coordinates provided by the authors",
 
-   comment = "Extracted from Perry, S.E., T. Brown, and V. Klotz. 2023. Interagency Ecological Program: Phytoplankton monitoring in the Sacramento-San Joaquin Bay-Delta, collected by the Environmental Monitoring Program, 2008-2021 ver 1. Environmental Data Initiative. https://doi.org/10.6073/pasta/389ea091f8af4597e365d8b8a4ff2a5a (Accessed 2023-02-23). METHODS: 'Phytoplankton samples are collected with a submersible pump or a Van Dorn sampler from a water depth of one meter (approximately three feet) below the water surface.' density vlues were retrieved from column 'organisms_per_mL' LOCAL is a stationcode and REGIONAL is the whole Sacramento-San Joaquin Bay-Delta with a split depending on the lab in charge of identifying algae organisms.",
-   comment_standardisation = "Only samples rated as 'Good' are kept. Only sites/years with at least 10 months sampled are kept. When more than 10 months are sampled, the 10 most frequently sampled months (overall) are kept.",
-   doi = 'https://doi.org/10.6073/pasta/044ee4a506ef1860577a990e20ea4305'
+   comment_standardisation = "Only samples rated as 'Good' are kept.
+Only sites/years with at least 10 months sampled are kept.
+When more than 10 months are sampled, the 10 most frequently sampled months (overall) are kept.
+Sites that were not sampled at least twice 10 years apart were excluded."
 )][, ":="(
-   gamma_sum_grains = sum(alpha_grain),
-   gamma_bounding_box = geosphere::areaPolygon(data.frame(longitude, latitude)[grDevices::chull(longitude, latitude), ]) / 10^6
-),
-by = year
-]
+   gamma_bounding_box = geosphere::areaPolygon(data.frame(longitude, latitude)[grDevices::chull(longitude, latitude), ]) / 10^6),
+   by = year]
 
-ddata[, c('latitude','longitude') := NULL]
-
-base::dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, ".csv"),
-                   row.names = FALSE
+## Saving standardised data ----
+data.table::fwrite(
+   x = ddata,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised.csv"),
+   row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   x = meta,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised_metadata.csv"),
+   row.names = FALSE
 )

@@ -30,9 +30,10 @@ locations[, location := as.character(location)][location == "gal\xe9_island", lo
 
 
 # selecting and merging data ----
-ddata <- locations[, .(transect_id, location, site, longitude, latitude,
-                       ntransect, year)
-                   ][community, on = "transect_id"]
+ddata <- community[
+   locations[, .(transect_id, location, site, longitude, latitude,
+                 ntransect, year, month, day)],
+   on = "transect_id", nomatch = 0L]
 
 # saving data ----
 base::dir.create("data/raw data/quimbayo_2022", showWarnings = FALSE)

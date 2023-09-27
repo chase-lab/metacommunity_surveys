@@ -14,8 +14,8 @@
 # ddata <- ddata[sampling_method == 'RN'][, sampling_method := NULL]
 # ddata[, alpha_grain := plotdimx * plotdimy]
 # ddata[
-#    ddata[, length(unique(local)), by = regional)[V1 >= 4L][, V1 := NULL],
-#    on = `regional`
+#    !ddata[, data.table::uniqueN(local) < 4, by = .(regional, year)][(V1)L],
+#    on = .(regional, year)
 # ]
 
 # doi = 'https://doi.org/10.1002/ecy.3923 | https://doi.org/10.5281/zenodo.6567608'

@@ -1,0 +1,11 @@
+variable name	necessary
+dataset_id	TRUE
+year	TRUE
+month	FALSE
+day	FALSE
+regional	TRUE
+local	TRUE
+species	TRUE
+metric	TRUE
+value	TRUE
+unit	TRUE

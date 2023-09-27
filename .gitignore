@@ -1,11 +1,25 @@
+# R generated files
 .Rproj.user
 .Rproj.user/**
 .Rhistory
 .Rprofile
-
+.RData
 backup/**
+
 data/communities.csv
+data/communities_raw.csv
+data/communities_standardised.csv
 data/metadata.csv
+data/metadata_raw.csv
+data/metadata_standardised.csv
+
+data/communities_raw.csv.gz
+data/communities_standardised.csv.gz
+data/metadata_raw.csv.gz
+data/metadata_standardised.csv.gz
+
+data/communities_09_07_2023.csv
+data/metadata_09_07_2023.csv
 
 data/wrangled data/**
 data/cache/**
@@ -15,6 +29,8 @@ data/references/homogenisation_dropbox_folder_path.rds
 
 to-do.md
 !README.md
+!rulebook.md
+to-do.md
 
 
 # Created by https://www.toptal.com/developers/gitignore/api/macos,windows
@@ -80,4 +96,3 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,windows
-

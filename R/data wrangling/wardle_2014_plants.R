@@ -1,52 +1,52 @@
-#wardle_2014_vegetation
 dataset_id <- "wardle_2014_plants"
 
 ###Data manually downloaded from:
 ### https://datacommons.anu.edu.au/DataCommons/rest/display/anudc:5755?layout=def:display
 ###Login for national university of australia needed. Data accessible after login without further requests.
 
+# Raw Data ----
 
-datapath <- "./data/raw data/wardle_2014_vegetation/derg_vegetation_1993+_p903t1208.csv"
+ddata <- unique(data.table::fread(
+   file = "data/raw data/wardle_2014_vegetation/derg_vegetation_1993+_p903t1208.csv",
+   sep = ',', header = TRUE, stringsAsFactors = TRUE,
+   drop = c("trip_no", "avg_of_fl", "avg_of_seed")))
 
-ddata <- unique(data.table::fread(file = datapath)) # replicated rows in raw data
-
-# program uses a core of 12 sites which are spaced at least 15 km apart, each comprising two 1-ha trapping grids program uses a core of 12 sites which are spaced at least 15 km apart, each comprising two 1-ha trapping grids - Vegetation attribute are recorded in a 2.5 m radius around six pitfall traps on each vertebrate trapping grid. have been aggregated to grid level data
 
 #coordinates:
 coords <- data.frame(longitude = c(137.86511, 138.6059, 137.86511, 138.6059),
                      latitude = c(-23.20549, -23.20549, -23.99417, -23.99417))
 
-data.table::setnames(ddata, "site_grid", "local")
+data.table::setnames(ddata,
+                     old = c("site_grid", "avg_of_cover"),
+                     new = c("local", "value"))
 
-#remove NAs in Column percent coverage
-ddata <- na.omit(ddata, on = "avg_of_cover")
-#remove rows with percent coverage of dead plants
-ddata <- ddata[dead_alive == "Alive"]
+#extract month
+ddata[, month := stringi::stri_extract_first_regex(
+   str = month_year,
+   pattern = "[A-Z][a-z]{1,3}")
+][, month_year := NULL
+][, month := (2L:12L)[data.table::chmatch(month, c("Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"))]]
 
 
+## community ----
 ddata[, ":="(
-
    dataset_id = dataset_id,
 
    regional = "Simpson Desert",
+   local = factor(paste(site_name, local, sep = "_")),
 
-   metric = "pa", #percent coverage transformed to presence absence data
-   unit = "pa",
+   metric = "cover",
+   unit = "percent",
 
-   value = 1L,
-
-   site_name = NULL,
-   avg_of_cover = NULL,
-   month_year = NULL,
-   trip_no = NULL,
-   avg_of_fl = NULL,
-   avg_of_seed = NULL,
-   dead_alive = NULL
+   site_name = NULL
 )]
-ddata <- unique(ddata)
 
-# meta ----
-meta <- unique(ddata[, .(dataset_id, year, regional, local)])
+## Deleting samples with redundant observations ----
+data.table::setkey(ddata, regional, local, year, month)
+ddata <- ddata[!ddata[, .N, by = .(regional, local, year, month, species)][N != 1L]]
+
+## meta ----
+meta <- unique(ddata[, .(dataset_id, regional, local, year, month)])
 meta[, ":="(
    realm = "Terrestrial",
    taxon = "Plants",
@@ -54,19 +54,77 @@ meta[, ":="(
    latitude =  "23°35'59.388″ S",
    longitude = "138°14'7.818″ E", #coordinates from download page
 
-   study_type = "ecological_sampling", #two possible values, or NA if not sure
+   study_type = "ecological_sampling",
 
    data_pooled_by_authors = TRUE,
    data_pooled_by_authors_comment = "spatial pooling: percent of coverage in an area occupying 2.5 m radius around six traps on each trapping grid and have been aggregated to grid level data",
    sampling_years = year,
 
-   effort = 6L, #sampled annualy every April-May - constant? different amount of local per regional over time
-
-
    alpha_grain = 6 * pi * 2.5^2,
-   alpha_grain_unit = "m2", #"acres", "ha", "km2", "m2", "cm2"
+   alpha_grain_unit = "m2",
    alpha_grain_type = "plot",
    alpha_grain_comment = "percent of coverage in an area occupying 2.5 m radius around six traps on each trapping grid and have been aggregated to grid level data",
+
+   comment = "Data manually downloaded via https://datacommons.anu.edu.au/DataCommons/rest/display/anudc:5755 for national university of australia. The authors estimated percent coverage in an area occupying 2.5 m radius around six traps on each plot and have been aggregated to plot level data. Regional in this dataset is defined as the Simpson desert where the whole experiment is located and local is defined as site_name _ grid_name.",
+   comment_standardisation = "Samples with duplicated observations were removed.",
+   doi = 'http://doi.org/10.25911/5c13171d944fe'
+)]
+
+# save data ----
+dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
+data.table::fwrite(
+   x = ddata[, !"dead_alive"],
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
+   row.names = FALSE
+)
+data.table::fwrite(
+   x = meta,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
+   row.names = FALSE
+)
+
+# Standardised Data ----
+## exclude rows with NA in Column percent coverage ----
+## exclude rows with percent coverage of dead plants ----
+ddata <- ddata[!is.na(value) & dead_alive == "Alive"][, dead_alive := NULL]
+
+### When a site is sampled several times a year, selecting the 1 most frequently sampled months from the 6 most sampled months ----
+month_order <- ddata[, data.table::uniqueN(.SD), by = .(regional, local, year, month), .SDcols = c("year","month")][, sum(V1), by = month][order(-V1)][1L:6L, month]
+ddata[, month_order := (1L:6L)[match(month, month_order, nomatch = NULL)]]
+data.table::setkey(ddata, month_order)
+
+ddata <- ddata[!base::is.na(month_order)]
+
+ddata <- ddata[
+   unique(ddata[,
+                .(regional, local, year, month)])[, .SD[1L],
+                                                  by = .(regional, local, year)],
+   on = .(regional, local, year, month)
+][, month_order := NULL]
+
+## Pooling all samples from a year together ----
+ddata <- ddata[, .(species = unique(species)), by = .(dataset_id, regional, local, year, metric, unit)]
+
+## Excluding sites that were not sampled at least twice 10 years apart ----
+ddata <- ddata[!ddata[, diff(range(year)) < 9L, by = .(regional, local)][(V1)],
+               on = .(regional, local)]
+
+ddata[, ":="(
+   value = 1L,
+   metric = "pa",
+   unit = "pa",
+
+   month = NULL
+)]
+
+# update meta ----
+meta[, "month" := NULL]
+meta <- unique(meta)
+meta <- meta[unique(ddata[, .(local, year)]),
+             on = .(local, year)]
+
+meta[, ":="(
+   effort = 1L,
 
    gamma_sum_grains_unit = "m2",
    gamma_sum_grains_type = "plot",
@@ -77,17 +135,22 @@ meta[, ":="(
    gamma_bounding_box_type = "box",
    gamma_bounding_box_comment = "coordinates provided by the authors",
 
-   comment = "Data manually downloaded via https://datacommons.anu.edu.au/DataCommons/rest/display/anudc:5755 for national university of australia. The authors estimated percent coverage in an area occupying 2.5 m radius around six traps on each plot and have been aggregated to plot level data. Regional in this dataset is defined as Site, local is defined as Plot ",
-   comment_standardisation = "Converted percent of cover into presence absence. Exclude rows with NA values for perent coverage. Exclude percent coverage of dead plants",
-   doi = 'http://doi.org/10.25911/5c13171d944fe'
-)]
+   comment_standardisation = "Samples with duplicated observations were removed.
+Converted percent of cover into presence absence.
+Exclude rows with NA values for percent coverage.
+Exclude percent coverage of dead plants.
+When a site is sampled several times a year, selecting the 1 most frequently sampled months from the 6 most sampled months.
+Sites that were not sampled at least twice 10 years apart were excluded."
+)][, gamma_sum_grains := sum(alpha_grain), by = .(regional, year)]
 
-meta[, gamma_sum_grains := sum(alpha_grain), by = year]
-
-dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, ".csv"),
-                   row.names = FALSE
+# save data -----
+data.table::fwrite(
+   x = ddata,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised.csv"),
+   row.names = FALSE
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_metadata.csv"),
-                   row.names = FALSE
+data.table::fwrite(
+   x = meta,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised_metadata.csv"),
+   row.names = FALSE
 )

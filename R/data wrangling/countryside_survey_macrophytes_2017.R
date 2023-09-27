@@ -1,71 +1,116 @@
 dataset_id <- "countryside_survey_macrophytes_2017"
 
-ddata <- data.table::rbindlist(list(
-  `1998` = data.table::fread(file = "./data/raw data/countryside_survey_macrophytes_2017/e0b638d5-8271-4442-97ef-cf46ea220f5d/data/STREAM_MACROPHYTES_98.csv"),
-  `2007` = data.table::fread(file = "./data/raw data/countryside_survey_macrophytes_2017/249a90ec-238b-4038-a706-6633c3690d20/data/STREAM_MACROPHYTES_07.csv")
-),
-use.names = TRUE, idcol = TRUE
-)
+ddata <- base::readRDS(file = "data/raw data/countryside_survey_macrophytes_2017/rdata.rds")
+data.table::setnames(ddata, old = "PROPORTION", new = "value")
 
-data.table::setnames(ddata, c(".id", "SQUARE", "EZ_DESC_07", "PLANT_NAME"), c("year", "local", "regional", "species"))
+#Raw Data ----
+## community data  ----
+ddata[, date := data.table::as.IDate(date, format = "%d-%b-%y")]
+ddata[, ":="(year = as.integer(year),
+             month = data.table::month(date),
+             day = data.table::mday(date))]
 
-
-# Ddata ----
 ddata[, ":="(
-  dataset_id = dataset_id,
-  regional = stringi::stri_extract_first_regex(str = regional, pattern = "(?<=\\().*(?=\\))"),
+   dataset_id = dataset_id,
 
-  metric = "pa",
-  unit = "pa",
-  value = 1L,
+   metric = "cover",
+   unit = "percent",
 
-  YEAR = NULL,
-  SITE_ID = NULL,
-  SURVEY_DATE = NULL,
-  PROPORTION = NULL,
-  LC07 = NULL,
-  LC07_NUM = NULL,
-  COUNTY07 = NULL,
-  COUNTRY = NULL
+   YEAR = NULL,
+   SITE_ID = NULL,
+   date = NULL,
+   LC07 = NULL,
+   LC07_NUM = NULL,
+   COUNTY07 = NULL
+)][species == "No species entered",
+   species := data.table::fifelse(value == 0, "NONE", NA)]
+ddata <- ddata[!is.na(species)]
+
+##meta data ----
+meta <- unique(ddata[, .(dataset_id, COUNTRY, regional, local, year, month, day)])
+meta[, ":="(
+   taxon = "Plants",
+   realm = "Freshwater",
+
+   study_type = "resurvey",
+
+   data_pooled_by_authors = FALSE,
+
+   latitude = c(52.3, 53, 57)[match(COUNTRY, c("WAL", "ENG", "SCO"))],
+   longitude = c(-3.6, -1, -4)[match(COUNTRY, c("WAL", "ENG", "SCO"))],
+
+   alpha_grain = 1L,
+   alpha_grain_unit = "km2",
+   alpha_grain_type = "plot",
+
+   comment = "Extracted from 2 published Environmental Information Data Centre data sets, DOIs https://doi.org/10.5285/e0b638d5-8271-4442-97ef-cf46ea220f5d and https://doi.org/10.5285/249a90ec-238b-4038-a706-6633c3690d20. Authors sampled macrophytes in 1 100m long stream reaches per 1km2 grid cells in England, Scotland and Wales.",
+   comment_standardisation = "regional is an ecoregion (eg Westerly lowlands (England), Uplands (Wales))
+local is a SQUARE_ID.",
+doi = 'https://doi.org/10.5285/249a90ec-238b-4038-a706-6633c3690d20 | https://doi.org/10.5285/e0b638d5-8271-4442-97ef-cf46ea220f5d'
 )]
 
-# Metadata ----
-meta <- unique(ddata[, .(dataset_id, regional, local, year)])
-meta[, ":="(
-  taxon = "Plants",
-  realm = "Freshwater",
+ddata[, COUNTRY := NULL]
 
-  effort = 1L,
-
-  study_type = "resurvey",
-
-  data_pooled_by_authors = FALSE,
-
-  latitude = c(52.3, 53, 57)[match(regional, c("Wales", "England", "Scotland"))],
-  longitude = c(-3.6, -1, -4)[match(regional, c("Wales", "England", "Scotland"))],
-
-  alpha_grain = 1L,
-  alpha_grain_unit = "km2",
-  alpha_grain_type = "plot",
-
-  gamma_sum_grains_unit = "km2",
-  gamma_sum_grains_type = "plot",
-  gamma_sum_grains_comment = "sum of the plots per year per region",
-
-  gamma_bounding_box = c(20779L, 130279L, 77933L)[match(regional, c("Wales", "England", "Scotland"))],
-  gamma_bounding_box_unit = "km2",
-  gamma_bounding_box_type = "administrative",
-  gamma_bounding_box_comment = "ecological zone area is unknown so gamma has been set to the country",
-
-  comment = "Extracted from 2 published Environmental Information Data Centre data sets, DOIs https://doi.org/10.5285/e0b638d5-8271-4442-97ef-cf46ea220f5d and https://doi.org/10.5285/249a90ec-238b-4038-a706-6633c3690d20. Authors sampled macrophytes in 1 100m long stream reaches per 1km2 grid cells in England, Scotland and Wales.",
-  comment_standardisation = "none needed",
-  doi = 'https://doi.org/10.5285/249a90ec-238b-4038-a706-6633c3690d20 | https://doi.org/10.5285/e0b638d5-8271-4442-97ef-cf46ea220f5d'
-)][, gamma_sum_grains := length(unique(local)), by = .(regional, year)]
-
+## save data
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(ddata, paste0("data/wrangled data/", dataset_id, "/", dataset_id, ".csv"),
-  row.names = FALSE
+data.table::fwrite(
+   x = ddata,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
+   row.names = FALSE, sep = ",", encoding = "UTF-8"
 )
-data.table::fwrite(meta, paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_metadata.csv"),
-  row.names = FALSE
+data.table::fwrite(
+   x = meta[, !"COUNTRY"],
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
+   row.names = FALSE, sep = ",", encoding = "UTF-8"
+)
+
+#standardised data ----
+### excluding samples with abnormal null values
+ddata <- ddata[!ddata[value == 0L], on = .(regional, local, year)]
+
+## Excluding sites that were not sampled at least twice 10 years apart ----
+ddata <- ddata[!ddata[, diff(range(year)) < 9L, by = .(regional, local)][(V1)],
+               on = .(regional, local)]
+
+ddata[, c("month","day") := NULL]
+ddata[, value := as.integer(value)][, ":="(
+   value = 1L,
+
+   metric = factor("pa"),
+   unit = factor("pa")
+)]
+
+
+## meta data ----
+meta[, c("month","day") := NULL]
+meta[,":="(
+   effort = 1L,
+
+   gamma_sum_grains_unit = "km2",
+   gamma_sum_grains_type = "plot",
+   gamma_sum_grains_comment = "sum of the plots per year per region",
+
+   gamma_bounding_box = c(20779L, 130279L, 77933L)[match(COUNTRY, c("WAL", "ENG", "SCO"))],
+   gamma_bounding_box_unit = "km2",
+   gamma_bounding_box_type = "administrative",
+   gamma_bounding_box_comment = "ecological zone area is unknown so gamma has been set to the country",
+
+   comment_standardisation = "regional is an ecoregion (eg Westerly lowlands (England), Uplands (Wales))
+local is a SQUARE_ID.
+Samples containing abnormal values were excluded.
+Sites that were not sampled at least twice 10 years apart were excluded.",
+
+   COUNTRY = NULL
+)][, gamma_sum_grains := data.table::uniqueN(local), by = .(regional, year)]
+
+##save data
+data.table::fwrite(
+   x = ddata,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised.csv"),
+   row.names = FALSE, sep = ",", encoding = "UTF-8"
+)
+data.table::fwrite(
+   x = meta,
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised_metadata.csv"),
+   row.names = FALSE, sep = ",", encoding = "UTF-8"
 )
