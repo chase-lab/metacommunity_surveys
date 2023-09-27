@@ -67,8 +67,8 @@ if (anyDuplicated(dt_standardised)) warning(
    )
 )
 
-if (any(dt_standardised[, .N, by = .(dataset_id, regional, local, year, species)]$N != 1L))
-   warning(paste(
+if (any(dt_standardised[, .N, by = .(dataset_id, regional, local, year, species)]$N != 1L)) warning(
+   paste(
       'duplicated species in:',
       paste(collapse = ', ',
             dt_standardised[, .N, by = .(dataset_id, regional, local, year, species)][N != 1L, unique(dataset_id)])))
@@ -81,7 +81,7 @@ for (i in seq_along(lst_community_standardised)) if (is.character(lst_community_
 
 #### adding GBIF matched names by Dr. Wubing Xu ----
 corrected_species_names <- data.table::fread(
-   file = "data/requests to taxonomy databases/manual_community_species_filled_20221003.csv",
+   file = "data/requests to taxonomy databases/manual_community_species_filled_20230922.csv",
    select = c("dataset_id", "species", "species.new")
 )
 
@@ -217,8 +217,7 @@ try(for (i in seq_along(lst_metadata_standardised)) if (any(!unlist(unique(apply
 
 
 ### checking year range length among regions ----
-if (any(meta_standardised[, diff(range(year)) < 9L, by = .(dataset_id, regional, local)]$V1))
-   warning(
+if (any(meta_standardised[, diff(range(year)) < 9L, by = .(dataset_id, regional, local)]$V1)) warning(
       paste(
          "Time periods shorter than 10 years in: ",
          paste(meta_standardised[, .(diff(range(year))), by = .(dataset_id, regional, local)][V1 < 9L, unique(dataset_id)], collapse = ", ")

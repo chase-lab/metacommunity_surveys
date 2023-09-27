@@ -88,7 +88,7 @@ for (i in seq_along(lst_community_raw)) if (is.character(lst_community_raw[[i]]$
 
 #### adding GBIF matched names by Dr. Wubing Xu ----
 corrected_species_names <- data.table::fread(
-   file = "data/requests to taxonomy databases/manual_community_species_filled_20221003.csv",
+   file = "data/requests to taxonomy databases/manual_community_species_filled_20230922.csv",
    select = c("dataset_id","species","species.new")
 )
 
@@ -182,13 +182,13 @@ meta_raw[, is_coordinate_local_scale := data.table::uniqueN(latitude) != 1L
 if (anyDuplicated(meta_raw)) warning("Duplicated rows in metadata")
 
 ### checking taxon ----
-if (any(meta_raw[, data.table::uniqueN(taxon), by = dataset_id]$V1 != 1L))
-   warning(paste0("several taxa values in ", paste(
+if (any(meta_raw[, data.table::uniqueN(taxon), by = dataset_id]$V1 != 1L)) warning(
+   paste0("several taxa values in ", paste(
       meta_raw[, data.table::uniqueN(taxon), by = dataset_id][V1 != 1L, dataset_id],
       collapse = ", "))
-   )
-if (any(!unique(meta_raw$taxon) %in% c("Fish", "Invertebrates", "Plants", "Birds", "Mammals", "Herpetofauna", "Marine plants")))
-   warning(paste0("Non standard taxon category in ", paste(
+)
+if (any(!unique(meta_raw$taxon) %in% c("Fish", "Invertebrates", "Plants", "Birds", "Mammals", "Herpetofauna", "Marine plants"))) warning(
+   paste0("Non standard taxon category in ", paste(
       unique(meta_raw[!taxon %in% c("Fish", "Invertebrates", "Plants", "Birds", "Mammals", "Herpetofauna", "Marine plants"),
                       .(dataset_id),
                       by = dataset_id]$dataset_id), collapse = ", ")))
@@ -200,20 +200,19 @@ try(for (i in seq_along(lst_metadata_raw))
 )
 
 ### checking year values ----
-if (!all(data.table::between(x = meta_raw$year, lower = 1500, upper = 2023)))
-   warning(paste("Invalid year values in:",
-                 meta_raw[!data.table::between(x = meta_raw$year, lower = 1500, upper = 2023), unique(dataset_id)],
-                 collapse = ", ")
-   )
+if (!all(data.table::between(x = meta_raw$year, lower = 1500, upper = 2023))) warning(
+   paste("Invalid year values in:",
+         meta_raw[!data.table::between(x = meta_raw$year, lower = 1500, upper = 2023), unique(dataset_id)],
+         collapse = ", ")
+)
 
 ### checking year range homogeneity among regions ----
 if (any(meta_raw[, data.table::uniqueN(paste(range(year), collapse = "-")),
-                 by = .(dataset_id, regional)]$V1 != 1L))
-   warning("all local scale sites were not sampled for the same years and timepoints has to be consistent with years")
+                 by = .(dataset_id, regional)]$V1 != 1L)) warning(
+                    "all local scale sites were not sampled for the same years and timepoints has to be consistent with years")
 
 ### checking study_type ----
-if (any(!meta_raw$study_type %in% c("ecological_sampling", "resurvey")))
-   warning(
+if (any(!meta_raw$study_type %in% c("ecological_sampling", "resurvey"))) warning(
       paste(
          "study_type has to be either 'ecological_sampling' or 'resurvey', see: ",
          paste(meta_raw[!study_type  %in% c("ecological_sampling","resurvey"), unique(dataset_id)], collapse = ",")
@@ -270,7 +269,7 @@ data.table::fwrite(dt_raw, "data/communities_raw.csv", row.names = FALSE) # for 
 # if (file.exists("data/references/homogenisation_dropbox_folder_path.rds")) {
 #    path_to_homogenisation_dropbox_folder <- base::readRDS(file = "data/references/homogenisation_dropbox_folder_path.rds")
 #    data.table::fwrite(dt_raw, paste0(path_to_homogenisation_dropbox_folder, "/metacommunity-survey_communities-raw.csv"), row.names = FALSE)
-# }
+}
 
 
 ## Saving meta ----

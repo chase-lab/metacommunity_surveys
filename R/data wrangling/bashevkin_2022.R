@@ -178,14 +178,16 @@ for (i in seq_len(nrow(min_sample_size))) {
          value := resampling(species, value, min_sample_size[i, min_sample_size], replace = TRUE),
          by = .(local, year)]
 }
-ddata <- ddata[!is.na(value)]
 
+ddata <- ddata[!is.na(value) & value != 0L]
 
 ddata[, ":="(
    regional = factor("Upper San Francisco Estuary"),
 
    metric = factor("density"),
-   unit = factor("cpue")
+   unit = factor("cpue"),
+
+   sample_size = NULL
 )]
 # ddata[, .N, by = .(dataset_id, regional, local, year, species)][N != 1]
 

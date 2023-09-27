@@ -24,6 +24,7 @@ ddata[, ":="(
    COUNTY07 = NULL
 )][species == "No species entered",
    species := data.table::fifelse(value == 0, "NONE", NA)]
+ddata <- ddata[!is.na(species)]
 
 ##meta data ----
 meta <- unique(ddata[, .(dataset_id, COUNTRY, regional, local, year, month, day)])

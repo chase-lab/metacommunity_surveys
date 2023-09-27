@@ -89,8 +89,8 @@ data.table::setnames(ddata,
                      old = c("park", "plot","genus_species", "N"),
                      new = c("regional","local","species", "value"))
 
-### excluding unknown species ----
-ddata <- ddata[species != "NONE"]
+### excluding unknown species and empty sites ----
+ddata <- ddata[species != "NONE" & species != ""]
 
 ## community data ----
 ddata[, ":="(
@@ -106,12 +106,6 @@ ddata[, ":="(
    visit = NULL,
    date = NULL
 )]
-
-## cleaning: deleting samples with duplicated rows ----
-ddata <- ddata[
-   !ddata[, .N, by = .(regional, local, year, month, day, species)][N != 1L],
-   on = c("regional", "local", "year", "month", "day")
-]
 
 ## Excluding sites that were not resampled at least 10 years apart
 ddata <- ddata[

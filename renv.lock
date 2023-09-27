@@ -1037,13 +1037,10 @@
     },
     "renv": {
       "Package": "renv",
-      "Version": "1.0.2",
-      "Source": "Repository",
+      "Version": "1.0.3",
+      "OS_type": null,
       "Repository": "CRAN",
-      "Requirements": [
-        "utils"
-      ],
-      "Hash": "4b22ac016fe54028b88d0c68badbd061"
+      "Source": "Repository"
     },
     "rgdal": {
       "Package": "rgdal",
