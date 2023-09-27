@@ -19,7 +19,7 @@ data.table::setnames(ddata, old = "wetland", new = "local")
 ddata <- unique(ddata[, .(value = sum(count)),
                       by = .(local, year, species, transect, month, day)])
 
-## excluding absences ----
+## excluding absences but keeping empty samples----
 ddata <- ddata[!(value == 0L & species != "NONE")]
 
 ## community data ----
@@ -114,10 +114,9 @@ meta <- meta[unique(ddata[, .(local, year)]),
 meta[, ":="(
    effort = 6L,
 
-   gamma_sum_grains = NA,
    gamma_sum_grains_type = "sample",
    gamma_sum_grains_unit = "m2",
-   gamma_sum_grains_comment = "unknown number of trap per transect.",
+   gamma_sum_grains_comment = "area of a trap * 3 transects per wetland * 2 months",
 
    gamma_bounding_box = geosphere::areaPolygon(data.frame(longitude, latitude)[grDevices::chull(longitude, latitude), ]) / 10^6,
    gamma_bounding_box_unit = "km2",
@@ -125,7 +124,7 @@ meta[, ":="(
    gamma_bounding_box_comment = "area of the region computed as the convexhull covering the centres of all ponds",
 
    comment_standardisation = "To ensure standard effort, we kept only wetlands and years that were sampled in all 3 transects during 2 months in May, June or July. Then, samples from all transects and vegetative zones of a site, of all selected months of a year were pooled together."
-)]
+)][, gamma_sum_grains := sum(alpha_grain) * 3 * 2, by = year]
 
 ## save standardised data ----
 data.table::fwrite(

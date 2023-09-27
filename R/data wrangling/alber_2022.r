@@ -51,7 +51,8 @@ ddata[, Date := data.table::as.IDate(Date, format = "%Y-%m-%d")][, ":="(
 )]
 
 ## metadata ----
-meta <- unique(ddata[, .(dataset_id, regional, local, year, month, day, latitude, longitude, alpha_grain)])
+meta <- unique(ddata[, .(dataset_id, regional, local, year, month, day,
+                         latitude, longitude, alpha_grain)])
 meta[, ":="(
    taxon = "Invertebrates",
    realm = "Terrestrial",
@@ -68,11 +69,11 @@ meta[, ":="(
    alpha_grain_comment = "area of a single quadrat",
 
    comment = "Data were downloaded from DOI:10.6073/pasta/651d603e2930d7ff608d7325230418e8 . METHODS: 'This data set includes long-term observational data on mollusc species abundance and size distribution at 10 Georgia Coastal Ecosystems marsh sites used for annual plant and invertebrate population monitoring. Infaunal and epifaunal molluscs were hand-collected from within quadrats of known area in mid-marsh and creekbank zones (n = 4 quadrats per zone) at all sites annually in October' also see: https://gce-lter.marsci.uga.edu/public/app/dataset_details.asp?accession=INV-GCES-1610",
-   comment_standardisation = "Rows with quadrat_area = NA or quadrat_area having a very rare value were excluded.",
+   comment_standardisation = "Rows with quadrat_area = NA were excluded.",
    doi = 'https://doi.org/10.6073/pasta/651d603e2930d7ff608d7325230418e8'
 )]
 
-ddata[, c("latitude","longitude") := NULL]
+ddata[, c("latitude","longitude","alpha_grain") := NULL]
 
 ## splitting and saving into several studies because several sampling gears were used ----
 data.table::setkey(ddata, dataset_id)
@@ -82,7 +83,7 @@ dataset_ids <- unique(meta$dataset_id)
 for (dataset_id_i in dataset_ids) {
    dir.create(paste0("data/wrangled data/", dataset_id_i), showWarnings = FALSE)
    data.table::fwrite(
-      x = ddata[dataset_id_i, !"alpha_grain"],
+      x = ddata[dataset_id_i],
       file = paste0("data/wrangled data/", dataset_id_i, "/", dataset_id_i, "_raw.csv"),
       row.names = FALSE
    )
@@ -98,7 +99,6 @@ ddata[, c("month","day") := NULL]
 meta[, c("month","day") := NULL]
 
 ## data selection ----
-ddata <- ddata[alpha_grain == 0.5][, alpha_grain := NULL]
 ## excluding empty sites ----
 ddata <- ddata[value != 0L]
 
@@ -130,7 +130,8 @@ meta[, ":="(
    gamma_bounding_box_type = "convex-hull",
    gamma_bounding_box_comment = "coordinates provided by the authors",
 
-   comment_standardisation = "We excluded regions/years with less than 4 locations with observed molluscs.
+   comment_standardisation = "Samples with unknown alpha_grain were excluded.
+We excluded regions/years with less than 4 locations with observed molluscs.
 We excluded sites that were not sampled twice at least 10 years apart."
 )][, ":="(
    gamma_sum_grains = sum(alpha_grain),
@@ -154,4 +155,3 @@ for (dataset_id_i in dataset_ids) {
       row.names = FALSE
    )
 }
-

@@ -171,7 +171,10 @@ meta_standardised[, gamma_bounding_box := as.numeric(gamma_bounding_box)
   )
 ][, gamma_bounding_box_unit := NULL]
 
-data.table::setnames(meta_standardised, c("alpha_grain", "gamma_bounding_box", "gamma_sum_grains"), c("alpha_grain_m2", "gamma_bounding_box_km2", "gamma_sum_grains_km2"))
+data.table::setnames(
+   x = meta_standardised,
+   old = c("alpha_grain", "gamma_bounding_box", "gamma_sum_grains"),
+   new = c("alpha_grain_m2", "gamma_bounding_box_km2", "gamma_sum_grains_km2"))
 
 meta_standardised[is.na(alpha_grain_m2), unique(dataset_id)]
 meta_standardised[is.na(gamma_sum_grains_km2) & is.na(gamma_bounding_box_km2), unique(dataset_id)]
@@ -269,6 +272,9 @@ if (any(!unique(meta_standardised$alpha_grain_type) %in% c("island", "plot", "sa
 if (any(!na.omit(unique(meta_standardised$gamma_sum_grains_type)) %in% c("archipelago", "sample", "lake_pond", "plot", "quadrat", "transect", "functional", "box"))) warning(paste("Invalid gamma_sum_grains_type value in", paste(unique(meta_standardised[!is.na(gamma_sum_grains_type) & !gamma_sum_grains_type %in% c("archipelago", "sample", "lake_pond", "plot", "quadrat", "transect", "functional", "box"), dataset_id]), collapse = ", ")))
 
 if (any(!na.omit(unique(meta_standardised$gamma_bounding_box_type)) %in% c("administrative", "island", "functional", "convex-hull", "watershed", "box", "buffer", "ecosystem", "shore", "lake_pond"))) warning(paste("Invalid gamma_bounding_box_type value in", paste(unique(meta_standardised[!is.na(gamma_bounding_box_type) & !gamma_bounding_box_type %in% c("administrative", "island", "functional", "convex-hull", "watershed", "box", "buffer", "ecosystem", "shore", "lake_pond"), dataset_id]), collapse = ", ")))
+
+### checking gamma_bouding_box ----
+meta_standardised[gamma_bounding_box_km2 == 0, gamma_bounding_box_km2 := NA_real_]
 
 ## Ordering metadata ----
 data.table::setorder(meta_standardised, dataset_id, regional, local, year)

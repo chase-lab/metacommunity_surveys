@@ -30,11 +30,14 @@ coords[, c("longitude", "latitude", "z") := do.call(rbind.data.frame, geometry)]
 
 ## metadata ----
 meta <- unique(ddata[, .(dataset_id, regional, Site, Transect, local, year,
-                         Name = sub(pattern = "-.*$", replacement = "", x = local))])
+                         Name = gsub(pattern = "^[0-9]{2}_|_[0-9_]*$",
+                                     replacement = "",
+                                     x = local))])
+
 meta[coords, ":="(
    latitude = i.latitude,
    longitude = i.longitude),
-   on = "Name"]
+   on = "Name"][, Name := NULL]
 
 meta[, ":="(
    taxon = "Invertebrates",
@@ -49,11 +52,9 @@ meta[, ":="(
    alpha_grain_type = "plot",
    alpha_grain_comment = "area of a 25m*2m transect",
 
-   comment = "Data were downloaded from https://github.com/calves06/Belizean_Barrier_Reef_Change associated to the article: Alves C, Valdivia A, Aronson RB, Bood N, Castillo KD, et al. (2022) Twenty years of change in benthic communities across the Belizean Barrier Reef. PLOS ONE 17(1): e0249155. https://doi.org/10.1371/journal.pone.0249155. Authors measured cover of the substrate by recording images along transects. Site coordinates were looked for on maps",
+   comment = "Data were downloaded from https://github.com/calves06/Belizean_Barrier_Reef_Change associated to the article: Alves C, Valdivia A, Aronson RB, Bood N, Castillo KD, et al. (2022) Twenty years of change in benthic communities across the Belizean Barrier Reef. PLOS ONE 17(1): e0249155. https://doi.org/10.1371/journal.pone.0249155. Authors measured cover of the substrate by recording images along transects. Site coordinates were looked for on maps.",
    comment_standardisation = "Items from the following types were excluded: Substrate, Dead, Equipment, Fish, Rubble, Sand.sediment, Unknown, Water, N.c, CTB.",
-   doi = 'https://doi.org/10.1371/journal.pone.0249155',
-
-   Name = NULL
+   doi = 'https://doi.org/10.1371/journal.pone.0249155'
 )]
 
 ## Saving raw data ----
@@ -111,10 +112,8 @@ meta[, ":="(
    gamma_sum_grains_type = "sample",
    gamma_sum_grains_comment = "sum of the areas of all transects of a site/region on a given year",
 
-   gamma_bounding_box = NA,
-   gamma_bounding_box_unit = "km2",
-   gamma_bounding_box_type = "convex-hull",
-   gamma_bounding_box_comment = "sites located by hand on maps",
+   gamma_bounding_box_unit = NA,
+   gamma_bounding_box_type = NA,
 
    comment_standardisation = "Items from the following types were excluded: Substrate, Dead, Equipment, Fish, Rubble, Sand.sediment, Unknown, Water, N.c, CTB.
 Only Coral is kept.
@@ -122,7 +121,10 @@ Regional is an island/site.
 local is a transect.
 Transects that had 15 pictures taken where resampled down to 14 pictures.
 Transects that were not sampled at least twice at least 10 years apart were excluded."
-)][, gamma_sum_grains := sum(alpha_grain), by = .(regional, year)]
+)][, ":="(
+   # gamma_bounding_box = geosphere::areaPolygon(data.frame(longitude, latitude)[grDevices::chull(longitude, latitude), ]) / 10^6,
+   gamma_sum_grains = sum(alpha_grain)),
+   by = .(regional, year)]
 
 ## Saving standardised data ----
 data.table::fwrite(

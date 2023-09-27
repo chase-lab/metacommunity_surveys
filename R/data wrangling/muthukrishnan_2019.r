@@ -160,7 +160,7 @@ county_areas <- data.table::fread(paste0("data/raw data/", dataset_id, "/county_
 county_areas[, ":="(
    county = gsub(" County", "", county),
    area = as.numeric(gsub(",| .*", "", area))
-)]
+)][county == "Lac qui Parle", county := "Lac Qui Parle"]
 
 meta[, ":="(
    gamma_bounding_box = county_areas$area[match(regional, county_areas$county)],
