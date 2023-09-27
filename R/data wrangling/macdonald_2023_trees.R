@@ -22,14 +22,15 @@ ddata <- base::suppressWarnings(
 )
 
 data.table::setnames(x = ddata,
-                     old = c('Site','Q-1967','Year_sampled'),
+                     old = c('Site','Q-2010','Year_sampled'),
                      new = c('regional','local','year'))
 
 # Raw data ----
 
 ## Community data ----
 # For each sample and species, we sum abundances from saplings and the different size classes
-ddata <- ddata[, species := base::substr(species, 1, 2)][, .(value = sum(value)), by = .(regional, local, year, species)]
+ddata <- ddata[, species := base::substr(species, 1, 2)][, .(value = sum(value)),
+                                                         by = .(regional, local, year, species)]
 
 ddata[, ":="(
    dataset_id = dataset_id,
@@ -78,6 +79,11 @@ data.table::fwrite(
 
 
 # Standardised data ----
+## Pooling quadrats 20 by 20, row by row ----
+ddata[, local := regional][, regional := "Alberta"]
+ddata[, .(value = sum(value)), by = .(dataset_id, regional, local, year,
+                                     species, metric, unit)]
+
 ## Excluding sites that were not sampled at least twice 10 years apart ----
 ddata <- ddata[!ddata[, diff(range(year)) < 9L, by = .(regional, local)][(V1)],
                on = .(regional, local)]
@@ -89,17 +95,18 @@ meta <- meta[unique(ddata[, .(regional, local, year)]),
 meta[, ":="(
    effort = 1L,
 
-   gamma_sum_grains = 5L * 5L * 397L,
-   gamma_sum_grains_unit = "m2",
+   gamma_sum_grains = 1L,
+   gamma_sum_grains_unit = "ha",
    gamma_sum_grains_type = "quadrat",
    gamma_sum_grains_comment = "sum of the areas of all plots of all sites on a given year",
 
-   gamma_bounding_box = 1L,
-   gamma_bounding_box_unit = "ha",
-   gamma_bounding_box_type = "ecosystem",
-   gamma_bounding_box_comment = "each region is a 1ha permanent plot split into 400 5*5m quadrats",
+   gamma_bounding_box = 11000L + 6641L,
+   gamma_bounding_box_unit = "km2",
+   gamma_bounding_box_type = "administrative",
+   gamma_bounding_box_comment = "sum of areas of Banff and Jasper National Parks, Alberta, Canada",
 
-   comment_standardisation = "Sites that were not sampled at least twice 10 years apart were excluded."
+   comment_standardisation = "Size classes were pooled together.
+Communities were pooled at the 1ha plot scale"
 )]
 
 ## Saving standardised data ----
