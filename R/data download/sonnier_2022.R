@@ -2,7 +2,7 @@ dataset_id <- "sonnier_2022"
 
 # Package ID: edi.1157.1 Cataloging System:https://pasta.edirepository.org.
 # Data set title: Long-term response of wetland plant communities to management intensity, grazing abandonment, and prescribed fire.
-# Data set creator:  GrÃ©gory Sonnier - Archbold Biological Station
+# Data set creator:  Grégory Sonnier - Archbold Biological Station
 # Data set creator:  Ruth Whittington - Colorado Natural Heritage Program
 # Data set creator:  Elizabeth Boughton - Archbold Biological Station
 # Contact:  Data Manager -  Archbold Biological Station  - datamanager@archbold-station.org

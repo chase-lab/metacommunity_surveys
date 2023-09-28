@@ -1,5 +1,5 @@
 external.libraries:
-ignored.packages: tb
+ignored.packages: tb, testthat, pkgload, rprojroot
 package.dependency.fields: Imports, Depends, LinkingTo
 snapshot.type: implicit
 use.cache: TRUE

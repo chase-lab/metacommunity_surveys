@@ -9,7 +9,7 @@ if (!file.exists('data/raw data/jacinto_2022/rdata.rds')) {
    base::saveRDS(
       object = data.table::fread(
          file = 'data/cache/jacinto_2022_Fish_Query_Clean_R_031120_CSV copy.csv',
-         stringsAsFactors = FALSE, drop = c("FishID","Status","Length","TripID","Date_start","V9","V10")),
+         stringsAsFactors = FALSE, drop = c("FishID","Status","Length","TripID","V9","V10")),
       file = 'data/raw data/jacinto_2022/rdata.rds'
    )
 }
