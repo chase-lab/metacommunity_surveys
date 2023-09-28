@@ -1,0 +1,20 @@
+variable name	definition
+dataset_id	"Unique ID linked to a publication (article or data set). If the data set was split because different taxa group are provided, a letter is added at the end. No missing value."
+year	"Year of sampling. If sampling was pooled over several years, the last sampling year is used here. No missing value."
+regional	"Region name, countains at least two localities. Can be a national park, a state or a forest name for example but smaller scales are also included where the region is an experimental sites. A data set can have several regions. No missing value. UTF-8 encoding."
+local	"Name or code of the sampled locality or experimental sample as given by the original data provider. For example, it can correspond to the name of an island, a lake or forest. No missing value. UTF-8 encoding."
+latitude	"Latitude North in decimal degree, WGS84. Site specific coordinates were included when available."
+longitude	"Longitude East in decimal degree, WGS84. Site specific coordinates were included when available."
+study_type	"one of ""resurvey"" or ""ecological sampling"". RESURVEY: typically two samplings separated by a long, 20+ years, stretch of time and a great deal of effort is put in matching very precisely historical plots or transects. ECOLOGICAL SAMPLING: these studies generally involve more samplings than resurveys: 10 samplings, 1 every few years. No missing value."
+data_pooled_by_authors	TRUE if the data provided by the authors was already pooled covering several years: several samples made over several years pooled together. No missing value.
+data_pooled_by_authors_comment	"If there was pooling by the original authors, countains free text describing how the authors pooled their data."
+sampling_years	"If there was pooling by the original authors, countains the years sampled for each period. ""1997, 1999"" means 1997 and 1999, ""1997-1999"" means 1997, 1998 and 1999."
+alpha_grain_m2	"Area of the local unit or area of the sampling gear (alpha_grain_type = sample). NA values indicate that information could not be collected."
+alpha_grain_type	"Category of alpha_grain, one of: ""island"", ""plot"", ""administrative"", ""watershed"", ""sample"", ""lake_pond"", ""archipelago"", ""trap"", ""transect"", ""ecosystem"", ""functional"", ""box"" or ""quadrat"". No missing value."
+alpha_grain_comment	"Description of the alpha_grain measure."
+realm	"Realm in which the sampling was done, one of: Freshwater or Terrestrial. No missing value."
+taxon	"Taxon group of the data set, one of: ""Plants"", ""Invertebrates"", ""Birds"", ""Herpetofauna"", ""Marine Plants"" or ""Fish"". No missing value."
+comment	"A description of the data set origin, goal and sampling method. No missing value. UTF-8 encoding."
+comment_standardisation	"A short description of the modifications we made to the data set to ensure standard effort: excluded sites or years, excluded taxa, etc."
+doi   "One or several DOIs separated by ""|""" that have to be cited for each data set."
+is_coordinate_local_scale	Logical. TRUE if coordinates are given at the scale of the site/locality. FALSE if the coordinates are at the regional scale or missing. No missing value.
