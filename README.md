@@ -7,7 +7,7 @@
 
 This research compendium regroups scripts used to download, re-structure and aggregate data sets to constitute a large meta-analysis of communities sampled at least twice, 10 years apart or more.  
 
-As of 2.3, data are provided in a raw and standardised states. Raw data were restructured to fit a common template and few modifications were made, see `rulebook.md`. Standardised data were restructured to fit a common template and the effort was standardised to be consistent between localities and years of the same region.  
+As of 2.4, data are provided in a raw and standardised states. Raw data were restructured to fit a common template and few modifications were made, see `rulebook.md`. Standardised data were restructured to fit a common template and the effort was standardised to be consistent between localities and years of the same region.  
 
 Variable definitions are in files:
 ```
@@ -17,7 +17,7 @@ Variable definitions are in files:
 ```
 
 ## Availability
-### Release v2.3-Blowes_etal_Science_Advances 
+### Release v2.4-Blowes_etal_Science_Advances 
 
  - Code archived on Zenodo: https://doi.org/10.5281/zenodo.7785287
  - Data are also available in this repository in the following files:
