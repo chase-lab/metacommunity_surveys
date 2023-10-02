@@ -89,6 +89,8 @@ ddata <- ddata[!ddata[, diff(range(year)) < 9L, by = .(regional, local)][(V1)],
                on = .(regional, local)]
 
 ## Metadata ----
+meta[, local := regional][, regional := "Alberta"]
+meta <- unique(meta)
 meta <- meta[unique(ddata[, .(regional, local, year)]),
              on = .(regional, local, year)]
 
