@@ -213,7 +213,8 @@ if (any(meta_standardised[, data.table::uniqueN(taxon), by = dataset_id]$V1 != 1
 if (any(!unique(meta_standardised$taxon) %in% c("Fish", "Invertebrates", "Plants", "Birds", "Mammals", "Herpetofauna", "Marine plants"))) warning(paste0("Non standard taxon category in ", paste(unique(meta_standardised[!taxon %in% c("Fish", "Invertebrates", "Plants", "Birds", "Mammals", "Herpetofauna", "Marine plants"), .(dataset_id), by = dataset_id]$dataset_id), collapse = ", ")))
 
 ### checking encoding ----
-try(for (i in seq_along(lst_metadata_standardised)) if (any(!unlist(unique(apply(lst_metadata_standardised[[i]][, c("local", "regional", "comment")], 2L, Encoding))) %in% c("UTF-8", "unknown"))) warning(paste0("Encoding issue in ", listfiles_metadata_standardised[i])))
+try(for (i in seq_along(lst_metadata_standardised)) if (any(!unlist(unique(apply(lst_metadata_standardised[[i]][, c("local", "regional", "comment")], 2L, Encoding))) %in% c("UTF-8", "unknown"))) warning(paste0("Encoding issue in ", listfiles_metadata_standardised[i])),
+    silent = TRUE)
 
 
 ### checking year range length among regions ----
@@ -289,6 +290,9 @@ if (any(meta_standardised[, .N, by = .(dataset_id, regional, local, year)][, N !
 if (nrow(meta_standardised) != nrow(unique(meta_standardised[, .(dataset_id, regional, local, year)]))) warning("Redundant rows in meta")
 if (nrow(meta_standardised) != nrow(unique(dt_standardised[, .(dataset_id, regional, local, year)]))) warning("Discrepancies between dt and meta")
 
+## Removing not shareable data sets before publication ----
+dt_standardised <- dt_standardised[!grepl(pattern = "myers-smith|edgar", x = dataset_id)]
+meta_standardised <- meta_standardised[!grepl(pattern = "myers-smith|edgar", x = dataset_id)]
 
 ## Saving dt ----
 data.table::setcolorder(dt_standardised, c("dataset_id", "regional", "local", "year", "species", "species_original", "value", "metric", "unit"))
@@ -306,3 +310,4 @@ base::saveRDS(meta_standardised, file = "data/metadata_standardised.rds")
 # if (file.exists("data/references/homogenisation_dropbox_folder_path.rds")) {
 #    data.table::fwrite(meta_standardised, paste0(path_to_homogenisation_dropbox_folder, "/metacommunity-survey_metadata-standardised.csv"), sep = ",", row.names = FALSE)
 # }
+

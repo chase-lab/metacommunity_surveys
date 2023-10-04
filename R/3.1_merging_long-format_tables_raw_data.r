@@ -260,6 +260,9 @@ if (length(base::setdiff(unique(dt_raw$dataset_id), unique(meta_raw$dataset_id))
 if (nrow(meta_raw) != nrow(unique(meta_raw[, .(dataset_id, regional, local, year, month, day)]))) warning("Redundant rows in meta")
 if (nrow(meta_raw) != nrow(unique(dt_raw[, .(dataset_id, regional, local, year, month, day)]))) warning("Discrepancies between dt and meta")
 
+## Removing not shareable data sets before publication ----
+dt_raw <- dt_raw[!grepl(pattern = "myers-smith|edgar", x = dataset_id)]
+meta_raw <- meta_raw[!grepl(pattern = "myers-smith|edgar", x = dataset_id)]
 
 ## Saving dt ----
 data.table::setcolorder(dt_raw, c("dataset_id", "regional", "local", "year", "species", "species_original", "value", "metric", "unit"))
