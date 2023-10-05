@@ -1,38 +1,15 @@
 dataset_id <- "mushet_2017"
 
 # Data preparation ----
-##Extracting taxonomy from metadata ----
-if (!file.exists("data/raw data/muschet_2017/CLSAInvertebrateCounts_metadata_taxonomy.csv")) {
-   tax <- XML::xmlToList("data/raw data/muschet_2017/CLSAInvertebrateCounts_metadata.xml")
-
-   codes <- unlist(sapply(tax$eainfo[[1]], function(element) element$attrlabl))
-   lnames <- unlist(sapply(tax$eainfo[[1]], function(element) element$attrdef))
-   lnames <- stringi::stri_extract_first_regex(str = lnames, pattern = "(?<=identified as? ).*(?= present)")
-
-   write.table(
-      x = na.omit(data.frame(codes = codes, long_names = lnames)),
-      sep = ",", row.names = FALSE,
-      file = "data/raw data/muschet_2017/CLSAInvertebrateCounts_metadata_taxonomy.csv"
-   )
-}
-tax <- read.table(
-   file = "data/raw data/muschet_2017/CLSAInvertebrateCounts_metadata_taxonomy.csv",
-   sep = ",", header = TRUE)
-
-
-## Coordinates
-coords <- data.table::fread(file = "data/raw data/muschet_2017/site locations.csv", skip = 1)
-coords[, Plot_name := data.table::fifelse(nchar(Plot_name) == 2L,
-                                          paste0(substr(Plot_name, 1, 1), "0", substr(Plot_name, 2, 2)),
-                                          Plot_name)]
-data.table::setnames(coords, c("Latitude","Longitude"), c("latitude", "longitude"))
-
 ## Reading insect counts ----
 ddata <- base::readRDS("data/raw data/muschet_2017/rdata.rds")
+tax <- base::readRDS("data/raw data/muschet_2017/taxonomy.rds")
 
 ##melting species ----
 ddata <- data.table::melt(ddata,
-                          id.vars = c("YEAR", "WETLAND", "MONTH", "TRANSECT", "VEGZONE"),
+                          id.vars = c("WETLAND", "TRANSECT", "VEGZONE",
+                                      "YEAR", "MONTH",
+                                      "latitude", "longitude"),
                           variable.name = "species",
                           na.rm = TRUE
 )
@@ -66,8 +43,7 @@ ddata[, ":="(
 )]
 
 ##meta data ----
-meta <- unique(ddata[, .(dataset_id, regional, local, year, month, Plot_name = sub("_.*$", "", local))])
-meta[coords, ":="(latitude = i.latitude, longitude = i.longitude), on = "Plot_name"][, Plot_name := NULL]
+meta <- unique(ddata[, .(dataset_id, regional, local, year, month, latitude, longitude)])
 
 meta[, ":="(
    taxon = "Invertebrates",
@@ -82,11 +58,13 @@ meta[, ":="(
    alpha_grain_type = "sample",
    alpha_grain_comment = "estimated",
 
-   comment = "Extracted from Mushet, D.M., Euliss, N.H., Jr., and Solensky, M.J. 2017, Cottonwood Lake Study Area - Invertebrate Counts, U.S. Geological Survey data release, https://doi.org/10.5066/F7BK1B77. Authors provide data sampled in the Cottonwood Lake Study Area from 1992 to 2015. Methods: 'Aquatic macroinvertebrates were collected each month (April-September) from all wetlands at Cottonwood Lake Study Area containing water using vertically oriented funnel traps (Swanson 1978). Sampling was stratified to provide separate estimates of invertebrate biomass and abundance in all major vegetative zones of each wetland. Samples were collected at random locations along the 3 established transects in each wetland that were established earlier and used to collect other biotic and abiotic data (LaBaugh et al. 1987). The length of each vegetation zone as bisected by transects was measured and a computer-generated set of random numbers used to identify sample points for the collection of invertebrate samples in each vegetative zone. One sample was collected from each major vegetative zone from each transect. Data consist of counts by taxa.'  Taxonomic names were extracted from metadata file https://www.sciencebase.gov/catalog/item/get/599d9555e4b012c075b964a6",
-   comment_standardisation = "Absences: 0 and NA were excluded but empty samples ('D') were kept.
+   comment = "Extracted from Mushet, D.M., and Solensky, M.J., 2022, Cottonwood Lake Study Area - Invertebrate Counts (ver. 2.0): U.S. Geological Survey data release, https://doi.org/10.5066/P99GXVSV. Authors provide data sampled in the Cottonwood Lake Study Area from 1992 to 2021 Methods: 'Aquatic macroinvertebrates were collected each month (April-September) from all wetlands at Cottonwood Lake Study Area containing water using vertically oriented funnel traps (Swanson 1978). Sampling was stratified to provide separate estimates of invertebrate biomass and abundance in all major vegetative zones of each wetland. Samples were collected at random locations along the 3 established transects in each wetland that were established earlier and used to collect other biotic and abiotic data (LaBaugh et al. 1987). The length of each vegetation zone as bisected by transects was measured and a computer-generated set of random numbers used to identify sample points for the collection of invertebrate samples in each vegetative zone. One sample was collected from each major vegetative zone from each transect. Data consist of counts by taxa.'  Taxonomic names were extracted from metadata file https://www.sciencebase.gov/catalog/item/get/599d9555e4b012c075b964a6",
+   comment_standardisation = "Absences: 0 and NA were excluded but empty sites ('D') were kept.
 Samples with duplicated observations were excluded.",
 doi = 'https://doi.org/10.5066/F7BK1B77'
 )]
+
+ddata[, c("longitude","latitude") := NULL]
 
 ## save raw data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
@@ -103,8 +81,8 @@ data.table::fwrite(
 
 # Standaridzed Data----
 ## Change of local name to remove the transect and vegzone names ----
-ddata[, local := gsub("_.*$", "", local, perl = TRUE)]
-meta[, local := gsub("_.*$", "", local, perl = TRUE)]
+ddata[, local := sub("_.*$", "", local, perl = TRUE)]
+meta[, local := sub("_.*$", "", local, perl = TRUE)]
 
 # selecting only months when all 3 transects were sampled ----
 ddata[, full_sample_month := data.table::uniqueN(TRANSECT), by = .(local, year, month)]

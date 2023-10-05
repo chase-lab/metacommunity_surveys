@@ -1,15 +1,6 @@
 dataset_id <- "mushet_2018"
 
-# Loading coordinates
-coords <- data.table::fread(file = "data/raw data/muschet_2017/site locations.csv", skip = 1)
-coords[, Plot_name := data.table::fifelse(nchar(Plot_name) == 2L,
-                                          sub("(^[PT])([0-9]{1}$)", "\\10\\2", Plot_name, perl = TRUE),
-                                          Plot_name)]
-data.table::setnames(coords, c("Latitude","Longitude"), c("latitude", "longitude"))
-
-ddata <- data.table::fread(
-   file = "data/raw data/muschet_2018/muschet_2018-CLSAamphibiansCounts_v2.csv",
-   sep = ",", header = TRUE)
+ddata <- base::readRDS(file = "data/raw data/muschet_2018/rdata.rds")
 
 # Raw data ----
 data.table::setnames(ddata, tolower(colnames(ddata)))
@@ -17,13 +8,14 @@ data.table::setnames(ddata, old = "wetland", new = "local")
 
 ## pooling all development stages and sex together ----
 ddata <- unique(ddata[, .(value = sum(count)),
-                      by = .(local, year, species, transect, month, day)])
+                      by = .(local, transect, latitude, longitude,
+                             year, month, day, species)])
 
 ## excluding absences but keeping empty samples----
 ddata <- ddata[!(value == 0L & species != "NONE")]
 
 ## community data ----
-ddata[, ":="(
+ddata[, species := as.character(species)][, ":="(
    dataset_id = dataset_id,
 
    regional = "Cottonwood Lake Study Area",
@@ -40,8 +32,7 @@ ddata[, ":="(
 )]
 
 ## meta data ----
-meta <- unique(ddata[, .(dataset_id, regional, local, year, month, day, Plot_name = sub("_.*$", "", local))])
-meta[coords, ":="(latitude = i.latitude, longitude = i.longitude), on = "Plot_name"][, Plot_name := NULL]
+meta <- unique(ddata[, .(dataset_id, regional, local, year, month, day, latitude, longitude)])
 
 meta[, ":="(
    taxon = "Herpetofauna",
@@ -56,10 +47,12 @@ meta[, ":="(
    alpha_grain_type = "sample",
    alpha_grain_comment = "5cm wide aperture of the funnel opening",
 
-   comment = "Extracted from Mushet, D.M., and Solensky, M.J., 2022, Cottonwood Lake Study Area - Amphibians (ver. 2.0): U.S. Geological Survey data release, https://doi.org/10.5066/P9G8TM2S. Authors provide data sampled in the Cottonwood Lake Study Area from 1992 to 2021. METHODS: 'Amphibians and reptiles were captured over one week in May-September from 1992-2017 using amphibian funnel traps (Mushet et al. 1997). Traps were placed along three existing transects within the central vegetation zone of each CLSA wetland. Funnel traps were constructed of 1/8 inch galvanized hardware cloth and had a 5-cm aperture at the funnel opening. The funnel traps designed for use in this study have been shown to minimize injury rates (Mushet et al. 1997) and provide captured animals access to the surface. Additionally, traps were checked daily to minimize the time captured animals spent in traps. Funnel traps were set on the morning of day one and checked each morning over four subsequent days. Adult amphibians and reptiles were identified to species, and tadpoles were identified to genus.'  Taxonomic names were extracted from metadata file https://www.sciencebase.gov/catalog/item/get/599d9555e4b012c075b964a6",
+   comment = "Extracted from MMushet, D.M., and Solensky, M.J., 2022, Cottonwood Lake Study Area - Amphibians (ver. 2.0): U.S. Geological Survey data release, https://doi.org/10.5066/P9G8TM2S. Authors provide data sampled in the Cottonwood Lake Study Area from 1992 to 2021. METHODS: 'Amphibians and reptiles were captured over one week in May-September from 1992-2017 using amphibian funnel traps (Mushet et al. 1997). Traps were placed along three existing transects within the central vegetation zone of each CLSA wetland. Funnel traps were constructed of 1/8 inch galvanized hardware cloth and had a 5-cm aperture at the funnel opening. The funnel traps designed for use in this study have been shown to minimize injury rates (Mushet et al. 1997) and provide captured animals access to the surface. Additionally, traps were checked daily to minimize the time captured animals spent in traps. Funnel traps were set on the morning of day one and checked each morning over four subsequent days. Adult amphibians and reptiles were identified to species, and tadpoles were identified to genus.'  Taxonomic names were extracted from metadata file https://www.sciencebase.gov/catalog/item/get/599d9555e4b012c075b964a6",
    comment_standardisation = "Absences excluded but empty sites kept (species == NONE)",
    doi = 'https://doi.org/10.5066/F7X9297Q'
 )]
+
+ddata[, c("latitude", "longitude") := NULL]
 
 ## Save raw data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
