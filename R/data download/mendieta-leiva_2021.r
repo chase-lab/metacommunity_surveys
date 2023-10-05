@@ -4,11 +4,11 @@ if (!file.exists("./data/raw data/mendieta-leiva_2021/rdata.rds")) {
    file1 <- "data/cache/Sherman_firstcensus_Mendietaetal2022.csv"
    file2 <- "data/cache/Sherman_secondcensus_Mendietaetal2022.csv"
 
-   download.file(
+   curl::curl_download(
       url = "https://zenodo.org/record/5645775/files/Sherman_firstcensus_Mendietaetal2022.csv?download=1",
       destfile = file1, mode = "wb"
    )
-   download.file(
+   curl::curl_download(
       url = "https://zenodo.org/record/5645775/files/Sherman_secondcensus_Mendietaetal2022.csv?download=1",
       destfile = file2, mode = "wb"
    )

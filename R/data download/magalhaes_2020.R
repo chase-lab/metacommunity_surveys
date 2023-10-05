@@ -3,7 +3,7 @@
 if (!file.exists("./data/raw data/magalhaes_2020/rdata.rds")) {
   # downloading
   if (!file.exists("./data/cache/magalhaes_2020 10750_2020_4307_MOESM1_ESM.pdf")) {
-    download.file(
+    curl::curl_download(
       url = "https://static-content.springer.com/esm/art%3A10.1007%2Fs10750-020-04307-w/MediaObjects/10750_2020_4307_MOESM1_ESM.pdf",
       destfile = "./data/cache/magalhaes_2020 10750_2020_4307_MOESM1_ESM.pdf",
       mode = "wb"

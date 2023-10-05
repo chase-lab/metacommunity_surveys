@@ -1,7 +1,7 @@
 # alves_2022
 
 if (!file.exists("data/raw data/alves_2022/rdata.rds")) {
-   download.file(
+   curl::curl_download(
       url = "https://github.com/calves06/Belizean_Barrier_Reef_Change/raw/main/Data/Processed/Long.Master.Species.Groups.csv",
       destfile = "data/cache/alves_2021_Long.Master.Species.Groups.csv"
    )

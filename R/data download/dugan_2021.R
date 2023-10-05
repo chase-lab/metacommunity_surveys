@@ -9,8 +9,8 @@ if (!file.exists("./data/raw data/dugan_2021/rdata.rds")) {
   inUrl1 <- "https://pasta.lternet.edu/package/data/eml/knb-lter-sbc/51/10/c63213ebb13dbd5371ced78f039fa73d"
   dir.create("./data/raw data/dugan_2021", showWarnings = FALSE)
   infile1 <- "./data/raw data/dugan_2021/rdata.csv"
-  if (!file.exists(infile1)) try(download.file(inUrl1, infile1, method = "curl"))
-  if (!file.exists(infile1)) download.file(inUrl1, infile1, method = "auto")
+  if (!file.exists(infile1)) try(curl::curl_download(inUrl1, infile1, method = "curl"))
+  if (!file.exists(infile1)) curl::curl_download(inUrl1, infile1, method = "auto")
 
 
   dt1 <- read.csv(infile1,

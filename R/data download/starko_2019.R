@@ -2,7 +2,7 @@
 ## starko_2019
 dataset_id <- "starko_2019"
 if (!file.exists(paste("data/raw data", dataset_id, "ddata_historical.rds", sep = "/"))) {
-  download.file(
+  curl::curl_download(
     url = "https://doi.org/10.1371/journal.pone.0213191.s002",
     destfile = "./data/cache/starko_2019_supp2.xlsx", mode = "wb"
   )
@@ -14,7 +14,7 @@ if (!file.exists(paste("data/raw data", dataset_id, "ddata_historical.rds", sep 
   base::saveRDS(ddata, file = paste("data/raw data", dataset_id, "ddata_historical.rds", sep = "/"))
 
 
-  download.file(
+  curl::curl_download(
     url = "https://doi.org/10.1371/journal.pone.0213191.s001",
     destfile = "./data/cache/starko_2019_supp1.csv"
   )

@@ -1,10 +1,10 @@
 # klinkovska_2022
 if (!file.exists('data/raw data/klinkovska_2022/rdata.rds')) {
    if (!file.exists('data/cache/klinkovska_2022_species.txt'))
-      download.file(url = 'https://zenodo.org/record/7338814/files/Jeseniky_resurvey_species.txt?download=1',
+      curl::curl_download(url = 'https://zenodo.org/record/7338814/files/Jeseniky_resurvey_species.txt?download=1',
                     destfile = 'data/cache/klinkovska_2022_species.txt')
    if (!file.exists('data/cache/kinklovska_2022_environment.txt'))
-      download.file(url = 'https://zenodo.org/record/7338814/files/Jeseniky_resurvey_head.txt?download=1',
+      curl::curl_download(url = 'https://zenodo.org/record/7338814/files/Jeseniky_resurvey_head.txt?download=1',
                     destfile = 'data/cache/klinkovska_2022_environment.txt')
 
    rdata <- data.table::fread(file = 'data/cache/klinkovska_2022_species.txt',

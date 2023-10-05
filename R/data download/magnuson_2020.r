@@ -12,8 +12,8 @@ if (!file.exists(paste0("./data/raw data/", dataset_id, "/rdata.rds"))) {
 
    inUrl1  <- "https://pasta.lternet.edu/package/data/eml/knb-lter-ntl/13/34/35a501a8e187da22f6cfc07015fca911"
    infile1 <- paste0("./data/cache/", dataset_id, "_knb-lter-ntl_13_34.csv")
-  if (!file.exists(infile1)) try(download.file(inUrl1, infile1, method = "curl"))
-  if (!file.exists(infile1)) download.file(inUrl1, infile1, method = "auto")
+  if (!file.exists(infile1)) try(curl::curl_download(inUrl1, infile1, method = "curl"))
+  if (!file.exists(infile1)) curl::curl_download(inUrl1, infile1, method = "auto")
 
 
   dt1 <- data.table::fread(infile1,

@@ -1,5 +1,5 @@
 if (!file.exists("data/cache/tanner_2022_coral_maps_exposed_crest.zip")) {
-   download.file(
+   curl::curl_download(
       url = "https://springernature.figshare.com/ndownloader/files/37459597",
       mode = "wb",
       destfile = "data/cache/tanner_2022_coral_maps_exposed_crest.zip"

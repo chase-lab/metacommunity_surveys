@@ -9,8 +9,8 @@
 
 inUrl1  <- "https://pasta.lternet.edu/package/data/eml/knb-lter-fce/1211/4/c55358e65d766fc8f2b2b3b28dec4600"
 infile1 <- 'data/cache/gaiser_2021_diatoms.csv'
-if (!file.exists(infile1)) try(download.file(inUrl1,infile1,method="curl", mode = 'wb'))
-if (!file.exists(infile1)) download.file(inUrl1,infile1,method="auto", mode = 'wb')
+if (!file.exists(infile1)) try(curl::curl_download(inUrl1,infile1,method="curl", mode = 'wb'))
+if (!file.exists(infile1)) curl::curl_download(inUrl1,infile1,method="auto", mode = 'wb')
 
 
 rdata <- data.table::fread(file = infile1, header=F

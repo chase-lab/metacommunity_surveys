@@ -10,8 +10,8 @@
 infile1 <- "./data/cache/alber_2022_abundances.csv"
 if (!file.exists(infile1)) {
    inUrl1  <- "https://pasta.lternet.edu/package/data/eml/knb-lter-gce/605/14/97c09b8ba676a1a750665d2ff1908b9e"
-   if (!file.exists(infile1)) try(download.file(inUrl1,infile1,method="curl"))
-   if (is.na(file.size(infile1))) download.file(inUrl1,infile1,method="auto")
+   if (!file.exists(infile1)) try(curl::curl_download(inUrl1,infile1,method="curl"))
+   if (is.na(file.size(infile1))) curl::curl_download(inUrl1,infile1,method="auto")
 
 
    dt1 <-read.csv(infile1,header=F

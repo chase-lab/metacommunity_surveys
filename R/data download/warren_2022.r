@@ -12,8 +12,8 @@ dataset_id <- "warren_2022"
 if (!file.exists(paste0("./data/raw data/", dataset_id, "/rdata1.rds"))) {
 inUrl1  <- "https://pasta.lternet.edu/package/data/eml/knb-lter-cap/46/20/832065765ce5a9a8238a0b25cb549722" 
 infile1 <- paste0("./data/cache/", dataset_id, "46_bird_observations.csv")
-if (!file.exists(infile1)) try(download.file(inUrl1, infile1, method = "curl"))
-if (!file.exists(infile1)) download.file(inUrl1, infile1, method = "auto")
+if (!file.exists(infile1)) try(curl::curl_download(inUrl1, infile1, method = "curl"))
+if (!file.exists(infile1)) curl::curl_download(inUrl1, infile1, method = "auto")
 
 
 dt1 <-data.table::fread(infile1,header=F 
@@ -113,8 +113,8 @@ base::saveRDS(dt1, file = paste0("./data/raw data/", dataset_id, "/rdata1.rds"))
 if (!file.exists(paste0("./data/raw data/", dataset_id, "/rdata2.rds"))) {
 inUrl2  <- "https://pasta.lternet.edu/package/data/eml/knb-lter-cap/46/20/86856afb2e6779f5acb261a2b04d1e13" 
 infile2 <- paste0("./data/cache/", dataset_id, "46_bird_survey_locations.csv")
-if (!file.exists(infile2)) try(download.file(inUrl2, infile2, method = "curl"))
-if (!file.exists(infile2)) download.file(inUrl2, infile2, method = "auto")
+if (!file.exists(infile2)) try(curl::curl_download(inUrl2, infile2, method = "curl"))
+if (!file.exists(infile2)) curl::curl_download(inUrl2, infile2, method = "auto")
 
 
 dt2 <-data.table::fread(infile2,header=F 

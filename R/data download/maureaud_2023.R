@@ -1,6 +1,6 @@
 # # Maureaud_2023 - FishGlob
 # if (!file.exists('data/cache/maureaud_2023_fish_communities.Rdata')) {
-#    utils::download.file(
+#    utils::curl::curl_download(
 #       url = 'https://github.com/AquaAuma/FishGlob_data/raw/main/outputs/Compiled_data/FishGlob_public_std_clean.RData',
 #       destfile = 'data/cache/maureaud_2023_fish_communities.Rdata', mode = 'wb'
 #    )

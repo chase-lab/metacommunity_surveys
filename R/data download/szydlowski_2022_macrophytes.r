@@ -20,8 +20,8 @@
 if (!file.exists("./data/raw data/szydlowski_2022_macrophytes/szydlowski_2022_macrophytes.rds")) {
    inUrl2  <- "https://pasta.lternet.edu/package/data/eml/knb-lter-ntl/417/1/1f230f0497f0d5614b934e475c34a33d"
    infile2 <- "./data/cache/szydlowski_2022_final_MLS_macrophytes.csv"
-   if (!file.exists(infile2)) try(download.file(inUrl2,infile2,method="curl"))
-   if (!file.exists(infile2)) try(download.file(inUrl2,infile2,method="auto"))
+   if (!file.exists(infile2)) try(curl::curl_download(inUrl2,infile2,method="curl"))
+   if (!file.exists(infile2)) try(curl::curl_download(inUrl2,infile2,method="auto"))
 
 
    dt2 <-data.table::fread(infile2,header=F

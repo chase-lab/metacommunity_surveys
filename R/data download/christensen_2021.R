@@ -3,7 +3,7 @@
 if (!file.exists("./data/raw data/christensen_2021/taxo.rds")) {
   if (!file.exists("./data/cache/christensen_2021/ecy3530-sup-0002-DataS2.zip")) {
     dir.create(path = "./data/cache/christensen_2021", showWarnings = FALSE)
-    download.file(
+    curl::curl_download(
       url = "https://esajournals.onlinelibrary.wiley.com/action/downloadSupplement?doi=10.1002%2Fecy.3530&file=ecy3530-sup-0002-DataS2.zip",
       destfile = "./data/cache/christensen_2021/ecy3530-sup-0002-DataS2.zip",
       mode = "wb"

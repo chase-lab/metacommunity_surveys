@@ -9,8 +9,8 @@
 
 inUrl1  <- "https://pasta.lternet.edu/package/data/eml/edi/1320/4/1eee2c2a562a5b856398082c487dc1a7"
 infile1 <- 'data/cache/perry_2023.csv'
-if (is.na(file.size(infile1))) download.file(inUrl1,infile1,method = "curl")
-if (is.na(file.size(infile1))) download.file(inUrl1,infile1,method = "auto")
+if (is.na(file.size(infile1))) curl::curl_download(inUrl1,infile1,method = "curl")
+if (is.na(file.size(infile1))) curl::curl_download(inUrl1,infile1,method = "auto")
 
 
 dt1 <- data.table::fread(infile1, header = TRUE, skip = 0, sep = ",",
@@ -35,8 +35,8 @@ suppressWarnings(
 
 inUrl2  <- "https://pasta.lternet.edu/package/data/eml/edi/1320/4/00b61678378071f779f1135be223fe0a"
 infile2 <- 'data/cache/perry_2023_environment.csv'
-if (is.na(file.size(infile2))) download.file(inUrl2, infile2, method = "curl")
-if (is.na(file.size(infile2))) download.file(inUrl2, infile2, method = "auto")
+if (is.na(file.size(infile2))) curl::curl_download(inUrl2, infile2, method = "curl")
+if (is.na(file.size(infile2))) curl::curl_download(inUrl2, infile2, method = "auto")
 
 
 dt2 <- data.table::fread(infile2, header = TRUE, sep = ',',

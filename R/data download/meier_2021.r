@@ -3,7 +3,7 @@
 if (!file.exists("./data/raw data/meier_2021/rdata.rds")) {
    # downloading data ----
    if (!file.exists("./data/cache/meier_2021.pdf")) {
-      download.file(
+      curl::curl_download(
          url = "https://www.tuexenia.de/publications/tuexenia/Tuexenia_2021_NS_041_0203-0226.pdf",
          method = "curl", destfile = "./data/cache/meier_2021.pdf", mode = "wb"
       )

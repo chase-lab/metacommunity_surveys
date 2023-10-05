@@ -18,8 +18,8 @@
 if (!file.exists("./data/raw data/szydlowski_2022_snails/rdata.rds")) {
    inUrl1  <- "https://pasta.lternet.edu/package/data/eml/knb-lter-ntl/417/1/b2883a4bf1f0d8e67559e9680d0d945c"
    infile1 <- "./data/cache/szydlowski_2022_final_MLS_snails.csv"
-   if (!file.exists(infile1)) try(download.file(inUrl1,infile1,method="curl"))
-   if (!file.exists(infile1)) download.file(inUrl1,infile1,method="auto")
+   if (!file.exists(infile1)) try(curl::curl_download(inUrl1,infile1,method="curl"))
+   if (!file.exists(infile1)) curl::curl_download(inUrl1,infile1,method="auto")
 
 
    dt1 <- data.table::fread(file = infile1, header=F

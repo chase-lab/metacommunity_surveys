@@ -1,7 +1,7 @@
 ## vojik_2018
 dataset_id <- "vojik_2018"
 #
-# download.file(
+# curl::curl_download(
 #    url = "https://static-content.springer.com/esm/art%3A10.1007%2Fs11258-018-0831-5/MediaObjects/11258_2018_831_MOESM1_ESM.docx",
 #    destfile = "./data/cache/vojik_2018_11258_2018_831_MOESM1_ESM.docx", mode = "wb"
 # )

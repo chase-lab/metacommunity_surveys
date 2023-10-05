@@ -1,7 +1,7 @@
 # quimbayo_2022
 # suppdata::suppdata(x = "https://doi.org/10.1002/ecy.3966", si = 2, dir = "data/cache", save.name = "quimbayo_2022_ecy3966-sup-0002-data_s1.zip")
 if (!file.exists("data/cache/quimbayo_2022_ecy3966-sup-0002-data_s1.zip"))
-   download.file(
+   curl::curl_download(
       url = "https://esajournals.onlinelibrary.wiley.com/action/downloadSupplement?doi=10.1002%2Fecy.3966&file=ecy3966-sup-0002-Data_S1.zip",
       desfile = "data/cache/quimbayo_2022_ecy3966-sup-0002-data_s1.zip",
       mode = "wb")

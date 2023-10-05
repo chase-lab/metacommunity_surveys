@@ -11,8 +11,8 @@ if (!file.exists("./data/raw data/sonnier_2022/rdata.rds")) {
 
    inUrl1  <- "https://pasta.lternet.edu/package/data/eml/edi/1157/1/5876c13b2d6c4a668729b76f0d800c3d"
    infile1 <- "./data/cache/sonnier_dt31.csv"
-   try(download.file(inUrl1,infile1,method="curl"))
-   if (is.na(file.size(infile1))) download.file(inUrl1,infile1,method="auto")
+   try(curl::curl_download(inUrl1,infile1,method="curl"))
+   if (is.na(file.size(infile1))) curl::curl_download(inUrl1,infile1,method="auto")
 
 
    dt1 <-read.csv(infile1,header=F
@@ -35,8 +35,8 @@ if (!file.exists("./data/raw data/sonnier_2022/rdata.rds")) {
 
    inUrl3  <- "https://pasta.lternet.edu/package/data/eml/edi/1157/1/a927e111541e05414ab1b387e929a28f"
    infile3 <- "./data/cache/sonnier_dt3.csv"
-   try(download.file(inUrl3,infile3,method="curl"))
-   if (is.na(file.size(infile3))) download.file(inUrl3,infile3,method="auto")
+   try(curl::curl_download(inUrl3,infile3,method="curl"))
+   if (is.na(file.size(infile3))) curl::curl_download(inUrl3,infile3,method="auto")
 
 
    dt3 <-read.csv(infile3,header=F

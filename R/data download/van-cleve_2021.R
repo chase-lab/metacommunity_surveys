@@ -11,8 +11,8 @@
 if (!file.exists("./data/raw data/van-cleve_2021/rdata.rds")) {
   inUrl1 <- "https://pasta.lternet.edu/package/data/eml/knb-lter-bnz/320/23/858dc623b84dd3dc2e0e877ca6fdc3c5"
   infile1 <- "./data/cache/van-cleve_2021.csv"
-  if (!file.exists(infile1)) try(download.file(inUrl1, infile1, method = "curl"))
-  if (!file.exists(infile1)) download.file(inUrl1, infile1, method = "auto")
+  if (!file.exists(infile1)) try(curl::curl_download(inUrl1, infile1, method = "curl"))
+  if (!file.exists(infile1)) curl::curl_download(inUrl1, infile1, method = "auto")
 
 
   dt1 <- read.csv(infile1,

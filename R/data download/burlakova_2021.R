@@ -1,7 +1,7 @@
 # burlakova_2021
 if (!file.exists("./data/raw data/burlakova_2021/rdata.rds")) {
   if (!file.exists("./data/cache/burlakova_2021_ecy3528-sup-0001-DataS1.zip")) {
-    download.file(
+    curl::curl_download(
       url = "https://esajournals.onlinelibrary.wiley.com/action/downloadSupplement?doi=10.1002%2Fecy.3528&file=ecy3528-sup-0001-DataS1.zip",
       destfile = "./data/cache/burlakova_2021_ecy3528-sup-0001-DataS1.zip",
       mode = "wb"

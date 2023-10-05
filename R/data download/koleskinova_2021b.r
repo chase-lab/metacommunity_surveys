@@ -3,7 +3,7 @@ dataset_id <- "koleskinova_2021b"
 if (!file.exists("data/raw_data/koleskinova_2021b/rdata.rds")) {
    # downloading ----
    if (!file.exists("data/cache/koleskinova_2021b_dwca-lpk-v1.3.zip")) {
-      download.file(url = "http://ib.komisc.ru:8088/ipt/archive.do?r=lpk&v=1.3",
+      curl::curl_download(url = "http://ib.komisc.ru:8088/ipt/archive.do?r=lpk&v=1.3",
                     destfile = "data/cache/koleskinova_2021b_dwca-lpk-v1.3.zip",
                     mode = "wb")
    }

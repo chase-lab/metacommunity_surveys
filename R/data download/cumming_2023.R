@@ -1,7 +1,7 @@
 # cumming_2023
 if (!base::file.exists('data/raw data/cumming_2023/rdata.rds')) {
    if (!base::file.exists('data/cache/cumming_2023_AIMSfish_v1.xlsx')) {
-      base::download.file(url = 'https://zenodo.org/record/7739234/files/AIMSfish_v2.xlsx?download=1',
+      curl::curl_download(url = 'https://zenodo.org/record/7739234/files/AIMSfish_v2.xlsx?download=1',
                           destfile = 'data/cache/cumming_2023_AIMSfish_v1.xlsx')
    }
 

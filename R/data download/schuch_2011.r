@@ -2,7 +2,7 @@
 dataset_id <- "schuch_2011"
 
 if (!file.exists(paste("data/raw data", dataset_id, "ddata.rds", sep = "/"))) {
-   download.file(
+   curl::curl_download(
       url = "https://onlinelibrary.wiley.com/action/downloadSupplement?doi=10.1111%2Fj.1439-0418.2011.01645.x&file=JEN_1645_sm_AppendixS1.xls",
       destfile = "./data/cache/schuch_2011_JEN_1645_sm_AppendixS1.xls", mode = "wb"
    )

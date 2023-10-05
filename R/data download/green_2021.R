@@ -2,7 +2,7 @@
 
 if (!file.exists("data/raw data/green_2021/docx_extraction.rds")) {
   if (!file.exists("data/cache/green_2021_suplementary.docx")) {
-    download.file(
+    curl::curl_download(
       url = "https://onlinelibrary.wiley.com/action/downloadSupplement?doi=10.1111%2Fddi.13387&file=ddi13387-sup-0001-Supinfo.docx",
       destfile = "data/cache/green_2021_suplementary.docx",
       mode = "wb"

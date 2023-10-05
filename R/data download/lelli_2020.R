@@ -4,13 +4,13 @@ if (!file.exists("./data/raw data/lelli_2020/rdata.rda")) {
 
   # coordinates
   if (!file.exists("./data/cache/lelli_2020_appendixS1.pdf")) {
-    download.file(
+    curl::curl_download(
       url = "https://onlinelibrary.wiley.com/action/downloadSupplement?doi=10.1111%2Fjvs.12939&file=jvs12939-sup-0001-AppendixS1.pdf",
       destfile = "./data/cache/lelli_2020_appendixS1.pdf", method = "auto", mode = "wb"
     )
   }
   if (!file.exists("./data/cache/lelli_2020_appendixS1.pdf")) {
-    download.file(
+    curl::curl_download(
       url = "https://onlinelibrary.wiley.com/action/downloadSupplement?doi=10.1111%2Fjvs.12939&file=jvs12939-sup-0001-AppendixS1.pdf",
       destfile = "./data/cache/lelli_2020_appendixS1.pdf", method = "curl", mode = "wb"
     )
@@ -18,13 +18,13 @@ if (!file.exists("./data/raw data/lelli_2020/rdata.rda")) {
 
   # historical sampling ----
   if (!file.exists("./data/cache/lelli_2020_appendixS6.pdf")) {
-    download.file(
+    curl::curl_download(
       url = "https://onlinelibrary.wiley.com/action/downloadSupplement?doi=10.1111%2Fjvs.12939&file=jvs12939-sup-0006-AppendixS6.pdf",
       destfile = "./data/cache/lelli_2020_appendixS6.pdf", method = "auto", mode = "wb"
     )
   }
   if (!file.exists("./data/cache/lelli_2020_appendixS6.pdf")) {
-    download.file(
+    curl::curl_download(
       url = "https://onlinelibrary.wiley.com/action/downloadSupplement?doi=10.1111%2Fjvs.12939&file=jvs12939-sup-0006-AppendixS6.pdf",
       destfile = "./data/cache/lelli_2020_appendixS6.pdf", method = "curl", mode = "wb"
     )
@@ -32,14 +32,14 @@ if (!file.exists("./data/raw data/lelli_2020/rdata.rda")) {
 
   # resurvey ----
   if (!file.exists("./data/cache/lelli_2020_appendixS7.pdf")) {
-    download.file(
+    curl::curl_download(
       url = "https://onlinelibrary.wiley.com/action/downloadSupplement?doi=10.1111%2Fjvs.12939&file=jvs12939-sup-0007-AppendixS7.pdf",
       destfile = "./data/cache/lelli_2020_appendixS7.pdf", method = "auto", mode = "wb"
     )
   }
 
   if (!file.exists("./data/cache/lelli_2020_appendixS7.pdf")) {
-    download.file(
+    curl::curl_download(
       url = "https://onlinelibrary.wiley.com/action/downloadSupplement?doi=10.1111%2Fjvs.12939&file=jvs12939-sup-0007-AppendixS7.pdf",
       destfile = "./data/cache/lelli_2020_appendixS7.pdf", method = "curl", mode = "wb"
     )

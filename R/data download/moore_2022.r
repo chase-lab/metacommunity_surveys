@@ -1,7 +1,7 @@
 dataset_id <- "moore_2022"
 
 if (!file.exists("./data/raw data/moore_2022/rdata.rds")) {
-   download.file(url = "https://www.fs.usda.gov/rds/archive/products/RDS-2021-0092/RDS-2021-0092_Data.zip", destfile = "./data/cache/moore_2022_RDS-2021-0092_Data.zip", mode = "wb")
+   curl::curl_download(url = "https://www.fs.usda.gov/rds/archive/products/RDS-2021-0092/RDS-2021-0092_Data.zip", destfile = "./data/cache/moore_2022_RDS-2021-0092_Data.zip", mode = "wb")
 
    ddata <- read.csv(
       unz(

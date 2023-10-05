@@ -1,7 +1,7 @@
 # seipel_2022
 if (!file.exists('data/raw data/seipel_2022/rdata.rds')) {
    if (!file.exists("./data/cache/seipel_2022_MIRENplant_records_data_2007-2019.lat.long_v2_2212.csv"))
-      download.file(
+      curl::curl_download(
          url = "https://zenodo.org/record/7495407/files/MIRENplant_records_data_2007-2019.lat.long_v2_2212.csv?download=1",
          destfile = "./data/cache/seipel_2022_MIRENplant_records_data_2007-2019.lat.long_v2_2212.csv")
 

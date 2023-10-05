@@ -10,8 +10,8 @@ dataset_id <- "reed_2022"
 if (!file.exists(paste0("./data/raw data/", dataset_id, "/rdata.rds"))) {
    inUrl1  <- "https://pasta.lternet.edu/package/data/eml/knb-lter-sbc/50/13/24d18d9ebe4f6e8b94e222840096963c"
    infile1 <- paste0("./data/cache/", dataset_id, "Annual_All_Species_Biomass_at_transect_20211020.csv")
-   if (!file.exists(infile1)) try(download.file(inUrl1, infile1, method = "curl"))
-   if (!file.exists(infile1)) download.file(inUrl1, infile1, method = "auto")
+   if (!file.exists(infile1)) try(curl::curl_download(inUrl1, infile1, method = "curl"))
+   if (!file.exists(infile1)) curl::curl_download(inUrl1, infile1, method = "auto")
 
 
    dt1 <-data.table::fread(infile1, header = F
