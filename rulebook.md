@@ -28,3 +28,7 @@ Gamma columns should not be in the raw data. regional should not either. local c
 
 Names for raw and standardised date sets:
    processed raw & processed standardised
+
+# Publishing
+We publish time-stamped versions of the database on Zenodo when colleagues use it in an accepted article.
+If you use the database in an article, we encourage you to use the latest Zenodo release and cite it.
