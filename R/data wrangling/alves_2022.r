@@ -27,6 +27,15 @@ ddata[, ":="(
 coords <- sf::st_read("data/GIS data/alves_2022_site_coordinates.kml")
 data.table::setDT(coords)
 coords[, c("longitude", "latitude", "z") := do.call(rbind.data.frame, geometry)]
+site_names <- c("Tobacco_Caye","Middle_Caye","South_of_Middle_Caye","Goffs_Caye",
+                "Bacalar_Chico","Tacklebox","Mexico_Rocks","Hol_Chan",
+                "Gallows_Reef","Alligator", "Calabash", "Halfmoon_Caye","South_Water",
+                "Southwest_Caye","Nicholas","Pompian","Chapel")
+coords[, gamma_bounding_box := c(21000, 50000, 50000, 2700,
+                          NA, NA, NA, NA,
+                          NA, NA, 1400000, 168000, NA,
+                          70000, NA, NA, 1140000)[data.table::chmatch(Name,
+                                                                   site_names)]]
 
 ## metadata ----
 meta <- unique(ddata[, .(dataset_id, regional, Site, Transect, local, year,
@@ -37,7 +46,7 @@ meta <- unique(ddata[, .(dataset_id, regional, Site, Transect, local, year,
 meta[coords, ":="(
    latitude = i.latitude,
    longitude = i.longitude),
-   on = "Name"][, Name := NULL]
+   on = c("Site" = "Name")]
 
 meta[, ":="(
    taxon = "Invertebrates",
@@ -104,6 +113,7 @@ meta[, regional := Site][, Site := NULL]
 meta[, local := Transect][, Transect := NULL]
 meta <- unique(unique(meta)[ddata[, .(regional, local, year)],
                             on = .(regional, local, year)])
+meta[coords, gamma_bounding_box := i.gamma_bounding_box, on = "Name"][, Name := NULL]
 
 meta[, ":="(
    effort = 1L,
@@ -112,8 +122,9 @@ meta[, ":="(
    gamma_sum_grains_type = "sample",
    gamma_sum_grains_comment = "sum of the areas of all transects of a site/region on a given year",
 
-   gamma_bounding_box_unit = NA,
-   gamma_bounding_box_type = NA,
+   gamma_bounding_box_unit = "m2",
+   gamma_bounding_box_type = "island",
+   gamma_bounding_box_comment = "Island areas computed on a map",
 
    comment_standardisation = "Items from the following types were excluded: Substrate, Dead, Equipment, Fish, Rubble, Sand.sediment, Unknown, Water, N.c, CTB.
 Only Coral is kept.
