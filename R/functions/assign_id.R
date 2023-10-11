@@ -3,7 +3,7 @@ assign_id <- function(dataset_id) {
    # read saved codes
    unique_IDs <- base::readRDS(file = "data/unique_IDs.rds")
    # if there are new datasets, create a code for them, add them to the dictionnary
-   new_dataset_ids <- ids[!ids %in% unique_IDs$dataset_id]
+   new_dataset_ids <- base::setdiff(ids, unique_IDs$dataset_id)
    if (!base::is.null(new_dataset_ids)) {
       unique_IDs <- base::rbind(unique_IDs, data.table::data.table(
       ## add new dataset_ids to the dictionnary
