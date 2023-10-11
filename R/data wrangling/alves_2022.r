@@ -74,7 +74,7 @@ data.table::fwrite(
    row.names = FALSE
 )
 data.table::fwrite(
-   x = unique(meta[ddata[value != 0 ], on = .(local, year), !c("Site", "Transect")]),
+   x = unique(meta[ddata[value != 0 ], on = .(local, year), !c("Site", "Transect", "Name")]),
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw_metadata.csv"),
    row.names = FALSE
 )
