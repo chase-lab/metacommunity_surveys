@@ -90,7 +90,7 @@ meta[, ":="(
 ##save data -----
 data.table::fwrite(
    x = ddata,
-   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standadized.csv"),
+   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised.csv"),
    row.names = FALSE
 )
 data.table::fwrite(
