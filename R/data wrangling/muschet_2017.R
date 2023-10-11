@@ -29,14 +29,12 @@ ddata <- ddata[
 
 #Raw Data ----
 ##community data ----
-
+ddata[tax, species := i.long_names, on = c("species" = "codes")]
 ddata[, ":="(
    dataset_id = dataset_id,
 
    regional = factor("Cottonwood Lake Study Area"),
    local = factor(paste(local, VEGZONE, TRANSECT, sep = "_")),
-
-   species = factor(tax$long_names[match(species, tax$codes)]),
 
    metric = factor("abundance"),
    unit = factor("count")
