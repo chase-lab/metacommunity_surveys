@@ -66,20 +66,6 @@ data.table::setkey(dt_raw, dataset_id, regional, local,
 
 ## Checks ----
 
-### checking duplicated rows ----
-if (anyDuplicated(dt_raw)) warning(
-   paste(
-      "Duplicated rows in dt_raw, see:",
-      paste(dt_raw[duplicated(dt_raw), unique(dataset_id)], collapse = ",")
-   )
-)
-
-if (any(dt_raw[, .N, by = .(dataset_id, regional, local, year, month, day, species)]$N != 1L))
-   warning(paste(
-      'Duplicated species in:',
-      paste(collapse = ', ',
-            dt_raw[, .N, by = .(dataset_id, regional, local, year, month, day, species)][N != 1L, unique(dataset_id)])))
-
 ### checking values ----
 # if (dt_raw[unit == "count", any(!is.integer(value))]) warning(paste("Non integer values in", paste(dt_raw[unit == "count" & !is.integer(value), unique(dataset_id)], collapse = ", ")))
 
@@ -112,6 +98,20 @@ dt_raw[is.na(species), species := species_original]
 # unique(dt[grepl("[^a-zA-Z\\._ ]", species) & nchar(species) < 10L, .(dataset_id)])
 # unique(dt[grepl("[^a-zA-Z\\._ \\(\\)0-9\\-\\&]", species), .(dataset_id, species)])[sample(1:1299, 50)]
 # unique(dt[grepl("Â", species), .(dataset_id, species)])
+
+### checking duplicated rows ----
+if (anyDuplicated(dt_raw)) warning(
+   paste(
+      "Duplicated rows in dt_raw, see:",
+      paste(dt_raw[duplicated(dt_raw), unique(dataset_id)], collapse = ",")
+   )
+)
+
+if (any(dt_raw[, .N, by = .(dataset_id, regional, local, year, month, day, species)]$N != 1L))
+   warning(paste(
+      'Duplicated species in:',
+      paste(collapse = ', ',
+            dt_raw[, .N, by = .(dataset_id, regional, local, year, month, day, species)][N != 1L, unique(dataset_id)])))
 
 
 ### checking metrics and units ----
@@ -255,19 +255,22 @@ if (meta_raw[, data.table::uniqueN(alpha_grain_m2), by = dataset_id][, any(V1 !=
 # meta[(!checklist), .(lterm = diff(range(year)), taxon = taxon, realm = realm, alpha_grain_type = alpha_grain_type), by = .(dataset_id, regional)][lterm >= 10L][taxon == "Fish" & realm == "Freshwater" & grep("lake",alpha_grain_type), unique(dataset_id)]
 if (any(!unique(meta_raw$alpha_grain_type) %in% c("island", "plot", "sample", "lake_pond", "trap", "transect", "functional", "box", "quadrat","listening_point"))) warning(paste("Invalid alpha_grain_type value in", paste(unique(meta_raw[!alpha_grain_type %in% c("island", "plot", "sample", "lake_pond", "trap", "transect", "functional", "box", "quadrat","listening_point"), dataset_id]), collapse = ", ")))
 
-## Ordering metadata ----
-data.table::setorder(meta_raw, dataset_id, regional, local, year, month, day)
-data.table::setcolorder(meta_raw, base::intersect(column_names_template_metadata_raw, colnames(meta_raw)))
+# Adding a unique ID ----
+source(file = "R/functions/assign_id.R")
+meta_raw[, ID := assign_id(dataset_id)]
+dt_raw[, ID := assign_id(dataset_id)]
 
+# Ordering metadata ----
+data.table::setorder(meta_raw, ID, regional, local, year, month, day)
+data.table::setcolorder(meta_raw, c("ID", base::intersect(column_names_template_metadata_raw, colnames(meta_raw))))
 
-
-## Checking that all data sets have both community and metadata data ----
+# Checking that all data sets have both community and metadata data ----
 if (length(base::setdiff(unique(dt_raw$dataset_id), unique(meta_raw$dataset_id))) > 0L) warning("Incomplete community or metadata tables")
 # if (any(meta_raw[, .N, by = .(dataset_id, regional, local, year, month, day)][, N != 1L])) warning(
 #    paste("Several values per local year in metadata of data sets:",
 #          paste(meta_raw[, .N, by = .(dataset_id, regional, local, year, month, day)][N != 1L][, unique(dataset_id)], collapse = ", ")))
-if (nrow(meta_raw) != nrow(unique(meta_raw[, .(dataset_id, regional, local, year, month, day)]))) warning("Redundant rows in meta")
-if (nrow(meta_raw) != nrow(unique(dt_raw[, .(dataset_id, regional, local, year, month, day)]))) warning("Discrepancies between dt and meta")
+if (nrow(meta_raw) != nrow(unique(meta_raw[, .(ID, regional, local, year, month, day)]))) warning("Redundant rows in meta")
+if (nrow(meta_raw) != nrow(unique(dt_raw[, .(ID, regional, local, year, month, day)]))) warning("Discrepancies between dt and meta")
 
 # Saving private data ----
 # if (file.exists("data/references/homogenisation_dropbox_folder_path.rds")) {
@@ -282,12 +285,12 @@ if (nrow(meta_raw) != nrow(unique(dt_raw[, .(dataset_id, regional, local, year, 
 dt_raw <- dt_raw[!grepl(pattern = "myers-smith|edgar", x = dataset_id)]
 meta_raw <- meta_raw[!grepl(pattern = "myers-smith|edgar", x = dataset_id)]
 
-## Saving public dt ----
-data.table::setcolorder(dt_raw, c("dataset_id", "regional", "local", "year", "species", "species_original", "value", "metric", "unit"))
+# Saving public dt ----
+data.table::setcolorder(dt_raw, c("ID", "dataset_id", "regional", "local", "year", "species", "species_original", "value", "metric", "unit"))
 base::saveRDS(dt_raw, file = "data/communities_raw.rds")
 # data.table::fwrite(dt_raw, "data/communities_raw.csv", row.names = FALSE) # for iDiv data portal: add , na = "NA"
 
 
-## Saving public meta ----
+# Saving public meta ----
 base::saveRDS(meta_raw, file = "data/metadata_raw.rds")
 # data.table::fwrite(meta_raw, "data/metadata_raw.csv", sep = ",", row.names = FALSE)  # for iDiv data portal: add , na = "NA"

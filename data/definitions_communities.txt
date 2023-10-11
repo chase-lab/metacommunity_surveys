@@ -1,4 +1,5 @@
 variable name	definition
+ID "Unique numeric ID linked to a publication (article or data set). If the data set was split because different taxa group are provided, a different number is assigned. No missing value."
 dataset_id	"Unique ID linked to a publication (article or data set). If the data set was split because different taxa group are provided, a letter is added at the end. No missing value."
 year	"Year of sampling. If sampling was pooled over several years, the last sampling year is used here. No missing value."
 regional	"Region name, contains at least two localities. Can be a national park, a state or a forest name for example but smaller scales are also included where the region is an experimental sites. A data set can have several regions. No missing value."

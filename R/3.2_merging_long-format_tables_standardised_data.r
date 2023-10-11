@@ -59,20 +59,6 @@ data.table::setorder(dt_standardised, dataset_id, regional, local,
 
 ## Checks ----
 
-### checking duplicated rows ----
-if (anyDuplicated(dt_standardised)) warning(
-   paste(
-      "Duplicated rows in dt, see:",
-      paste(dt_standardised[duplicated(dt_standardised), unique(dataset_id)], collapse = ", ")
-   )
-)
-
-if (any(dt_standardised[, .N, by = .(dataset_id, regional, local, year, species)]$N != 1L)) warning(
-   paste(
-      'duplicated species in:',
-      paste(collapse = ', ',
-            dt_standardised[, .N, by = .(dataset_id, regional, local, year, species)][N != 1L, unique(dataset_id)])))
-
 ### checking values ----
 if (dt_standardised[unit == "count", any(!is.integer(value))]) warning(paste("Non integer values in", paste(dt_standardised[unit == "count" & !is.integer(value), unique(dataset_id)], collapse = ", ")))
 
@@ -102,6 +88,20 @@ dt_standardised[is.na(species), species := species_original]
 # unique(dt[grepl("[^a-zA-Z\\._ ]", species) & nchar(species) < 10L, .(dataset_id)])
 # unique(dt[grepl("[^a-zA-Z\\._ \\(\\)0-9\\-\\&]", species), .(dataset_id, species)])[sample(1:1299, 50)]
 # unique(dt[grepl("Â", species), .(dataset_id, species)])
+
+### checking duplicated rows ----
+if (anyDuplicated(dt_standardised)) warning(
+   paste(
+      "Duplicated rows in dt, see:",
+      paste(dt_standardised[duplicated(dt_standardised), unique(dataset_id)], collapse = ", ")
+   )
+)
+
+if (any(dt_standardised[, .N, by = .(dataset_id, regional, local, year, species)]$N != 1L)) warning(
+   paste(
+      'duplicated species in:',
+      paste(collapse = ', ',
+            dt_standardised[, .N, by = .(dataset_id, regional, local, year, species)][N != 1L, unique(dataset_id)])))
 
 
 ### checking metrics and units ----
@@ -285,19 +285,22 @@ if (any(!na.omit(unique(meta_standardised$gamma_bounding_box_type)) %in% c("admi
 ### checking gamma_bouding_box ----
 meta_standardised[gamma_bounding_box_km2 == 0, gamma_bounding_box_km2 := NA_real_]
 
-## Ordering metadata ----
-data.table::setorder(meta_standardised, dataset_id, regional, local, year)
-data.table::setcolorder(meta_standardised, base::intersect(column_names_template_metadata_standardised, colnames(meta_standardised)))
+# Adding a unique ID ----
+source(file = "R/functions/assign_id.R")
+meta_standardised[, ID := assign_id(dataset_id)]
+dt_standardised[, ID := assign_id(dataset_id)]
 
+# Ordering metadata ----
+data.table::setorder(meta_standardised, ID, regional, local, year)
+data.table::setcolorder(meta_standardised, c("ID", base::intersect(column_names_template_metadata_standardised, colnames(meta_standardised))))
 
-
-## Checking that all data sets have both community and metadata data ----
+# Checking that all data sets have both community and metadata data ----
 if (length(base::setdiff(unique(dt_standardised$dataset_id), unique(meta_standardised$dataset_id))) > 0L) warning("Incomplete community or metadata tables")
 if (any(meta_standardised[, .N, by = .(dataset_id, regional, local, year)][, N != 1L])) warning(
    paste("Several values per local year in metadata of data sets:",
          paste(meta_standardised[, .N, by = .(dataset_id, regional, local, year)][N != 1L][, unique(dataset_id)], collapse = ", ")))
-if (nrow(meta_standardised) != nrow(unique(meta_standardised[, .(dataset_id, regional, local, year)]))) warning("Redundant rows in meta")
-if (nrow(meta_standardised) != nrow(unique(dt_standardised[, .(dataset_id, regional, local, year)]))) warning("Discrepancies between dt and meta")
+if (nrow(meta_standardised) != nrow(unique(meta_standardised[, .(ID, regional, local, year)]))) warning("Redundant rows in meta")
+if (nrow(meta_standardised) != nrow(unique(dt_standardised[, .(ID, regional, local, year)]))) warning("Discrepancies between dt and meta")
 
 # Saving private data ----
 # if (file.exists("data/references/homogenisation_dropbox_folder_path.rds")) {
@@ -312,13 +315,13 @@ if (nrow(meta_standardised) != nrow(unique(dt_standardised[, .(dataset_id, regio
 dt_standardised <- dt_standardised[!grepl(pattern = "myers-smith|edgar", x = dataset_id)]
 meta_standardised <- meta_standardised[!grepl(pattern = "myers-smith|edgar", x = dataset_id)]
 
-## Saving public dt ----
-data.table::setcolorder(dt_standardised, c("dataset_id", "regional", "local", "year", "species", "species_original", "value", "metric", "unit"))
+# Saving public dt ----
+data.table::setcolorder(dt_standardised, c("ID", "dataset_id", "regional", "local", "year", "species", "species_original", "value", "metric", "unit"))
 base::saveRDS(dt_standardised, file = "data/communities_standardised.rds")
 # data.table::fwrite(dt_standardised, "data/communities_standardised.csv", sep = ",", row.names = FALSE) # for iDiv data portal: add , na = "NA"
 
 
-## Saving public meta ----
+# Saving public meta ----
 base::saveRDS(meta_standardised, file = "data/metadata_standardised.rds")
 # data.table::fwrite(meta_standardised, "data/metadata_standardised.csv", sep = ",", row.names = FALSE) # for iDiv data portal: add , na = "NA"
 
