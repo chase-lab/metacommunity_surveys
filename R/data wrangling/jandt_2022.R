@@ -60,7 +60,7 @@ ddata <- ddata[
    on = .(dataset_id, regional, local, year, month, day)]
 
 ## metadata ----
-meta <- unique(ddata[, .(dataset_id, regional, local, alpha_grain,
+meta <- unique(ddata[, .(dataset_id, regional, local, releve_nr, alpha_grain,
                          year, month, day, latitude, longitude)])
 meta[, ":="(
    taxon = "Plants",
@@ -98,7 +98,7 @@ for (dataset_id_i in dataset_ids) {
       row.names = FALSE, sep = ","
    )
    data.table::fwrite(
-      x = meta[dataset_id_i],
+      x = meta[dataset_id_i, !"releve_nr"],
       file = paste0("data/wrangled data/", dataset_id_i, "/", dataset_id_i, "_raw_metadata.csv"),
       row.names = FALSE, sep = ","
    )
@@ -152,14 +152,14 @@ ddata <- ddata[
 # ddata[, data.table::uniqueN(releve_nr), keyby = .(dataset_id,regional, local, year, month, day)]
 # ddata[, data.table::uniqueN(day), keyby = .(dataset_id, regional, local, year, month)][, table(V1)]
 # ddata[, data.table::uniqueN(month), keyby = .(dataset_id, regional, local, year)][, table(V1)]
-ddata[, c("month", "day", "releve_nr") := NULL]
+ddata[, c("month", "day") := NULL]
 
-while (ddata[, diff(range(year)) < 9L, keyby = .(dataset_id, local)][, any(V1)] ||
+while (ddata[, diff(range(year)) < 9L, keyby = .(dataset_id, regional, local)][, any(V1)] ||
        ddata[, data.table::uniqueN(local) < 4L, keyby = .(dataset_id, regional, year)][, any(V1)]) {
    ### Excluding sites that were not sampled at least twice 10 years apart ----
    ddata <- ddata[
-      i = !ddata[, diff(range(year)) < 9L, keyby = .(dataset_id, local)][(V1)],
-      on = .(dataset_id, local)]
+      i = !ddata[, diff(range(year)) < 9L, keyby = .(dataset_id, regional, local)][(V1)],
+      on = .(dataset_id, regional, local)]
 
    ### Excluding regions/years that don't have 4 localities ----
    ddata <- ddata[
@@ -169,10 +169,14 @@ while (ddata[, diff(range(year)) < 9L, keyby = .(dataset_id, local)][, any(V1)] 
 # ddata[, .N, keyby = .(dataset_id, regional, local, year, species)][N != 1]
 
 ## Metadata ----
+meta[, local := stringi::stri_replace_first_regex(
+   str = local,
+   pattern = "_[0-9]{1,6}_(?=#)",
+   replacement = "")] # regex checked
 meta <- unique(meta[, c("month", "day") := NULL])
 meta <- meta[
-   i = unique(ddata[, .(dataset_id, regional, local, year)]),
-   on = .(dataset_id, regional, local, year)]
+   i = unique(ddata[, .(dataset_id, regional, local, releve_nr, year)]),
+   on = .(dataset_id, regional, local, releve_nr, year)]
 
 meta[, ":="(
    effort = 1L,
@@ -191,11 +195,15 @@ When available, the authors note whether the plot had a treatment (Y) or not (N)
 In localities that had several relevés a day, a month or a year, we selected the first relevé per year.
 Finally, regions/years with less than 4 localities were excluded and localities that were not sampled at least 10 years apart were excluded.
 Regional is rs_site
-Local is built as rs_plot!treatment!#layer.")
+Local is built as rs_plot!treatment!#layer."),
+
+   releve_nr = NULL
 )][, ":="(
    gamma_bounding_box = geosphere::areaPolygon(data.frame(na.omit(longitude), na.omit(latitude))[grDevices::chull(na.omit(longitude), na.omit(latitude)), ]) / 10^6,
    gamma_sum_grains = sum(alpha_grain)),
    keyby = .(dataset_id, regional, year)]
+
+ddata[, releve_nr := NULL]
 
 ## Saving standardised data ----
 data.table::setkey(ddata, dataset_id)
