@@ -86,14 +86,23 @@ if (any(dt_raw[, .N, by = .(dataset_id, regional, local, year, month, day, speci
 ### checking species names ----
 for (i in seq_along(lst_community_raw)) if (is.character(lst_community_raw[[i]]$species)) if (any(!unique(Encoding(lst_community_raw[[i]]$species)) %in% c("UTF-8", "unknown"))) warning(paste0("Encoding issue in ", listfiles_community_raw[i]))
 
-#### adding GBIF matched names by Dr. Wubing Xu ----
+### adding GBIF matched names by Dr. Wubing Xu ----
 corrected_species_names <- data.table::fread(
    file = "data/requests to taxonomy databases/manual_community_species_filled_20230922.csv",
-   select = c("dataset_id","species","species.new")
+   select = c("dataset_id","species_original","species.new")
 )
 
-# data.table join with update by reference
-dt_raw[corrected_species_names, on = .(dataset_id, species), species.new := i.species.new]
+#### removing new names assigned to several original names ----
+corrected_species_names <- corrected_species_names[
+   i = !corrected_species_names[, .N, by = .(dataset_id, species.new)][N != 1L],
+   on = .(dataset_id, species.new)]
+
+#### data.table join with update by reference ----
+data.table::setnames(corrected_species_names, "species_original", "species")
+dt_raw[
+   i = corrected_species_names,
+   on = .(dataset_id, species),
+   j = species.new := i.species.new]
 
 data.table::setnames(dt_raw,
                      old = c("species", "species.new"),
@@ -260,20 +269,25 @@ if (length(base::setdiff(unique(dt_raw$dataset_id), unique(meta_raw$dataset_id))
 if (nrow(meta_raw) != nrow(unique(meta_raw[, .(dataset_id, regional, local, year, month, day)]))) warning("Redundant rows in meta")
 if (nrow(meta_raw) != nrow(unique(dt_raw[, .(dataset_id, regional, local, year, month, day)]))) warning("Discrepancies between dt and meta")
 
-
-## Saving dt ----
-data.table::setcolorder(dt_raw, c("dataset_id", "regional", "local", "year", "species", "species_original", "value", "metric", "unit"))
-base::saveRDS(dt_raw, file = "data/communities_raw.rds")
-# data.table::fwrite(dt_raw, "data/communities_raw.csv", row.names = FALSE) # for iDiv data portal: add , na = "NA"
+# Saving private data ----
 # if (file.exists("data/references/homogenisation_dropbox_folder_path.rds")) {
 #    path_to_homogenisation_dropbox_folder <- base::readRDS(file = "data/references/homogenisation_dropbox_folder_path.rds")
 #    data.table::fwrite(dt_raw, paste0(path_to_homogenisation_dropbox_folder, "/metacommunity-survey_communities-raw.csv"), row.names = FALSE)
 # }
-
-
-## Saving meta ----
-base::saveRDS(meta_raw, file = "data/metadata_raw.rds")
-# data.table::fwrite(meta_raw, "data/metadata_raw.csv", sep = ",", row.names = FALSE)  # for iDiv data portal: add , na = "NA"
 # if (file.exists("data/references/homogenisation_dropbox_folder_path.rds")) {
 #    data.table::fwrite(meta_raw, paste0(path_to_homogenisation_dropbox_folder, "/metacommunity-survey_metadata-raw.csv"), sep = ",", row.names = FALSE)
 # }
+
+## Removing not shareable data sets before publication ----
+dt_raw <- dt_raw[!grepl(pattern = "myers-smith|edgar", x = dataset_id)]
+meta_raw <- meta_raw[!grepl(pattern = "myers-smith|edgar", x = dataset_id)]
+
+## Saving public dt ----
+data.table::setcolorder(dt_raw, c("dataset_id", "regional", "local", "year", "species", "species_original", "value", "metric", "unit"))
+base::saveRDS(dt_raw, file = "data/communities_raw.rds")
+# data.table::fwrite(dt_raw, "data/communities_raw.csv", row.names = FALSE) # for iDiv data portal: add , na = "NA"
+
+
+## Saving public meta ----
+base::saveRDS(meta_raw, file = "data/metadata_raw.rds")
+# data.table::fwrite(meta_raw, "data/metadata_raw.csv", sep = ",", row.names = FALSE)  # for iDiv data portal: add , na = "NA"

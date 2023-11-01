@@ -81,7 +81,7 @@ data.table::fwrite(
 # Standardised data ----
 ## Pooling quadrats 20 by 20, row by row ----
 ddata[, local := regional][, regional := "Alberta"]
-ddata[, .(value = sum(value)), by = .(dataset_id, regional, local, year,
+ddata <- ddata[, .(value = sum(value)), by = .(dataset_id, regional, local, year,
                                      species, metric, unit)]
 
 ## Excluding sites that were not sampled at least twice 10 years apart ----
@@ -89,6 +89,8 @@ ddata <- ddata[!ddata[, diff(range(year)) < 9L, by = .(regional, local)][(V1)],
                on = .(regional, local)]
 
 ## Metadata ----
+meta[, local := regional][, regional := "Alberta"]
+meta <- unique(meta)
 meta <- meta[unique(ddata[, .(regional, local, year)]),
              on = .(regional, local, year)]
 

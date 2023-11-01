@@ -79,14 +79,23 @@ if (dt_standardised[unit == "count", any(!is.integer(value))]) warning(paste("No
 ### checking species names ----
 for (i in seq_along(lst_community_standardised)) if (is.character(lst_community_standardised[[i]]$species)) if (any(!unique(Encoding(lst_community_standardised[[i]]$species)) %in% c("UTF-8", "unknown"))) warning(paste0("Encoding issue in ", listfiles_community_standardised[i]))
 
-#### adding GBIF matched names by Dr. Wubing Xu ----
+### adding GBIF matched names by Dr. Wubing Xu ----
 corrected_species_names <- data.table::fread(
    file = "data/requests to taxonomy databases/manual_community_species_filled_20230922.csv",
-   select = c("dataset_id", "species", "species.new")
+   select = c("dataset_id", "species_original", "species.new")
 )
 
-# data.table join with update by reference
-dt_standardised[corrected_species_names, on = .(dataset_id, species), species.new := i.species.new]
+#### removing new names assigned to several original names ----
+corrected_species_names <- corrected_species_names[
+   i = !corrected_species_names[, .N, by = .(dataset_id, species.new)][N != 1L],
+   on = .(dataset_id, species.new)]
+
+#### data.table join with update by reference ----
+data.table::setnames(corrected_species_names, "species_original", "species")
+dt_standardised[
+   i = corrected_species_names,
+   on = .(dataset_id, species),
+   j = species.new := i.species.new]
 
 data.table::setnames(dt_standardised, c("species", "species.new"), c("species_original", "species"))
 dt_standardised[is.na(species), species := species_original]
@@ -213,16 +222,17 @@ if (any(meta_standardised[, data.table::uniqueN(taxon), by = dataset_id]$V1 != 1
 if (any(!unique(meta_standardised$taxon) %in% c("Fish", "Invertebrates", "Plants", "Birds", "Mammals", "Herpetofauna", "Marine plants"))) warning(paste0("Non standard taxon category in ", paste(unique(meta_standardised[!taxon %in% c("Fish", "Invertebrates", "Plants", "Birds", "Mammals", "Herpetofauna", "Marine plants"), .(dataset_id), by = dataset_id]$dataset_id), collapse = ", ")))
 
 ### checking encoding ----
-try(for (i in seq_along(lst_metadata_standardised)) if (any(!unlist(unique(apply(lst_metadata_standardised[[i]][, c("local", "regional", "comment")], 2L, Encoding))) %in% c("UTF-8", "unknown"))) warning(paste0("Encoding issue in ", listfiles_metadata_standardised[i])))
+try(for (i in seq_along(lst_metadata_standardised)) if (any(!unlist(unique(apply(lst_metadata_standardised[[i]][, c("local", "regional", "comment")], 2L, Encoding))) %in% c("UTF-8", "unknown"))) warning(paste0("Encoding issue in ", listfiles_metadata_standardised[i])),
+    silent = TRUE)
 
 
 ### checking year range length among regions ----
 if (any(meta_standardised[, diff(range(year)) < 9L, by = .(dataset_id, regional, local)]$V1)) warning(
-      paste(
-         "Time periods shorter than 10 years in: ",
-         paste(meta_standardised[, .(diff(range(year))), by = .(dataset_id, regional, local)][V1 < 9L, unique(dataset_id)], collapse = ", ")
-      )
+   paste(
+      "Time periods shorter than 10 years in: ",
+      paste(meta_standardised[, .(diff(range(year))), by = .(dataset_id, regional, local)][V1 < 9L, unique(dataset_id)], collapse = ", ")
    )
+)
 
 ### checking year range homogeneity among regions ----
 if (any(meta_standardised[, data.table::uniqueN(paste(range(year), collapse = "-")),
@@ -289,20 +299,26 @@ if (any(meta_standardised[, .N, by = .(dataset_id, regional, local, year)][, N !
 if (nrow(meta_standardised) != nrow(unique(meta_standardised[, .(dataset_id, regional, local, year)]))) warning("Redundant rows in meta")
 if (nrow(meta_standardised) != nrow(unique(dt_standardised[, .(dataset_id, regional, local, year)]))) warning("Discrepancies between dt and meta")
 
-
-## Saving dt ----
-data.table::setcolorder(dt_standardised, c("dataset_id", "regional", "local", "year", "species", "species_original", "value", "metric", "unit"))
-base::saveRDS(dt_standardised, file = "data/communities_standardised.rds")
-# data.table::fwrite(dt_standardised, "data/communities_standardised.csv", sep = ",", row.names = FALSE) # for iDiv data portal: add , na = "NA"
+# Saving private data ----
 # if (file.exists("data/references/homogenisation_dropbox_folder_path.rds")) {
 #    path_to_homogenisation_dropbox_folder <- base::readRDS(file = "data/references/homogenisation_dropbox_folder_path.rds")
 #    data.table::fwrite(dt_standardised, paste0(path_to_homogenisation_dropbox_folder, "/metacommunity-survey_communities-standardised.csv"), row.names = FALSE)
 # }
-
-
-## Saving meta ----
-base::saveRDS(meta_standardised, file = "data/metadata_standardised.rds")
-# data.table::fwrite(meta_standardised, "data/metadata_standardised.csv", sep = ",", row.names = FALSE) # for iDiv data portal: add , na = "NA"
 # if (file.exists("data/references/homogenisation_dropbox_folder_path.rds")) {
 #    data.table::fwrite(meta_standardised, paste0(path_to_homogenisation_dropbox_folder, "/metacommunity-survey_metadata-standardised.csv"), sep = ",", row.names = FALSE)
 # }
+
+## Removing not shareable data sets before publication ----
+dt_standardised <- dt_standardised[!grepl(pattern = "myers-smith|edgar", x = dataset_id)]
+meta_standardised <- meta_standardised[!grepl(pattern = "myers-smith|edgar", x = dataset_id)]
+
+## Saving public dt ----
+data.table::setcolorder(dt_standardised, c("dataset_id", "regional", "local", "year", "species", "species_original", "value", "metric", "unit"))
+base::saveRDS(dt_standardised, file = "data/communities_standardised.rds")
+# data.table::fwrite(dt_standardised, "data/communities_standardised.csv", sep = ",", row.names = FALSE) # for iDiv data portal: add , na = "NA"
+
+
+## Saving public meta ----
+base::saveRDS(meta_standardised, file = "data/metadata_standardised.rds")
+# data.table::fwrite(meta_standardised, "data/metadata_standardised.csv", sep = ",", row.names = FALSE) # for iDiv data portal: add , na = "NA"
+
