@@ -29,7 +29,7 @@ data.table::setnames(
 #    longitude = unique(longitude),
 #    sample_size = unique(sample_size),
 #    effort = unique(effort)
-# ), by = .(local, year, species)]
+# ), keyby = .(local, year, species)]
 #
 # ddata[, species := as.character(species)]
 
@@ -96,33 +96,31 @@ meta[, local := gsub("_.*$", "", local, FALSE, TRUE)]
 
 ## define latitude longitude values ----
 ddata[, ":="(latitude = mean(latitude), longitude = mean(longitude)),
-      by = .(local, year)]
+      keyby = .(local, year)]
 
 ## standardising effort ----
 ## selecting samples with comparable effort ----
 min_sample_number <- 4L
 ddata <- ddata[, effort := data.table::uniqueN(sector),
-               by = .(local, year)][effort >= min_sample_number]
+               keyby = .(local, year)][effort >= min_sample_number]
 set.seed(42)
 ddata <- ddata[
-   ddata[, .(sector = sample(unique(sector), min_sample_number, replace = FALSE)),
-         by = .(local, year)],
+   i = ddata[, .(sector = sample(unique(sector), min_sample_number, replace = FALSE)),
+             keyby = .(local, year)],
    on = .(local, year, sector)]
 
 ## pooling sectors together ----
-ddata <- ddata[, .(value = sum(value), latitude = mean(latitude),
-                   longitude = mean(longitude)),
-               by = .(dataset_id, regional, local, year, species, metric, unit)]
+ddata <- ddata[, .(value = sum(value)),
+               keyby = .(dataset_id, regional, local, year, species, metric, unit)]
 
 ##meta ----
 meta[, c("month","day") := NULL]
-meta <- unique(meta)
-meta <- unique(meta[
-   unique(ddata[, .(local, year)]),
-   ":="(latitude = mean(latitude),
-        longitude = mean(longitude)),
-   on = .(local, year)
-])
+meta <- meta[
+   i = unique(ddata[, .(local, year)]),
+   on = .(local, year)]
+meta <- unique(meta[, j = ":="(latitude = mean(latitude),
+                               longitude = mean(longitude)),
+                    keyby = local])
 
 meta[, ":="(
    effort = 4L,
@@ -140,9 +138,7 @@ meta[, ":="(
 
    comment_standardisation = "To get a comparable effort between years and lakes, we randomly selected 4 sectors (ie samples) from each lake/year. The number of 4 samples is a trade-off between excluding the fewest lakes with insufficient effort and getting as many individuals as possible.
 When some of these sectors were sampled twice a year, we selected the first date."
-)][, gamma_sum_grains := sum(alpha_grain), by = year]
-
-ddata[, c("latitude", "longitude") := NULL]
+)][, gamma_sum_grains := sum(alpha_grain), keyby = year]
 
 ##save data ----
 data.table::fwrite(
