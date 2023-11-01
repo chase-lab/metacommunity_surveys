@@ -25,11 +25,11 @@ ddata[, ':='(
 )]
 
 ### pooling individual observations from the same species ----
-ddata <- ddata[, .(value = sum(value)), by = .(dataset_id, regional, local,
-                                               program,
-                                               latitude, longitude,
-                                               year, month, day, survey_date,
-                                               species, metric, unit)]
+ddata <- ddata[, .(value = sum(value)), keyby = .(dataset_id, regional, local,
+                                                  program,
+                                                  latitude, longitude,
+                                                  year, month, day, survey_date,
+                                                  species, metric, unit)]
 
 ## Metadata ----
 meta <- unique(ddata[, .(dataset_id, regional, local,
@@ -100,21 +100,21 @@ ddata <- ddata[
    on = .(regional, local, block)]
 
 #### Pooling abundances from both blocks in RLS program ----
-ddata[base::grepl("RLS", dataset_id),
-      value := sum(value),
+ddata[i = base::grepl("RLS", dataset_id),
+      j = value := sum(value),
       by = .(regional, local, year, month, day, species)]
 ddata <- unique(ddata[, block := NULL])
 
 ### Excluding sites that were sampled by several programs ----
-ddata[
-   !ddata[, data.table::uniqueN(program), by = .(regional, local)][V1 != 1L],
+ddata <- ddata[
+   i = !ddata[, data.table::uniqueN(program), keyby = .(regional, local)][V1 != 1L],
    on = .(regional, local)]
 ddata[, program := NULL]
 
 ### subsetting ----
 ### subsetting locations/regions with 4 sites/local scale samples or more.
 ddata <- ddata[
-   !ddata[, data.table::uniqueN(local) < 4L, by = .(dataset_id, regional, year)][(V1)],
+   i = !ddata[, data.table::uniqueN(local) < 4L, keyby = .(dataset_id, regional, year)][(V1)],
    on = .(dataset_id, regional, year)]
 
 # subsetting one sample per year from the most sampled months
@@ -126,14 +126,14 @@ ddata <- ddata[
       month_order = order(month_order, decreasing = TRUE)[match(month, names(month_order))],
       survey_date)]
    )[order(month_order)
-   ][, .SD[1L], by = .(dataset_id, regional, local, year) # first sampling from the most frequently sampled month
+   ][, .SD[1L], keyby = .(dataset_id, regional, local, year) # first sampling from the most frequently sampled month
    ][, c('month_order', 'month') := NULL],
    on = .(dataset_id, regional, local, year, survey_date)
 ][, c("month", "day", 'survey_date') := NULL]
 
 ### Subsetting sites samples at least 10 years apart ----
 ddata <- ddata[
-   !ddata[, diff(range(year)) < 9L, by = .(dataset_id, regional, local)][(V1)],
+   i = !ddata[, diff(range(year)) < 9L, keyby = .(dataset_id, regional, local)][(V1)],
    on = .(dataset_id, regional, local)]
 
 ## Metadata
@@ -141,8 +141,8 @@ meta[, local := data.table::tstrsplit(local, "_", keep = 1L)]
 meta[, c("month", "day") := NULL]
 
 meta <- unique(meta[
-   unique(ddata[, .(regional, local, year)]),
-   on = .(regional, local, year)])
+   i = unique(ddata[, .(dataset_id, regional, local, year)]),
+   on = .(dataset_id, regional, local, year)])
 
 meta[, ":="(
    alpha_grain = data.table::fifelse(base::grepl("RLS", dataset_id), 100L, 50L),
@@ -165,7 +165,7 @@ Only regions with at least 4 sites sampled at least 10 years appart.
 Abundances of individual observations of different sizes were pooled together by species."
 )][, ":="(gamma_bounding_box = geosphere::areaPolygon(data.frame(longitude, latitude)[grDevices::chull(longitude, latitude), ]) / 10^6,
           gamma_sum_grains = sum(alpha_grain)),
-   by = .(dataset_id, regional, year)]
+   keyby = .(dataset_id, regional, year)]
 
 ## Saving standardised data ----
 data.table::setkey(ddata, dataset_id)

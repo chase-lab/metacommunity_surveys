@@ -66,10 +66,10 @@ data.table::fwrite(
 
 #standardised data ----
 ### excluding samples with abnormal null values
-ddata <- ddata[!ddata[value == 0L], on = .(regional, local, year)]
+ddata <- ddata[i = !ddata[value == 0L], on = .(regional, local, year)]
 
 ## Excluding sites that were not sampled at least twice 10 years apart ----
-ddata <- ddata[!ddata[, diff(range(year)) < 9L, by = .(regional, local)][(V1)],
+ddata <- ddata[i = !ddata[, diff(range(year)) < 9L, keyby = .(regional, local)][(V1)],
                on = .(regional, local)]
 
 ddata[, c("month","day") := NULL]
@@ -83,6 +83,11 @@ ddata[, value := as.integer(value)][, ":="(
 
 ## meta data ----
 meta[, c("month","day") := NULL]
+
+meta <- meta[
+   i = unique(ddata[, .(regional, local, year)]),
+   on = .(regional, local, year)]
+
 meta[,":="(
    effort = 1L,
 
@@ -100,8 +105,8 @@ local is a SQUARE_ID.
 Samples containing abnormal values were excluded.
 Sites that were not sampled at least twice 10 years apart were excluded.",
 
-   COUNTRY = NULL
-)][, gamma_sum_grains := data.table::uniqueN(local), by = .(regional, year)]
+COUNTRY = NULL
+)][, gamma_sum_grains := data.table::uniqueN(local), keyby = .(regional, year)]
 
 ##save data
 data.table::fwrite(

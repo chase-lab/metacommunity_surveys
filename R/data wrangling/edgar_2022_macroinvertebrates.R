@@ -20,7 +20,7 @@ ddata[, ':='(
 )]
 
 #### pooling individual observations from the same species ----
-ddata <- ddata[, .(value = sum(total)), by = .(dataset_id, regional = location, local,
+ddata <- ddata[, .(value = sum(total)), keyby = .(dataset_id, regional = location, local,
                                                program,
                                                year, month, day, survey_date,
                                                latitude, longitude,
@@ -83,7 +83,7 @@ ddata <- ddata[
    !ddata[
       i = base::grepl("RLS", dataset_id),
       j = data.table::uniqueN(block) != 2L,
-      by = .(regional, local, year, month, day)][(V1)],
+      keyby = .(regional, local, year, month, day)][(V1)],
    on = .(regional, local, year, month, day)]
 
 #### Randomly excluding 1 block in transects with 2 blocks in ATRC ParkVic and FRDC program ----
@@ -92,7 +92,7 @@ ddata <- ddata[
    ddata[
       i = !base::grepl("RLS", dataset_id),
       j = .(block = sample(unique(block), 1L)),
-      by = .(regional, local)],
+      keyby = .(regional, local)],
    on = .(regional, local, block)]
 
 #### Pooling abundances from both blocks in RLS program ----
@@ -102,8 +102,8 @@ ddata[base::grepl("RLS", dataset_id),
 ddata <- unique(ddata[, block := NULL])
 
 ### Excluding sites that were sampled by several programs ----
-ddata[
-   !ddata[, data.table::uniqueN(program), by = .(regional, local)][V1 != 1L],
+ddata <- ddata[
+   !ddata[, data.table::uniqueN(program), keyby = .(regional, local)][V1 != 1L],
    on = .(regional, local)]
 ddata[, program := NULL]
 
@@ -115,15 +115,15 @@ ddata <- ddata[!ddata[value == 0L], on = .(regional, local, year)]
 
 ### excluding locations/regions with less than 4 sites/local scale samples ----
 ddata <- ddata[
-   !ddata[, data.table::uniqueN(local) < 4L, by = .(regional, year)][(V1)],
+   !ddata[, data.table::uniqueN(local) < 4L, keyby = .(regional, year)][(V1)],
    on = .(regional, year)]
 
-ddata <- ddata[, .(value = sum(value)), by = .(dataset_id, regional, local, year,
+ddata <- ddata[, .(value = sum(value)), keyby = .(dataset_id, regional, local, year,
                                                species, metric, unit)]
 
 #### Subsetting sites samples at least 10 years apart ----
 ddata <- ddata[
-   !ddata[, diff(range(year)) < 9L, by = .(dataset_id, regional, local)][(V1)],
+   i = !ddata[, diff(range(year)) < 9L, keyby = .(dataset_id, regional, local)][(V1)],
    on = .(dataset_id, regional, local)]
 
 ## metadata ----
@@ -131,8 +131,8 @@ meta[, c("month", "day") := NULL]
 meta[, local := data.table::tstrsplit(local, "_", keep = 1L)]
 
 meta <- unique(meta[
-   unique(ddata[, .(regional, local, year)]),
-   on = .(regional, local, year)])
+   i = unique(ddata[, .(dataset_id, regional, local, year)]),
+   on = .(dataset_id, regional, local, year)])
 
 meta[, ":="(
    effort = data.table::fifelse(base::grepl("RLS", dataset_id), 2L, 1L),
@@ -155,7 +155,7 @@ Transects that were sampled by several programs were excluded.
 Only regions with at least 4 sites sampled at least 10 years appart."
 )][, ":="(gamma_bounding_box = geosphere::areaPolygon(data.frame(longitude, latitude)[grDevices::chull(longitude, latitude), ]) / 10^6,
           gamma_sum_grains = sum(alpha_grain)),
-   by = .(dataset_id, regional, year)]
+   keyby = .(dataset_id, regional, year)]
 
 ## Saving standardised data ----
 data.table::setkey(ddata, dataset_id)

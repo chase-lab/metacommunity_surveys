@@ -43,10 +43,10 @@ data.table::setkeyv(ddata, cols = c('dataset_id', 'local', 'year', 'month', 'day
 ### Pooling life stages together ----
 ddata[, ":="(latitude = mean(latitude, na.rm = TRUE),
              longitude = mean(longitude, na.rm = TRUE)),
-      by = .(dataset_id, local)]
+      keyby = .(dataset_id, local)]
 ddata <- ddata[, .(value = sum(value)),
-               by = .(dataset_id, local, latitude, longitude, year, month, day,
-                      species)]
+               keyby = .(dataset_id, local, latitude, longitude, year, month, day,
+                         species)]
 
 ddata[, ":="(
    regional = factor("Upper San Francisco Estuary"),
@@ -54,7 +54,7 @@ ddata[, ":="(
    metric = "density",
    unit = "cpue"
 )]
-# ddata[, .N, by = .(dataset_id, regional, local, year, month, day, species)][N != 1]
+# ddata[, .N, keyby = .(dataset_id, regional, local, year, month, day, species)][N != 1]
 
 ## metadata ----
 meta <- unique(ddata[, .(dataset_id, regional, local, year, month, day, latitude, longitude)])
@@ -120,50 +120,50 @@ data.table::setkeyv(ddata, cols = c('dataset_id', 'local', 'year','month','sampl
 
 ### When a site is sampled several times a year, selecting the 6 most frequently sampled months from the 8 most sampled months ----
 month_order <- ddata[, data.table::uniqueN(sampleid),
-                     by = .(dataset_id, month)][, sum(V1), by = month][order(-V1)][1L:8L, month]
+                     keyby = .(dataset_id, month)][, sum(V1), keyby = month][order(-V1)][1L:8L, month]
 ddata[, month_order := (1L:8L)[match(month, month_order, nomatch = NULL)]]
 data.table::setkey(ddata, month_order)
 
 ddata <- ddata[!is.na(month_order)][, nmonths := data.table::uniqueN(month),
-                                    by = .(dataset_id, local, year)][nmonths >= 6L][, nmonths := NULL]
+                                    keyby = .(dataset_id, local, year)][nmonths >= 6L][, nmonths := NULL]
 
 ddata <- ddata[
    unique(ddata[,
                 .(dataset_id, local, year, month)])[, .SD[1L:6L],
-                                                    by = .(dataset_id, local, year)],
+                                                    keyby = .(dataset_id, local, year)],
    on = .(dataset_id, local, year, month), nomatch = NULL][, month_order := NULL]
 
 ### When a site is sampled twice a month, selecting the first visit ----
 ddata <- ddata[
    unique(ddata[,
                 .(dataset_id, local, year, month, sampleid)])[, .SD[1L],
-                                                              by = .(dataset_id, local, year, month)],
+                                                              keyby = .(dataset_id, local, year, month)],
    on = .(dataset_id, local, year, month, sampleid)][, month := NULL][, sampleid := NULL]
 
 ### Pooling all samples from a year together ----
 ddata[,
       ':='(latitude = mean(latitude), longitude = mean(longitude)),
-      by = .(dataset_id, local)]
+      keyby = .(dataset_id, local)]
 
-ddata[, effort := sum(volume), by = .(dataset_id, local, year)]
+ddata[, effort := sum(volume), keyby = .(dataset_id, local, year)]
 
 ddata <- ddata[, .(value = sum(value)),
-               by = .(dataset_id, local, year, effort, latitude, longitude, species)]
+               keyby = .(dataset_id, local, year, effort, latitude, longitude, species)]
 
 ### Excluding sites that were not sampled at least twice 10 years apart ----
-ddata <- ddata[!ddata[, diff(range(year)) < 9L, by = .(dataset_id, local)][(V1)],
+ddata <- ddata[!ddata[, diff(range(year)) < 9L, keyby = .(dataset_id, local)][(V1)],
                on = .(dataset_id, local)]
 
 ### Individual based rarefaction to account for varying volume ----
 ## computing min total abundance for the local/year where the effort is the smallest ----
-ddata[, sample_size := sum(value), by = .(dataset_id, local, year)]
+ddata[, sample_size := sum(value), keyby = .(dataset_id, local, year)]
 
 ## deleting samples with less than 10 individuals
 ddata <- ddata[sample_size >= 10L]
-min_sample_size <- ddata[i = ddata[, .(effort = min(effort)), by = dataset_id],
+min_sample_size <- ddata[i = ddata[, .(effort = min(effort)), keyby = dataset_id],
                          on = .(dataset_id, effort),
                          j = .(min_sample_size = min(sample_size)),
-                         by = dataset_id]
+                         keyby = dataset_id]
 
 ## resampling abundances down to the minimal total abundance observed among the surveys with the minimal effort
 source("R/functions/resampling.r")
@@ -189,7 +189,7 @@ ddata[, ":="(
 
    sample_size = NULL
 )]
-# ddata[, .N, by = .(dataset_id, regional, local, year, species)][N != 1]
+# ddata[, .N, keyby = .(dataset_id, regional, local, year, species)][N != 1]
 
 ## Metadata ----
 meta[, c("latitude","longitude","month","day") := NULL][
@@ -198,7 +198,7 @@ meta <- unique(meta)
 meta <- meta[
    unique(ddata[, .(dataset_id, local, year, effort, latitude, longitude)]),
    on = .(dataset_id, local, year)]
-meta[, effort := min(effort), by = dataset_id]
+meta[, effort := min(effort), keyby = dataset_id]
 meta[, ":="(
    gamma_sum_grains = NA,
    gamma_sum_grains_unit = "m2",
@@ -223,7 +223,7 @@ This resampling sometimes reduced the specific richness compared to the full obs
 In rare cases, larger samples had fewer individuals and we resampled with replacement to get to the target number of individuals.')
 )][, ":="(
    gamma_bounding_box = geosphere::areaPolygon(data.frame(na.omit(longitude), na.omit(latitude))[grDevices::chull(na.omit(longitude), na.omit(latitude)), ]) / 10^6),
-   by = .(dataset_id, year)]
+   keyby = .(dataset_id, year)]
 
 ddata[, c("effort","latitude","longitude") := NULL]
 
