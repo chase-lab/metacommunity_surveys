@@ -29,8 +29,8 @@ ddata[, ":="(
    dataset_id = dataset_id,
    regional = "Barkley Sound",
 
-   metric = "coverage",
-   unit = "levels"
+   metric = "cover",
+   unit = "score"
 )]
 
 ##meta data ----

@@ -5,7 +5,7 @@ data.table::setnames(ddata, 1, "section")
 
 #Raw Data ----
 ##melting, splitting and melting period and site ----
-ddata <- data.table::melt(ddata,
+ddata <- data.table::melt(data = ddata,
                           id.vars = c("section", "species", "layer")
 )
 ddata[, c("period", "site") := data.table::tstrsplit(variable, " ")]
@@ -71,12 +71,15 @@ data.table::fwrite(
 #Standaradized Data ----
 
 ## pooling values of different layers and turning cover into presence absence ----
-ddata <- ddata[, .(species = unique(species), value = 1L),
-               by = .(dataset_id, regional, local = site, year, metric, unit)]
+ddata <- ddata[, j = .(species = unique(species),
+                       value = 1L,
+                       metric = "pa",
+                       unit = "pa"),
+               keyby = .(dataset_id, regional, local = site, year)]
 
 ##meta data ----
 meta[, local := site][, site := NULL]
-meta <- unique(meta)[unique(ddata[, .(local, year)]),
+meta <- unique(meta)[i = unique(ddata[, .(local, year)]),
                      on = .(local, year)]
 
 meta[, ":="(
@@ -93,7 +96,7 @@ meta[, ":="(
    gamma_bounding_box_comment = "area provided by the authors",
 
    comment = "Extracted from supplementary material Table 1 in Vojik and Boublik 2018 (https://doi.org/10.1007/s11258-018-0831-5). Historical vegetation records of the Klinec forest, Czech Republic, were made in 1957. In 2015, M Vojik resampled the same 29 plots of 500m2 each using the same methodology.",
-   comment_standardisation = "Braun-Blanquet ccover turned into rpesence absence
+   comment_standardisation = "Braun-Blanquet ccover turned into presence absence
 tree, shrub and herb layers pooled together"
 )]
 

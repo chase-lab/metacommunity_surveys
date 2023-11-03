@@ -37,8 +37,9 @@ ddata[, ":="(
   year = c(1981L, 2012L)[match(period, c("historical", "present"))],
 
   species = gsub("\\*", "", species),
+
   metric = "density",
-  unit = "ind per 250m2",
+  unit = "individuals per 250m2",
 
   period = NULL
 )]

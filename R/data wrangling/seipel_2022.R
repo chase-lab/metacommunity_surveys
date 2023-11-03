@@ -13,7 +13,7 @@ data.table::setnames(
 ddata[, ':='(
    dataset_id = dataset_id,
 
-   metric = 'abundance score',
+   metric = 'abundance',
    unit = 'score',
 
    road = NULL,

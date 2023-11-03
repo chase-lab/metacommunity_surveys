@@ -197,6 +197,7 @@ Finally, regions/years with less than 4 localities were excluded and localities 
 Regional is rs_site
 Local is built as rs_plot!treatment!#layer."),
 
+   layer = NULL,
    releve_nr = NULL
 )][, ":="(
    gamma_bounding_box = geosphere::areaPolygon(data.frame(na.omit(longitude), na.omit(latitude))[grDevices::chull(na.omit(longitude), na.omit(latitude)), ]) / 10^6,
@@ -219,6 +220,6 @@ for (dataset_id_i in dataset_ids) {
    data.table::fwrite(
       x = meta[dataset_id_i],
       file = paste0("data/wrangled data/", dataset_id_i, "/", dataset_id_i, "_standardised_metadata.csv"),
-      row.names = FALSE, sep = ","
+      row.names = FALSE, sep = ",", bom = TRUE
    )
 }

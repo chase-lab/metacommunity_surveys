@@ -20,8 +20,8 @@ ddata[, ":="(
    dataset_id = dataset_id,
    regional = c("Komakuk", "Herschel")[data.table::chmatch(substr(regional, 5, 6), c("KO", "HE"))],
 
-   metric = "count",
-   unit = "frequency",
+   metric = "incidence",
+   unit = "count",
 
    species = trimws(species)
 )]

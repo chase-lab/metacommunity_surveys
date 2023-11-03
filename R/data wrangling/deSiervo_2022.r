@@ -26,6 +26,7 @@ ddata[, ":="(
    dataset_id = dataset_id,
 
    regional = "Russian wilderness",
+   local = substr(local, 1L, 3L),
 
    metric = "cover",
    unit = "percent"
@@ -72,7 +73,7 @@ data.table::fwrite(
 
 #Standarized Data ----
 ## Excluding sites that were not sampled at least twice 10 years apart ----
-ddata <- ddata[!ddata[, diff(range(year)) < 9L, by = local][(V1)],
+ddata <- ddata[i = !ddata[, diff(range(year)) < 9L, by = local][(V1)],
                on = "local"]
 
 ##community data ----
@@ -100,7 +101,7 @@ meta[, ":="(
 
    comment_standardisation = "all life stages pooled together, if lifestages are of interest they can be found in the raw raw data on dryad. Percent cover turned into presence absence.
 Sites that were not sampled at least twice 10 years apart were excluded."
-)][, gamma_sum_grains := sum(alpha_grain), by = .(regional, year)]
+)][, gamma_sum_grains := sum(alpha_grain), keyby = .(regional, year)]
 
 ##save data ----
 data.table::fwrite(

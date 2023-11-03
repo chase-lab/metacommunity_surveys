@@ -61,9 +61,8 @@ meta[, ":="(
 
 ## Saving raw data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-drop_col <- "Tidal Height"
 data.table::fwrite(
-   x = ddata[, !..drop_col],
+   x = ddata[, !"Tidal Height"],
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"),
    row.names = FALSE, sep = ",", encoding = "UTF-8"
 )
@@ -77,53 +76,69 @@ data.table::fwrite(
 # Standardised data ----
 ## standardisation ----
 ddata <- ddata[`Tidal Height` %in% c(1, 1.5, 2, 2.5, 3)]
-ddata[, effort := length(unique(`Tidal Height`)), by = .(regional, local, year)]
-ddata <- unique(ddata[effort == 5L][,
-                                    .(value = sum(value)),
-                                    by = .(dataset_id, regional, local, year,
-                                           species, metric, unit)])
+ddata[, local := base::sub("_[0-9]\\.?5?$", "", local)]
+ddata[, effort := data.table::uniqueN(`Tidal Height`), keyby = .(regional, local, year)]
+ddata <- ddata[i = effort == 5L,
+               j = .(value = sum(value)),
+               by = .(dataset_id, regional, local, year,
+                      species, metric, unit)]
 
-## community data ----
-ddata[, ":="(
-   dataset_id = dataset_id,
+while (ddata[, diff(range(year)) < 9L, by = .(regional, local)][, any(V1)] ||
+       ddata[, data.table::uniqueN(local) < 4L, by = .(regional, year)][, any(V1)]) {
+   ddata <- ddata[
+      i = !ddata[, diff(range(year)) < 9L, by = .(regional, local)][(V1)],
+      on = .(regional, local)
+   ]
+   ddata <- ddata[
+      i = !ddata[, data.table::uniqueN(local) < 4L, by = .(regional, year)][(V1)],
+      on = .(regional, year)
+   ]
+}
 
-   value = 1L,
-   metric = "pa",
-   unit = "pa"
-)]
+if (nrow(ddata) != 0L) {
+   ## community data ----
+   ddata[, ":="(
+      dataset_id = dataset_id,
 
-## metadata ----
-meta[, c("month","day") := NULL]
-meta <- unique(unique(meta)[ddata[, .(regional, local, year)], on = .(regional, local, year)])
-meta[, ":="(
-   effort = 5L,
+      value = 1L,
+      metric = "pa",
+      unit = "pa"
+   )]
 
-   alpha_grain = 25L * 25L * 5L,
-   alpha_grain_unit = "cm2",
-   alpha_grain_type = "plot",
-   alpha_grain_comment = "sum of the areas of quadrats of each transect",
+   ## metadata ----
+   meta[, c("month","day") := NULL]
+   meta[, local := base::sub("_[0-9]\\.?5?$", "", local)]
+   meta <- unique(unique(meta)[i = ddata[, .(regional, local, year)],
+                               on = .(regional, local, year)])
+   meta[, ":="(
+      effort = 5L,
 
-   gamma_sum_grains_unit = "cm2",
-   gamma_sum_grains_type = "sample",
-   gamma_sum_grains_comment = "sum of the areas of quadrats of each island",
+      alpha_grain = 25L * 25L * 5L,
+      alpha_grain_unit = "cm2",
+      alpha_grain_type = "plot",
+      alpha_grain_comment = "sum of the areas of quadrats of each transect",
 
-   gamma_bounding_box_unit = "ha",
-   gamma_bounding_box_type = "island",
-   gamma_bounding_box_comment = "area of the Wizard islet given by the authors",
+      gamma_sum_grains_unit = "cm2",
+      gamma_sum_grains_type = "sample",
+      gamma_sum_grains_comment = "sum of the areas of quadrats of each island",
 
-  comment_standardisation = "Only the 5 middle tidal heights kept and only samples with all of these 5 tidal heights sampled kept. Samples from these 5 quadrats were then pooled together"
-)][, gamma_sum_grains := sum(alpha_grain), by = .(regional, year)][regional == "Wizard", gamma_bounding_box := 1.73]
+      gamma_bounding_box_unit = "ha",
+      gamma_bounding_box_type = "island",
+      gamma_bounding_box_comment = "area of the Wizard islet given by the authors",
+
+      comment_standardisation = "Only the 5 middle tidal heights kept and only samples with all of these 5 tidal heights sampled kept. Samples from these 5 quadrats were then pooled together"
+   )][, gamma_sum_grains := sum(alpha_grain), keyby = .(regional, year)][regional == "Wizard", gamma_bounding_box := 1.73]
 
 
-## Saving standardised data ----
-dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(
-   x = ddata,
-   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised.csv"),
-   row.names = FALSE, sep = ",", encoding = "UTF-8"
-)
-data.table::fwrite(
-   x = meta,
-   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised_metadata.csv"),
-   row.names = FALSE, sep = ",", encoding = "UTF-8"
-)
+   ## Saving standardised data ----
+   data.table::fwrite(
+      x = ddata,
+      file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised.csv"),
+      row.names = FALSE, sep = ",", encoding = "UTF-8"
+   )
+   data.table::fwrite(
+      x = meta,
+      file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised_metadata.csv"),
+      row.names = FALSE, sep = ",", encoding = "UTF-8"
+   )
+}

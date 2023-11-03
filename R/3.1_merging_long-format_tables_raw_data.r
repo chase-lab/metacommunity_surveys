@@ -17,7 +17,8 @@ template_community_raw <- utils::read.csv(file = "data/template_communities_raw.
 column_names_template_community_raw <- template_community_raw[, 1]
 
 lst_community_raw <- lapply(listfiles_community_raw,
-                            FUN = data.table::fread, integer64 = "character", encoding = "UTF-8",
+                            FUN = data.table::fread,
+                            integer64 = "character", encoding = "UTF-8",
                             stringsAsFactors = TRUE)
 dt_raw <- data.table::rbindlist(lst_community_raw, fill = TRUE)
 
@@ -26,7 +27,8 @@ template_metadata_raw <- utils::read.csv(file = "data/template_metadata_raw.txt"
 column_names_template_metadata_raw <- template_metadata_raw[, 1L]
 
 lst_metadata_raw <- lapply(listfiles_metadata_raw,
-                           FUN = data.table::fread, integer64 = "character", encoding = "UTF-8",
+                           FUN = data.table::fread,
+                           integer64 = "character", encoding = "UTF-8",
                            stringsAsFactors = TRUE, sep = ",", header = TRUE)
 meta_raw <- data.table::rbindlist(lst_metadata_raw, fill = TRUE)
 
@@ -40,19 +42,15 @@ if (anyNA(meta_raw$year)) warning(paste("missing _year_ value in ", unique(meta_
 if (dt_raw[metric == "pa", any(value != 1)]) warning(paste("abnormal presence absence value in ",
                                                            paste(unique(dt_raw[value != 1, dataset_id]), collapse = ", ")))
 if (dt_raw[, any(is.na(regional) | regional == "")]) warning(paste("missing _regional_ value in ", unique(dt_raw[is.na(regional) | regional == "", dataset_id]), collapse = ", "))
-if (dt_raw[, any(is.na(local) | local == "")])
-   warning(paste("missing _local_ value in ", unique(dt_raw[is.na(local) | local == "", dataset_id]), collapse = ", "))
-if (dt_raw[, any(is.na(species) | species == "")])
-   warning(paste("missing _species_ value in ", paste(unique(dt_raw[is.na(species) | species == "", dataset_id]), collapse = ", "))) # lightfoot_2022, muschet_2018, muthukrishnan_2019 and the 3 wardle data sets have empty samples.
-if (dt_raw[, any(is.na(value) | value == "" | value < 0)])
-   warning(paste("missing _value_ value in ", paste(unique(dt_raw[is.na(value) | value == "" | value < 0, dataset_id]), collapse = ", ")))
-if (dt_raw[, any(is.na(metric) | metric == "")])
-   warning(paste("missing _metric_ value in ", paste(unique(dt_raw[is.na(metric) | metric == "", dataset_id]), collapse = ", ")))
+if (dt_raw[, any(is.na(local) | local == "")]) warning(paste("missing _local_ value in ", unique(dt_raw[is.na(local) | local == "", dataset_id]), collapse = ", "))
+if (dt_raw[, any(is.na(species) | species == "")]) warning(paste("missing _species_ value in ", paste(unique(dt_raw[is.na(species) | species == "", dataset_id]), collapse = ", "))) # lightfoot_2022, muschet_2018, muthukrishnan_2019 and the 3 wardle data sets have empty samples.
+if (dt_raw[, any(is.na(value) | value == "" | value < 0)]) warning(paste("missing _value_ value in ", paste(unique(dt_raw[is.na(value) | value == "" | value < 0, dataset_id]), collapse = ", ")))
+if (dt_raw[, any(is.na(metric) | metric == "")]) warning(paste("missing _metric_ value in ", paste(unique(dt_raw[is.na(metric) | metric == "", dataset_id]), collapse = ", ")))
 if (dt_raw[, any(is.na(unit) | unit == "")]) warning(paste("missing _unit_ value in ", paste(unique(dt_raw[is.na(unit) | unit == "", dataset_id]), collapse = ", ")))
 
 ### Counting the study cases ----
 dt_raw[, .(nsites = data.table::uniqueN(.SD)), .SDcols = c('regional', 'local'),
-       by = .(dataset_id)][order(nsites, decreasing = TRUE)]
+       keyby = .(dataset_id)][order(nsites, decreasing = TRUE)]
 
 ## Ordering ----
 # data.table::setcolorder(dt, intersect(column_names_template, colnames(dt)))
@@ -80,7 +78,7 @@ corrected_species_names <- data.table::fread(
 
 #### removing new names assigned to several original names ----
 corrected_species_names <- corrected_species_names[
-   i = !corrected_species_names[, .N, by = .(dataset_id, species.new)][N != 1L],
+   i = !corrected_species_names[, .N, keyby = .(dataset_id, species.new)][N != 1L],
    on = .(dataset_id, species.new)]
 
 #### data.table join with update by reference ----
@@ -107,16 +105,15 @@ if (anyDuplicated(dt_raw)) warning(
    )
 )
 
-if (any(dt_raw[, .N, by = .(dataset_id, regional, local, year, month, day, species)]$N != 1L))
-   warning(paste(
+if (any(dt_raw[, .N, keyby = .(dataset_id, regional, local, year, month, day, species)]$N != 1L)) warning(paste(
       'Duplicated species in:',
       paste(collapse = ', ',
-            dt_raw[, .N, by = .(dataset_id, regional, local, year, month, day, species)][N != 1L, unique(dataset_id)])))
+            dt_raw[, .N, keyby = .(dataset_id, regional, local, year, month, day, species)][N != 1L, unique(dataset_id)])))
 
 
 ### checking metrics and units ----
-if (!all(dt_raw[metric == "pa", unit == "pa"]) || !all(dt_raw[unit == "pa", metric == "pa"]) || !all(dt_raw[metric == "pa" | unit == "pa", value == 1])) warning("inconsistent presence absence coding")
-if (any(dt_raw[, data.table::uniqueN(unit), by = dataset_id]$V1 != 1L)) warning("several units in a single data set")
+if (!all(dt_raw[metric == "pa", unit == "pa"]) || !all(dt_raw[unit == "pa", metric == "pa"])) warning("inconsistent presence absence coding")
+if (any(dt_raw[, data.table::uniqueN(unit), keyby = dataset_id]$V1 != 1L)) warning("several units in a single data set")
 
 
 ## Metadata ----
@@ -176,14 +173,14 @@ meta_raw[
    unique_coordinates_raw,
    on = .(latitude, longitude),
    ":="(latitude = i.lat, longitude = i.lon)]
-# meta_raw <- merge(meta_raw, unique_coordinates_raw, by = c("latitude", "longitude"))
+# meta_raw <- merge(meta_raw, unique_coordinates_raw, keyby = c("latitude", "longitude"))
 # meta_raw[, c("latitude", "longitude") := NULL]
 # data.table::setnames(meta_raw, c("lat", "lon"), c("latitude", "longitude"))
 
 ## Coordinate scale ----
 meta_raw[, is_coordinate_local_scale := data.table::uniqueN(latitude) != 1L
          && data.table::uniqueN(longitude) != 1L,
-         by = .(dataset_id, regional)]
+         keyby = .(dataset_id, regional)]
 
 
 ## Checks ----
@@ -191,16 +188,16 @@ meta_raw[, is_coordinate_local_scale := data.table::uniqueN(latitude) != 1L
 if (anyDuplicated(meta_raw)) warning("Duplicated rows in metadata")
 
 ### checking taxon ----
-if (any(meta_raw[, data.table::uniqueN(taxon), by = dataset_id]$V1 != 1L)) warning(
+if (any(meta_raw[, data.table::uniqueN(taxon), keyby = dataset_id]$V1 != 1L)) warning(
    paste0("several taxa values in ", paste(
-      meta_raw[, data.table::uniqueN(taxon), by = dataset_id][V1 != 1L, dataset_id],
+      meta_raw[, data.table::uniqueN(taxon), keyby = dataset_id][V1 != 1L, dataset_id],
       collapse = ", "))
 )
 if (any(!unique(meta_raw$taxon) %in% c("Fish", "Invertebrates", "Plants", "Birds", "Mammals", "Herpetofauna", "Marine plants"))) warning(
    paste0("Non standard taxon category in ", paste(
       unique(meta_raw[!taxon %in% c("Fish", "Invertebrates", "Plants", "Birds", "Mammals", "Herpetofauna", "Marine plants"),
                       .(dataset_id),
-                      by = dataset_id]$dataset_id), collapse = ", ")))
+                      keyby = dataset_id]$dataset_id), collapse = ", ")))
 
 ### checking encoding ----
 try(for (i in seq_along(lst_metadata_raw))
@@ -217,7 +214,7 @@ if (!all(data.table::between(x = meta_raw$year, lower = 1500, upper = 2023))) wa
 
 ### checking year range homogeneity among regions ----
 if (any(meta_raw[, data.table::uniqueN(paste(range(year), collapse = "-")),
-                 by = .(dataset_id, regional)]$V1 != 1L)) warning(
+                 keyby = .(dataset_id, regional)]$V1 != 1L)) warning(
                     "all local scale sites were not sampled for the same years and timepoints has to be consistent with years")
 
 ### checking study_type ----
@@ -244,15 +241,15 @@ if (data.table::uniqueN(meta_raw$comment) != data.table::uniqueN(meta_raw$datase
 if (anyNA(meta_raw$comment_standardisation)) warning("Missing comment_standardisation value")
 
 ## Checking that there is only one alpha_grain value per dataset_id ----
-if (meta_raw[, data.table::uniqueN(alpha_grain_m2), by = dataset_id][, any(V1 != 1L)]) warning(paste(
+if (meta_raw[, data.table::uniqueN(alpha_grain_m2), keyby = dataset_id][, any(V1 != 1L)]) warning(paste(
    "Inconsistent grain in",
    paste(
-      meta_raw[, data.table::uniqueN(alpha_grain_m2), by = dataset_id][V1 != 1L, unique(dataset_id)],
+      meta_raw[, data.table::uniqueN(alpha_grain_m2), keyby = dataset_id][V1 != 1L, unique(dataset_id)],
       collapse = ", ")
 )) # Magnuson: alpha is the size of each lake.
 
 ### checking alpha_grain_type ----
-# meta[(!checklist), .(lterm = diff(range(year)), taxon = taxon, realm = realm, alpha_grain_type = alpha_grain_type), by = .(dataset_id, regional)][lterm >= 10L][taxon == "Fish" & realm == "Freshwater" & grep("lake",alpha_grain_type), unique(dataset_id)]
+# meta[(!checklist), .(lterm = diff(range(year)), taxon = taxon, realm = realm, alpha_grain_type = alpha_grain_type), keyby = .(dataset_id, regional)][lterm >= 10L][taxon == "Fish" & realm == "Freshwater" & grep("lake",alpha_grain_type), unique(dataset_id)]
 if (any(!unique(meta_raw$alpha_grain_type) %in% c("island", "plot", "sample", "lake_pond", "trap", "transect", "functional", "box", "quadrat","listening_point"))) warning(paste("Invalid alpha_grain_type value in", paste(unique(meta_raw[!alpha_grain_type %in% c("island", "plot", "sample", "lake_pond", "trap", "transect", "functional", "box", "quadrat","listening_point"), dataset_id]), collapse = ", ")))
 
 # Adding a unique ID ----
@@ -266,9 +263,9 @@ data.table::setcolorder(meta_raw, c("ID", base::intersect(column_names_template_
 
 # Checking that all data sets have both community and metadata data ----
 if (length(base::setdiff(unique(dt_raw$dataset_id), unique(meta_raw$dataset_id))) > 0L) warning("Incomplete community or metadata tables")
-# if (any(meta_raw[, .N, by = .(dataset_id, regional, local, year, month, day)][, N != 1L])) warning(
+# if (any(meta_raw[, .N, keyby = .(dataset_id, regional, local, year, month, day)][, N != 1L])) warning(
 #    paste("Several values per local year in metadata of data sets:",
-#          paste(meta_raw[, .N, by = .(dataset_id, regional, local, year, month, day)][N != 1L][, unique(dataset_id)], collapse = ", ")))
+#          paste(meta_raw[, .N, keyby = .(dataset_id, regional, local, year, month, day)][N != 1L][, unique(dataset_id)], collapse = ", ")))
 if (nrow(meta_raw) != nrow(unique(meta_raw[, .(ID, regional, local, year, month, day)]))) warning("Redundant rows in meta")
 if (nrow(meta_raw) != nrow(unique(dt_raw[, .(ID, regional, local, year, month, day)]))) warning("Discrepancies between dt and meta")
 

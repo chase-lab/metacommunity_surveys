@@ -12,7 +12,7 @@ data.table::setnames(ddata,
 ddata[, ":="(
    dataset_id = dataset_id,
 
-   regional = as.factor(paste('Sacramento-San Joaquin Bay-Delta', regional, sep = ' ')),
+   regional = factor("Sacramento-San Joaquin Bay-Delta"),
 
    year = data.table::year(sampledate),
    month = data.table::month(sampledate),
@@ -38,11 +38,6 @@ meta[, ":="(
    study_type = "ecological_sampling",
 
    data_pooled_by_authors = FALSE,
-
-   alpha_grain = NA,
-   alpha_grain_unit = NA,
-   alpha_grain_type = NA,
-   alpha_grain_comment = NA,
 
    comment = "Extracted from Perry, S.E., T. Brown, and V. Klotz. 2023. Interagency Ecological Program: Phytoplankton monitoring in the Sacramento-San Joaquin Bay-Delta, collected by the Environmental Monitoring Program, 2008-2021 ver 1. Environmental Data Initiative. https://doi.org/10.6073/pasta/389ea091f8af4597e365d8b8a4ff2a5a (Accessed 2023-02-23). METHODS: 'Phytoplankton samples are collected with a submersible pump or a Van Dorn sampler from a water depth of one meter (approximately three feet) below the water surface.' density vlues were retrieved from column 'organisms_per_mL' LOCAL is a stationcode and REGIONAL is the whole Sacramento-San Joaquin Bay-Delta with a split depending on the lab in charge of identifying algae organisms.",
    comment_standardisation = "In some samples, one species was observed and considered 'Good' quality observations and it was also observed in a 'Fragmented' state. When this happened, we pooled densities together.",
@@ -70,9 +65,10 @@ data.table::fwrite(
 ## When there are 2 dates per month, select one ----
 # data.table style join
 ddata <- ddata_standardised[
-   ddata_standardised[qualitycheck == 'Good'][,
-                                              .(sampledate = sampledate[1L]),
-                                              by = .(regional, year, month, local)],
+   i = ddata_standardised[
+      i = qualitycheck == 'Good',
+      j = .(sampledate = sampledate[1L]),
+      by = .(regional, year, month, local)],
    on = .(regional, year, month, local, sampledate)
 ]
 
@@ -80,7 +76,7 @@ ddata <- ddata_standardised[
 ddata[, order_month := order(table(month), decreasing = TRUE)[base::match(month, 1L:12L)]]
 data.table::setorder(ddata, regional, local, year, order_month)
 ddata <- ddata[
-   unique(ddata[, .(regional, local, year, month)])[, .SD[1L:10L], by = .(regional, local, year)],
+   i = unique(ddata[, .(regional, local, year, month)])[, .SD[1L:10L], by = .(regional, local, year)],
    on = .(regional, local, year, month)
 ] # (data.table style join)
 
@@ -88,23 +84,25 @@ month_order <- ddata[, data.table::uniqueN(sampledate), by = .(regional, year, m
 ddata[, month_order := (1L:12L)[match(month, month_order, nomatch = NULL)]]
 data.table::setkey(ddata, month_order)
 
-ddata <- ddata[!is.na(month_order)][, nmonths := data.table::uniqueN(month),
-                                    by = .(regional, local, year)][nmonths >= 10L][, nmonths := NULL]
+ddata <- ddata[i = !is.na(month_order),
+               j = nmonths := data.table::uniqueN(month),
+               by = .(regional, local, year)][nmonths >= 10L][, nmonths := NULL]
 
 ddata <- ddata[
-   unique(ddata[,
-                .(regional, local, year, month)])[, .SD[1L:10L],
-                                                  by = .(regional, local, year)],
+   i = unique(ddata[, .(regional, local, year, month)])[,
+                                                        j = .SD[1L:10L],
+                                                        by = .(regional, local, year)],
    on = .(regional, local, year, month), nomatch = NULL][, month_order := NULL]
 
 ## Pooling monthly samples together ----
-ddata <- ddata[, .(value = mean(value)),
-               by = .(dataset_id, year, regional, local,
-                      species, metric, unit)][!is.na(species)]
+ddata <- ddata[, j = .(value = mean(value)),
+               keyby = .(dataset_id, year, regional, local,
+                         species, metric, unit)][!is.na(species)]
 
 ## Excluding sites that were not sampled at least twice 10 years apart ----
-ddata <- ddata[!ddata[, diff(range(year)) < 9L, by = .(regional, local)][(V1)],
-               on = .(regional, local)]
+ddata <- ddata[
+   i = !ddata[, diff(range(year)) < 9L, by = .(regional, local)][(V1)],
+   on = .(regional, local)]
 
 ## Metadata ----
 meta[, c("month", "day") := NULL]
@@ -114,11 +112,6 @@ meta <- meta[unique(ddata[, .(regional, local, year)]),
 
 meta[, ":="(
    effort = 10L,
-
-   gamma_sum_grains = NA,
-   gamma_sum_grains_unit = NA,
-   gamma_sum_grains_type = NA,
-   gamma_sum_grains_comment = NA,
 
    gamma_bounding_box_unit = "km2",
    gamma_bounding_box_type = "convex-hull",

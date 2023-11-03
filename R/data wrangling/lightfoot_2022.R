@@ -22,7 +22,7 @@ suppressWarnings(ddata$pit <- ifelse(!is.na(as.numeric("NA")) & (trimws(as.chara
 
 #Raw Data ----
 
-data.table::setnames(ddata, c("zone", "spp"), c("local", "species"))
+data.table::setnames(ddata, old = c("zone", "spp"), new = c("local", "species"))
 ddata[, local := paste0(local, "_", site, "_", plot,
                         data.table::fifelse(is.na(pit), "", paste0("_", pit))
 )][, ":="(
@@ -32,8 +32,8 @@ ddata[, local := paste0(local, "_", site, "_", plot,
 
 ## Community data ----
 ### Pooling individuals together ----
-ddata <- ddata[, .(value = .N), by = .(local, site, plot, pit,
-                                       year, month, day, date, species)]
+ddata <- ddata[, .(value = .N), keyby = .(local, site, plot, pit,
+                                          year, month, day, date, species)]
 
 ddata[, ":="(
    dataset_id = dataset_id,
@@ -62,7 +62,7 @@ meta[, ":="(
    alpha_grain_type = "trap",
    alpha_grain_comment = "15 cm2 diameter pitfall traps",
 
-   comment = "Data extracted from EDI repository https://portal.edirepository.org/nis/mapbrowse?scope=knb-lter-jrn&identifier=210007001&revision=38 . The authors captured, marked and recaptured lizards in 4 zones, 2 to 3 plots per zone and a 4*4 grid of pitfal traps. Data is provided at the individual level per pitfall trap and we applied standardisation(described in comment_standardisation). Effort is the minimal number of sampling operations ie the number of pitfall traps * the number of dates per local per year.",
+   comment = "Data extracted from EDI repository https://portal.edirepository.org/nis/mapbrowse?scope=knb-lter-jrn&identifier=210007001&revision=38 . The authors captured, marked and recaptured lizards in 4 zones, 2 to 3 plots per zone and a 4*4 grid of pitfal traps. Data is provided at the individual level per pitfall trap.",
    comment_standardisation = "Individual level data (morpho, sex). Individuals counted to obtain abundances.",
    doi = 'https://doi.org/10.6073/pasta/51814fa39f87aea44629a5be8602ec49'
 )]
@@ -81,6 +81,8 @@ data.table::fwrite(
 )
 
 #standardised Data ----
+## Removing pit number from local name ----
+ddata[, local := sub("_[0-9]{1,2}$", "", local)]
 
 ## in 2005 and 2006, all empty pits were coded as pit 0, even if several pits were empty? this would lead to a significant underestimation of effort and we decide to exclude 2005 and 2006 entirely. ----
 ddata <- ddata[!year %in% 2005L:2006L]
@@ -92,20 +94,21 @@ ddata <- ddata[!(site == 'SAND' & plot == 'C') &
 
 ## resample individuals, based on the total abundance in the smallest sampling effort ----
 ### computing effort ----
-ddata[, pit_ID := .GRP, by = .(local, pit)
-      ][, effort := length(unique(date)), by = .(year, local, pit_ID)
-        ][, effort := sum(effort), by = .(year, local)] # Effort is the minimal
+ddata[, pit_ID := .GRP, keyby = .(local, pit)
+][, effort := data.table::uniqueN(date), keyby = .(year, local, pit_ID)
+][, effort := sum(effort), keyby = .(year, local)] # Effort is the minimal
 # number of sampling operations ie the number of pitfall traps * the number of
 # dates per local per year.
 
 ### pooling pits and dates ----
-ddata <- ddata[, .(value = .N, effort = unique(effort)), by = .(dataset_id, regional, local, year, species, metric, unit)]
+ddata <- ddata[, .(value = .N, effort = unique(effort)),
+               keyby = .(dataset_id, regional, local, year, species, metric, unit)]
 
 ### excluding more empty traps
 ddata <- ddata[species != "NONE"]
 
 ### computing min total abundance for the local/year where the effort is the smallest ----
-ddata[, sample_size := sum(value), by = .(local, year)]
+ddata[, sample_size := sum(value), keyby = .(local, year)]
 min_sample_size <- ddata[effort == min(effort), min(sample_size)]
 ddata[, effort := NULL]
 
@@ -113,44 +116,67 @@ ddata[, effort := NULL]
 ddata <- ddata[sample_size >= 10L]
 source("R/functions/resampling.r")
 set.seed(42)
-ddata[sample_size > min_sample_size, value := resampling(species, value, min_sample_size), by = .(local, year)]
-ddata[sample_size < min_sample_size, value := resampling(species, value, min_sample_size, replace = TRUE), by = .(local, year)]
+ddata[
+   i = sample_size > min_sample_size,
+   j = value := resampling(species, value, min_sample_size),
+   by = .(local, year)]
+ddata[
+   i = sample_size < min_sample_size,
+   j = value := resampling(species, value, min_sample_size, replace = TRUE),
+   by = .(local, year)]
 
 ddata <- ddata[!is.na(value)][, sample_size := NULL]
 
-##meta data ----
-meta[, c("month", "day") := NULL]
-meta <- unique(meta[unique(ddata[, .(local, year)]),
-             on = .(local, year)])
+while (ddata[, diff(range(year)) < 9L, by = .(regional, local)][, any(V1)] ||
+       ddata[, data.table::uniqueN(local) < 4L, by = .(regional, year)][, any(V1)]) {
+   ddata <- ddata[
+      i = !ddata[, diff(range(year)) < 9L, by = .(regional, local)][(V1)],
+      on = .(regional, local)
+   ]
+   ddata <- ddata[
+      i = !ddata[, data.table::uniqueN(local) < 4L, by = .(regional, year)][(V1)],
+      on = .(regional, year)
+   ]
+}
+if (nrow(ddata) != 0L) {
+   ##meta data ----
+   ## Removing pit number from local name ----
+   ddata[, local := sub("_[0-9]{1,2}$", "", local)]
 
-meta[, ":="(
-   effort = 14L, # Effort is the minimal number of sampling operations ie the number of pitfall traps * the number of dates per local per year
+   meta[, c("month", "day") := NULL]
+   meta <- unique(meta[i = unique(ddata[, .(local, year)]),
+                       on = .(local, year)])
 
-   gamma_bounding_box = 120L, #size of biggest common scale can be different values for different areas per region
-   gamma_bounding_box_unit = "km2",
-   gamma_bounding_box_type = "box",
-   gamma_bounding_box_comment = "complete area in which the 11 plots are located",
+   meta[, ":="(
+      effort = 14L, # Effort is the minimal number of sampling operations ie the number of pitfall traps * the number of dates per local per year
 
-   gamma_sum_grains_unit = "cm2",
-   gamma_sum_grains_type = "plot",
-   gamma_sum_grains_comment = "Each grid consisted of 4 x 4 rows of traps spaced at 15 meter intervals",
+      gamma_bounding_box = 120L, #size of biggest common scale can be different values for different areas per region
+      gamma_bounding_box_unit = "km2",
+      gamma_bounding_box_type = "box",
+      gamma_bounding_box_comment = "complete area in which the 11 plots are located",
 
-   comment_standardisation = "data from 2005 and 2006 are excluded because empty pits are underestimated.
+      gamma_sum_grains_unit = "cm2",
+      gamma_sum_grains_type = "plot",
+      gamma_sum_grains_comment = "Each grid consisted of 4 x 4 rows of traps spaced at 15 meter intervals",
+
+      comment_standardisation = "data from 2005 and 2006 are excluded because empty pits are underestimated.
 Only sites resampled in the 2000s are included.
 Because effort varies: varying number of traps and varying number of sampling events per year,
 individuals are resampled down to the minimal number of captured individuals among
 the least intensively sampled years i.e. 10 individuals.
-Samples with less than 10 individuals were excluded"
-)][, gamma_sum_grains := alpha_grain * effort]
+Samples with less than 10 individuals were excluded,
+Effort is the minimal number of sampling operations ie the number of pitfall traps * the number of dates per local per year."
+   )][, gamma_sum_grains := alpha_grain * effort, keyby = year]
 
-##save standardiseddata ----
-data.table::fwrite(
-   x = ddata,
-   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised.csv"),
-   row.names = FALSE, sep = ",", encoding = "UTF-8"
-)
-data.table::fwrite(
-   x = meta,
-   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised_metadata.csv"),
-   row.names = FALSE, sep = ",", encoding = "UTF-8"
-)
+   ##save standardiseddata ----
+   data.table::fwrite(
+      x = ddata,
+      file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised.csv"),
+      row.names = FALSE, sep = ",", encoding = "UTF-8"
+   )
+   data.table::fwrite(
+      x = meta,
+      file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised_metadata.csv"),
+      row.names = FALSE, sep = ",", encoding = "UTF-8"
+   )
+}

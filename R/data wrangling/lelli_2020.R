@@ -35,7 +35,7 @@ ddata[, ":="(
 
    year = c(1960L, 2018L)[data.table::chmatch(period, c("historical", "recent"))],
 
-   metric = "abundance score",
+   metric = "abundance",
    unit = "score",
 
    period = NULL

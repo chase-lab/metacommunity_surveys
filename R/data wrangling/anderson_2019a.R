@@ -64,9 +64,8 @@ meta[, ":="(
 
 ## saving raw data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-drop_col <- "Tidal Height"
 data.table::fwrite(
-   x = ddata[,!..drop_col],
+   x = ddata[,!"Tidal Height"],
    file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_raw.csv"), row.names = FALSE
 )
 data.table::fwrite(
@@ -79,46 +78,46 @@ data.table::fwrite(
 ddata <- ddata[`Tidal Height` %in% c(1, 1.5, 2, 2.5, 3)]
 ddata[, local := gsub("_[123]\\.*5*", "", local)]
 ddata[, effort := length(unique(`Tidal Height`)), by = .(regional, local, year)]
-ddata <- unique(ddata[effort == 5L][,
-                                    .(value = sum(value)),
-                                    by = .(dataset_id, regional, local, year,
-                                           species, metric, unit)]) # pooling dates together
+ddata <- ddata[effort == 5L][,
+                             .(value = sum(value)),
+                             by = .(dataset_id, regional, local, year,
+                                    species, metric, unit)] # pooling dates together
 
 ## Excluding sites that were not sampled at least twice 10 years apart ----
 ddata <- ddata[!ddata[, diff(range(year)) < 9L, by = .(regional, local)][(V1)],
                on = .(regional, local)]
+if (nrow(ddata) != 0L) {
+   ## community data ----
 
-## community data ----
+   ## metadata ----
+   meta[, local := gsub("_[123]\\.*5*", "", local)][, c("month","day") := NULL]
+   meta <- unique(unique(meta)[ddata[, .(regional, local, year)], on = .(regional, local, year)])
+   meta[, ":="(
+      effort = 1L,
 
-## metadata ----
-meta[, local := gsub("_[123]\\.*5*", "", local)][, c("month","day") := NULL]
-meta <- unique(unique(meta)[ddata[, .(regional, local, year)], on = .(regional, local, year)])
-meta[, ":="(
-   effort = 1L,
+      gamma_sum_grains_unit = "m2",
+      gamma_sum_grains_type = "sample",
+      gamma_sum_grains_comment = "sum of the areas of quadrats of each island",
 
-   gamma_sum_grains_unit = "m2",
-   gamma_sum_grains_type = "sample",
-   gamma_sum_grains_comment = "sum of the areas of quadrats of each island",
+      gamma_bounding_box_unit = "ha",
+      gamma_bounding_box_type = "island",
+      gamma_bounding_box_comment = "area of the Wizard islet given by the authors",
 
-   gamma_bounding_box_unit = "ha",
-   gamma_bounding_box_type = "island",
-   gamma_bounding_box_comment = "area of the Wizard islet given by the authors",
-
-   comment_standardisation = "Taxon Juvenile limpet (<5mm) as excluded.
+      comment_standardisation = "Taxon Juvenile limpet (<5mm) as excluded.
 Only the 5 middle tidal heights kept and only samples with all of these 5 tidal heights sampled kept.
 Samples from these 5 quadrats were then pooled together.
 Samples that were not sampled at least twice 10 years apart were excluded."
-)][, gamma_sum_grains := sum(alpha_grain) / 10000L, by = .(regional, year)][regional == "Wizard", gamma_bounding_box := 1.73]
+   )][, gamma_sum_grains := sum(alpha_grain) / 10000L, by = .(regional, year)][regional == "Wizard", gamma_bounding_box := 1.73]
 
-## saving standardised data ----
-dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
-data.table::fwrite(
-   x = ddata,
-   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised.csv"),
-   row.names = FALSE
-)
-data.table::fwrite(
-   x = meta,
-   file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised_metadata.csv"),
-   row.names = FALSE
-)
+   ## saving standardised data ----
+   data.table::fwrite(
+      x = ddata,
+      file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised.csv"),
+      row.names = FALSE
+   )
+   data.table::fwrite(
+      x = meta,
+      file = paste0("data/wrangled data/", dataset_id, "/", dataset_id, "_standardised_metadata.csv"),
+      row.names = FALSE
+   )
+}

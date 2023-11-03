@@ -63,13 +63,15 @@ data.table::fwrite(
 #standardised data ----
 ##community data ----
 ddata[, c("month", "day") := NULL]
-ddata <- ddata[
-   !ddata[is.na(value)],
-   on = .(regional, local, year)
-]
+ddata[, ":="(
+   value = 1L,
+   metric = "pa",
+   unit = "pa"
+)]
 
 ## Excluding sites that were not sampled at least twice 10 years apart ----
-ddata <- ddata[!ddata[, diff(range(year)) < 9L, by = .(regional, local)][(V1)],
+ddata <- ddata[
+   i = !ddata[, diff(range(year)) < 9L, by = .(regional, local)][(V1)],
                on = .(regional, local)]
 
 ### cleaning species names? ----

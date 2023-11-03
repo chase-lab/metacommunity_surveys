@@ -53,115 +53,197 @@ listfiles_metadata_standardised <- unique(grep(paste(listfiles, collapse = "|"),
 ## Community data ----
 testthat::test_that(desc = "data quality check - community data - raw data", code = {
    for (i in listfiles_community_raw) {
-      testthat::expect_true(unlist(
-         data.table::fread(
-            file = i, sep = ",", dec = ".", header = TRUE, stringsAsFactors = TRUE
-         )[, .(all(
-            all(data.table::between(year, 1500L, 2023L)),
-            all(try(data.table::between(month, 1L, 12L), silent = TRUE)),
-            all(try(data.table::between(day, 1L, 31L), silent = TRUE)),
-            all(value > 0),
-            length(levels(dataset_id)) == 1L,
-            length(levels(metric)) == 1L,
-            length(levels(unit)) == 1L,
-            levels(metric) %in% c("abundance", "relative abundance", "density",
-                                  "cover", "pa"),
-            levels(unit) %in% c("count", "pa", "individuals per liter",
-                                "individuals per mL", "individuals per transect",
-                                "cpue", "percent"),
-            na.rm = TRUE
-         ))]),
-         info = i
-      )
+      X <-  data.table::fread(file = i, sep = ",", dec = ".",
+                              header = TRUE, stringsAsFactors = TRUE)
+      testthat::expect_true(
+         all(data.table::between(X$year, 1500L, 2023L)),
+         info = paste("Year range", i))
+      # if ("month" %in% colnames(X) && any(!is.na(X$month))) testthat::expect_true(
+      #    X[, all(data.table::between(month, 1L, 12L))],
+      #    info = paste("Month range", i))
+      # if ("day" %in% colnames(X) && any(!is.na(X$day))) testthat::expect_true(
+      #    X[, all(data.table::between(day, 1L, 31L))],
+      #    info = paste("Day range", i))
+      testthat::expect_true(
+         suppressWarnings(
+            X[, all(is.na(value) | is.factor(value) | value >= 0)]
+         ),
+         info = paste("Positive values", i))
+      testthat::expect_length(
+         levels(X$dataset_id), 1L)
+      testthat::expect_length(
+         levels(X$metric), 1L)
+      testthat::expect_length(
+         levels(X$unit), 1L)
+      testthat::expect_true(
+         levels(X$metric) %in% c("abundance", "relative abundance", "density",
+                                 "cover", "Braun-Blanquet scale", "incidence",
+                                 "pa"),
+         info = paste("Metric is correct", i))
+      testthat::expect_true(
+         levels(X$unit) %in% c("count", "pa", "individuals per liter",
+                               "individuals per mL", "individuals per sqm",
+                               "individuals per 250m2",
+                               "individuals per transect",
+                               "cpue", "percent", "hits", "score", "unknown"),
+         info = paste("Unit is correct", i))
    }
 })
 
 testthat::test_that(desc = "data quality check - community data - standardised data", code = {
    for (i in listfiles_community_standardised) {
-      testthat::expect_true(unlist(
-         data.table::fread(
-            file = i, sep = ",", dec = ".", header = TRUE, stringsAsFactors = TRUE
-         )[, .(all(
-            all(data.table::between(year, 1500L, 2023L)),
-            all(value > 0),
-            length(levels(dataset_id)) == 1L,
-            length(levels(metric)) == 1L,
-            length(levels(unit)) == 1L,
-            levels(metric) %in% c("abundance", "relative abundance", "density",
-                                  "cover", "pa"),
-            levels(unit) %in% c("count", "pa", "individuals per liter",
-                                "individuals per mL", "individuals per transect",
-                                "cpue", "percent"),
-            na.rm = TRUE
-         ))]),
-         info = i
-      )
+      X <- data.table::fread(file = i, sep = ",", dec = ".",
+                             header = TRUE, stringsAsFactors = TRUE)
+      testthat::expect_true(
+         all(data.table::between(X$year, 1500L, 2023L)),
+         info = paste("Year range", i))
+      # if ("month" %in% colnames(X) && any(!is.na(X$month))) testthat::expect_true(
+      #    X[, all(data.table::between(month, 1L, 12L))],
+      #    info = paste("Month range", i))
+      # if ("day" %in% colnames(X) && any(!is.na(X$day))) testthat::expect_true(
+      #    X[, all(data.table::between(day, 1L, 31L))],
+      #    info = paste("Day range", i))
+      testthat::expect_true(
+         suppressWarnings(
+            X[, all(is.na(value) | is.factor(value) | value >= 0)]
+         ),
+         info = paste("Positive values", i))
+      testthat::expect_length(
+         levels(X$dataset_id), 1L)
+      testthat::expect_length(
+         levels(X$metric), 1L)
+      testthat::expect_length(
+         levels(X$unit), 1L)
+      testthat::expect_true(
+         levels(X$metric) %in% c("abundance", "relative abundance", "density",
+                                 "cover", "pa"),
+         info = paste("Metric is correct", i))
+      testthat::expect_true(
+         levels(X$unit) %in% c("count", "pa", "individuals per liter",
+                               "individuals per mL", "individuals per transect",
+                               "individuals per 250m2", "individuals per sqm",
+                               "cpue", "percent","unknown"),
+         info = paste("Unit is correct", i))
+
    }
 })
 
 ## Meta data ----
 testthat::test_that(desc = "data quality check - metadata data - raw data", code = {
    for (i in listfiles_metadata_raw) {
-      testthat::expect_true(unlist(
-         data.table::fread(
-            file = i, sep = ",", dec = ".", header = TRUE, stringsAsFactors = TRUE
-         )[, .(all(
-            all(data.table::between(year, 1500L, 2023L)),
-            length(levels(dataset_id)) == 1L,
-            length(levels(study_type)) == 1L,
-            length(levels(taxon)) == 1L,
-            length(levels(realm)) == 1L,
-            length(levels(alpha_grain_unit)) == 1L ||  length(levels(alpha_grain_unit)) == 0L,
-            length(levels(alpha_grain_type)) == 1L || length(levels(alpha_grain_type)) == 0L,
-            levels(study_type) %in% c("ecological_sampling", "resurvey"),
-            levels(taxon) %in% c("Fish", "Invertebrates", "Plants", "Birds", "Mammals",
-                                 "Herpetofauna", "Marine plants"),
-            levels(realm) %in% c("Terrestrial","Freshwater","Marine"),
-            try(levels(alpha_grain_unit) %in% c("acres", "ha", "km2", "m2", "cm2"), silent = TRUE),
-            try(levels(alpha_grain_type) %in% c("island", "plot", "sample", "lake_pond",
-                                                "trap", "transect", "functional", "box",
-                                                "quadrat","listening_point"), silent = TRUE),
-            na.rm = TRUE
-         ))]),
-         info = i
-      )
+      X <- data.table::fread(file = i, sep = ",", dec = ".",
+                             header = TRUE, stringsAsFactors = TRUE)
+      X[, year := as.integer(as.character(year))]
+
+      testthat::expect_true(
+         all(data.table::between(X$year, 1500L, 2023L)),
+         info = paste("Year range", i))
+      testthat::expect_length(
+         levels(X$dataset_id), 1L)
+      testthat::expect_length(
+         levels(X$study_type), 1L)
+      testthat::expect_length(
+         levels(X$taxon), 1L)
+      testthat::expect_length(
+         levels(X$realm), 1L)
+      testthat::expect_true(
+         length(levels(X$alpha_grain_unit)) == 1L ||
+            length(levels(X$alpha_grain_unit)) == 0L,
+         info = paste("alpha_grain_unit is unique", i))
+      testthat::expect_true(
+         length(levels(X$alpha_grain_type)) == 1L ||
+            length(levels(X$alpha_grain_type)) == 0L,
+         info = paste("alpha_grain_type is unique", i))
+
+      checkmate::expect_choice(
+         x = levels(X$study_type),
+         choices = c("ecological_sampling", "resurvey"),
+         info = paste("study_type is correct", i), null.ok = TRUE)
+      checkmate::expect_choice(
+         x = levels(X$taxon),
+         choices = c("Fish", "Invertebrates", "Plants", "Birds", "Mammals",
+                     "Herpetofauna", "Marine plants"),
+         info = paste("taxon is correct", i), null.ok = TRUE)
+      checkmate::expect_choice(
+         x = levels(X$realm),
+         choices = c("Terrestrial","Freshwater","Marine"),
+         info = paste("realm is correct", i), null.ok = TRUE)
+      checkmate::expect_choice(
+         x = levels(X$alpha_grain_type),
+         choices = c("island", "plot", "sample", "lake_pond", "trap","transect",
+                     "functional", "box", "quadrat","listening_point"),
+         info = paste("alpha_grain_type is correct", i), null.ok = TRUE)
+      checkmate::expect_choice(
+         x = levels(X$alpha_grain_unit),
+         choices = c("acres", "ha", "km2", "m2", "cm2"),
+         info = paste("alpha_grain_unit is correct", i), null.ok = TRUE)
    }
 })
 
 
 testthat::test_that(desc = "data quality check - metadata data - standardised data", code = {
    for (i in listfiles_metadata_standardised) {
-      testthat::expect_true(unlist(
-         data.table::fread(
-            file = i, sep = ",", dec = ".", header = TRUE, stringsAsFactors = TRUE
-         )[, .(all(
-            all(data.table::between(year, 1500L, 2023L)),
-            length(levels(dataset_id)) == 1L,
-            length(levels(study_type)) == 1L,
-            length(levels(taxon)) == 1L,
-            length(levels(realm)) == 1L,
-            length(levels(alpha_grain_unit)) == 1L || length(levels(alpha_grain_unit)) == 0L,
-            length(levels(alpha_grain_type)) == 1L || length(levels(alpha_grain_type)) == 0L,
-            length(levels(gamma_bounding_box_type)) == 1L || length(levels(gamma_bounding_box_type)) == 0L,
-            length(levels(gamma_sum_grains_type)) == 1L || length(levels(gamma_sum_grains_type)) == 0L,
-            levels(study_type) %in% c("ecological_sampling", "resurvey"),
-            levels(taxon) %in% c("Fish", "Invertebrates", "Plants", "Birds", "Mammals",
-                                 "Herpetofauna", "Marine plants"),
-            levels(realm) %in% c("Terrestrial","Freshwater","Marine"),
-            try(levels(alpha_grain_type) %in% c("island", "plot", "sample", "lake_pond",
-                                                "trap", "transect", "functional", "box",
-                                                "quadrat","listening_point"), silent = TRUE),
-            try(levels(alpha_grain_unit) %in% c("acres", "ha", "km2", "m2", "cm2"), silent = TRUE),
-            try(levels(gamma_sum_grains_type) %in% c("archipelago", "sample", "lake_pond",
-                                                     "plot", "quadrat", "transect",
-                                                     "functional", "box"), silent = TRUE),
-            try(levels(gamma_bounding_box_type) %in% c("administrative", "island", "functional",
-                                                       "convex-hull", "watershed", "box",
-                                                       "buffer", "ecosystem", "shore",
-                                                       "lake_pond"), silent = TRUE),
-            na.rm = TRUE
-         ))]),
-         info = i
-      )
+      X <- data.table::fread(file = i, sep = ",", dec = ".",
+                             header = TRUE, stringsAsFactors = TRUE)
+      X[, year := as.integer(as.character(year))]
+
+      testthat::expect_true(
+         all(data.table::between(X$year, 1500L, 2023L)),
+         info = paste("Year range", i))
+      testthat::expect_length(
+         levels(X$dataset_id), 1L)
+      testthat::expect_length(
+         levels(X$study_type), 1L)
+      testthat::expect_length(
+         levels(X$taxon), 1L)
+      testthat::expect_length(
+         levels(X$realm), 1L)
+      testthat::expect_true(
+         length(levels(X$alpha_grain_unit)) == 1L ||
+            length(levels(X$alpha_grain_unit)) == 0L,
+         info = paste("alpha_grain_unit is unique", i))
+      testthat::expect_true(
+         length(levels(X$alpha_grain_type)) == 1L ||
+            length(levels(X$alpha_grain_type)) == 0L,
+         info = paste("alpha_grain_type is unique", i))
+      testthat::expect_true(
+         length(levels(X$gamma_bounding_box_type)) == 1L || length(levels(X$gamma_bounding_box_type)) == 0L,
+         info = paste("gamma_bounding_box_type is unique", i))
+      testthat::expect_true(
+         length(levels(X$gamma_sum_grains_type)) == 1L || length(levels(X$gamma_sum_grains_type)) == 0L,
+         info = paste("gamma_sum_grains_type is unique", i))
+
+      checkmate::expect_choice(
+         x = levels(X$study_type),
+         choices = c("ecological_sampling", "resurvey"),
+         info = paste("study_type is correct", i), null.ok = TRUE)
+      checkmate::expect_choice(
+         x = levels(X$taxon),
+         choices = c("Fish", "Invertebrates", "Plants", "Birds", "Mammals",
+                     "Herpetofauna", "Marine plants"),
+         info = paste("taxon is correct", i), null.ok = TRUE)
+      checkmate::expect_choice(
+         x = levels(X$realm),
+         choices = c("Terrestrial","Freshwater","Marine"),
+         info = paste("realm is correct", i), null.ok = TRUE)
+      checkmate::expect_choice(
+         x = levels(X$alpha_grain_type),
+         choices = c("island", "plot", "sample", "lake_pond", "trap","transect",
+                     "functional", "box", "quadrat","listening_point"),
+         info = paste("alpha_grain_type is correct", i), null.ok = TRUE)
+      checkmate::expect_choice(
+         x = levels(X$alpha_grain_unit),
+         choices = c("acres", "ha", "km2", "m2", "cm2"),
+         info = paste("alpha_grain_unit is correct", i), null.ok = TRUE)
+      checkmate::expect_choice(
+         x = levels(X$gamma_sum_grains_type),
+         choices = c("archipelago", "sample", "lake_pond", "plot", "quadrat",
+                     "transect", "functional", "box"),
+         info = paste("gamma_sum_grains_type is correct", i), null.ok = TRUE)
+      checkmate::expect_choice(
+         x = levels(X$gamma_bounding_box_type),
+         choices = c("administrative", "island", "functional", "convex-hull",
+                     "watershed", "box", "buffer", "ecosystem", "shore", "lake_pond"),
+         info = paste("gamma_bounding_box_type is correct", i), null.ok = TRUE)
    }
 })

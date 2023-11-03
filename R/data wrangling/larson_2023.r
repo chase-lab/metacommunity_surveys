@@ -22,7 +22,7 @@ ddata[, ':='(
    day = data.table::mday(date),
 
    value = value + visual2 + visual3 + visual4 + visual6,
-   metric = 'relative abundance index',
+   metric = 'relative abundance',
    unit = 'score',
 
    latitude = data.table::fifelse(base::is.na(north2), latitude, latitude + north2 / 2),
