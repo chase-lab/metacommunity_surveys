@@ -3,10 +3,11 @@ dataset_id = 'larson_2023'
 ddata <- base::readRDS(file = 'data/raw data/larson_2023/rdata.rds')
 
 # Preparing data ----
-data.table::setnames(ddata, new = base::tolower(base::colnames(ddata)))
-data.table::setnames(ddata,
-                     old = c('fldnum', 'pool', 'visual1', 'east1', 'north1', 'sppcd'),
-                     new = c('regional', 'local', 'value', 'longitude', 'latitude', 'species'))
+data.table::setnames(x = ddata, new = base::tolower(base::colnames(ddata)))
+data.table::setnames(
+   x = ddata,
+   old = c('fldnum', 'pool', 'visual1', 'east_15', 'north_15', 'sppcd'),
+   new = c('regional', 'local', 'value', 'longitude', 'latitude', 'species'))
 ddata[, date := data.table::as.IDate(base::strptime(date, "%m/%d/%Y"))]
 
 # Raw data ----
@@ -25,9 +26,6 @@ ddata[, ':='(
    metric = 'relative abundance',
    unit = 'score',
 
-   latitude = data.table::fifelse(base::is.na(north2), latitude, latitude + north2 / 2),
-   longitude = data.table::fifelse(base::is.na(east2), longitude, longitude + east2 / 2),
-
    rivmile = NULL,
 
    north2 = NULL,
@@ -39,18 +37,24 @@ ddata <- ddata[value != 0L]
 
 # Metadata ----
 ## Coordinate conversion ----
-meta <- unique(ddata[, .(dataset_id, regional, local, year, month, day, longitude, latitude)])
+meta <- unique(ddata[, .(dataset_id, regional, local, year, month, day,
+                         longitude, latitude)])
 
 coords <- stats::na.omit(meta)
-coords_sf <- sf::st_as_sf(coords, coords = c('longitude', 'latitude'), crs = sf::st_crs(paste0('+proj=utm +zone=15')))
-coords_sf <- sf::st_transform(coords_sf, crs = sf::st_crs('+proj=longlat +datum=WGS84'))
+coords_sf <- sf::st_as_sf(x = coords,
+                          coords = c('longitude', 'latitude'),
+                          crs = sf::st_crs("EPSG:26915"))
+coords_sf <- sf::st_transform(x = coords_sf,
+                              crs = sf::st_crs("EPSG:4326"))
 
-coords[, longitude := sf::st_coordinates(coords_sf)[, 1]][, latitude := sf::st_coordinates(coords_sf)[, 2]]
+coords[, longitude := sf::st_coordinates(coords_sf)[, 1]
+][, latitude := sf::st_coordinates(coords_sf)[, 2]]
 
 ## Merging coordinates back in meta ----
-meta[coords,
-     ":="(latitude = i.latitude, longitude = i.longitude),
-     on = .(regional, local, year)]
+meta[, c("latitude","longitude") := numeric(nrow(meta))
+][i = coords,
+  j = ":="(latitude = i.latitude, longitude = i.longitude),
+  on = .(regional, local, year)]
 
 meta[, ':='(
    taxon = 'Plants',
@@ -96,7 +100,7 @@ ddata <- ddata[!base::grepl("^NO", species)
 
 #### Subsetting sites samples at least 10 years apart ----
 ddata <- ddata[
-   !ddata[, diff(range(year)) < 9L, by = .(regional, local)][(V1)],
+   i = !ddata[, diff(range(year)) < 9L, keyby = .(regional, local)][(V1)],
    on = .(regional, local)]
 
 ddata[, ":="(
@@ -112,7 +116,7 @@ ddata[, ":="(
 )]
 
 ## Metadata ----
-meta <- meta[unique(ddata[, .(regional, local, year)]),
+meta <- meta[i = unique(ddata[, .(regional, local, year)]),
              on = .(regional, local, year)]
 meta[, ":="(
    effort = 1L,
@@ -133,7 +137,7 @@ meta[, ":="(
 )][, ":="(
    gamma_bounding_box = geosphere::areaPolygon(data.frame(na.omit(longitude), na.omit(latitude))[grDevices::chull(na.omit(longitude), na.omit(latitude)), ]) / 10^6,
    gamma_sum_grains = sum(alpha_grain)
-), by = .(regional, year)]
+), keyby = .(regional, year)]
 
 ## Saving standardised data ----
 data.table::fwrite(

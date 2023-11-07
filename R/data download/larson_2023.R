@@ -19,12 +19,14 @@ if (!file.exists('data/raw data/larson_2023/rdata.rds')) {
       utils::unzip('data/cache/larson_2023_macrophytes.zip')
 
    # Read the CSV file using data.table package
-   rdata <- data.table::fread(file = 'data/cache/larson_2023_macrophytes/ltrm_vegsrs_data.csv',
-                              header = TRUE, sep = ',', stringsAsFactors = TRUE,
-                              # Select specific columns to read
-                              select = c('FLDNUM','PROJCD','POOL','SITECD','RIVMILE','DATE',
-                                         'EAST1','NORTH1','ZONE','EAST2','NORTH2','SPPCD','VOUCHER',
-                                         'VISUAL1', 'VISUAL2', 'VISUAL3', 'VISUAL4', 'VISUAL5', 'VISUAL6'))
+   rdata <- data.table::fread(
+      file = 'data/cache/larson_2023_macrophytes/ltrm_vegsrs_data.csv',
+      header = TRUE, sep = ',', stringsAsFactors = TRUE,
+      # Select specific columns to read
+      select = c('FLDNUM','PROJCD','POOL','SITECD','RIVMILE','DATE',
+                 'EAST1','NORTH1','ZONE','EAST2','NORTH2','EAST_15','NORTH_15',
+                 'SPPCD','VOUCHER',
+                 'VISUAL1', 'VISUAL2', 'VISUAL3', 'VISUAL4', 'VISUAL5', 'VISUAL6'))
 
    # Create the directory if it does not exist
    base::dir.create(path = 'data/raw data/larson_2023/', showWarnings = FALSE)
