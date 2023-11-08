@@ -56,7 +56,8 @@ data.table::setkey(ddata, dataset_id, regional, local,
 # ddata[, .N, keyby = .(dataset_id, regional, local, year, month, day, species)][N != 1]
 # remove two samples with duplicated observations of Brachypodium pinnatum agg.
 ddata <- ddata[
-   i  = !ddata[, .N, keyby = .(dataset_id, regional, local, year, month, day, species)][N != 1],
+   i  = !ddata[, .N, keyby = .(dataset_id, regional, local,
+                               year, month, day, species)][N != 1],
    on = .(dataset_id, regional, local, year, month, day)]
 
 ## metadata ----
@@ -111,14 +112,14 @@ ddata <- ddata[base::grepl(pattern = "!N!", x = local, fixed = TRUE)]
 
 ## Community data ----
 ### Pooling layers ----
-#### Creating understorey and tree layers ----
+#### Creating understory and tree layers ----
 ddata[, layer := as.integer(stringi::stri_extract_first_regex(local, "(?<=#)[0-9](?=#)"))]
-ddata[, layer := factor(c("understorey", rep("tree", 3L), rep("understorey", 5L)))[match(layer, 0L:8L)]]
+ddata[, layer := factor(c("understory", rep("tree", 3L), rep("understory", 5L)))[match(layer, 0L:8L)]]
 ddata[, local := stringi::stri_replace(local, replacement = "", regex = "#[0-9]#")]
 ddata[, local := stringi::stri_paste(local, layer, sep = "#")]
 
 meta[, layer := as.integer(stringi::stri_extract_first_regex(local, "(?<=#)[0-9](?=#)"))]
-meta[, layer := factor(c("understorey", rep("tree", 3L), rep("understorey", 5L)))[match(layer, 0L:8L)]]
+meta[, layer := factor(c("understory", rep("tree", 3L), rep("understory", 5L)))[match(layer, 0L:8L)]]
 meta[, local := stringi::stri_replace(local, replacement = "", regex = "#[0-9]#")]
 meta[, local := stringi::stri_paste(local, layer, sep = "#")]
 
@@ -154,16 +155,20 @@ ddata <- ddata[
 # ddata[, data.table::uniqueN(month), keyby = .(dataset_id, regional, local, year)][, table(V1)]
 ddata[, c("month", "day") := NULL]
 
-while (ddata[, diff(range(year)) < 9L, keyby = .(dataset_id, regional, local)][, any(V1)] ||
-       ddata[, data.table::uniqueN(local) < 4L, keyby = .(dataset_id, regional, year)][, any(V1)]) {
+while (ddata[, diff(range(year)) < 9L,
+             keyby = .(dataset_id, regional, local)][, any(V1)] ||
+       ddata[, data.table::uniqueN(local) < 4L,
+             keyby = .(dataset_id, regional, year)][, any(V1)]) {
    ### Excluding sites that were not sampled at least twice 10 years apart ----
    ddata <- ddata[
-      i = !ddata[, diff(range(year)) < 9L, keyby = .(dataset_id, regional, local)][(V1)],
+      i = !ddata[, diff(range(year)) < 9L,
+                 keyby = .(dataset_id, regional, local)][(V1)],
       on = .(dataset_id, regional, local)]
 
    ### Excluding regions/years that don't have 4 localities ----
    ddata <- ddata[
-      i = !ddata[, data.table::uniqueN(local) < 4L, keyby = .(dataset_id, regional, year)][(V1)],
+      i = !ddata[, data.table::uniqueN(local) < 4L,
+                 keyby = .(dataset_id, regional, year)][(V1)],
       on = .(dataset_id, regional, year)]
 }
 # ddata[, .N, keyby = .(dataset_id, regional, local, year, species)][N != 1]
