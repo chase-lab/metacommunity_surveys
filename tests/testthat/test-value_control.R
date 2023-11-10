@@ -3,6 +3,7 @@ testthat::local_edition(3)
 
 # Paths to datasets ----
 absolute_path <- rprojroot::find_rstudio_root_file()
+require(withr)
 
 #read input argument: edited files since last commit
 args <- commandArgs()

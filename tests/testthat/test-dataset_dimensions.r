@@ -1,5 +1,6 @@
 # Using testthat Edition 3
 testthat::local_edition(3)
+require(withr)
 
 # Paths to datasets ----
 absolute_path <- rprojroot::find_rstudio_root_file()
