@@ -28,6 +28,8 @@ ddata[, ':='(
 
    rivmile = NULL,
 
+   north1 = NULL,
+   east1 = NULL,
    north2 = NULL,
    east2 = NULL,
    zone = NULL

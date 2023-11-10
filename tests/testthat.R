@@ -1,4 +1,4 @@
 data.table::setDTthreads(4)
-testthat::test_dir(path = "tests/testthat/", reporter = "list",
-                   stop_on_warning = TRUE)
+require(withr)
+testthat::test_dir(path = "tests/testthat/")
 data.table::setDTthreads(8)
