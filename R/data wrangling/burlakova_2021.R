@@ -6,6 +6,7 @@ ddata <- base::readRDS(file = "data/raw data/burlakova_2021/rdata.rds")
 
 #Raw Data ----
 ## melting species ----
+ddata[, Lymnaea_emarginata := as.numeric(Lymnaea_emarginata)]
 ddata <- data.table::melt(
    ddata,
    id.vars = c("Year", "Station", "Depth_m", "Latitude", "Longitude"),

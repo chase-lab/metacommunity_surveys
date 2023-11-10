@@ -8,7 +8,7 @@ ddata <- base::readRDS("data/raw data/lightfoot_2022/rdata.rds")
 tmp1date <- data.table::as.IDate(ddata$date, format = "%Y-%m-%d")
 # Keep the new dates only if they all converted correctly
 if (length(tmp1date) == length(tmp1date[!is.na(tmp1date)])) {ddata$date <- tmp1date } else {print("Date conversion failed for ddata$date. Please inspect the data and do the date conversion yourself.")}
-rm(tmpDateFormat, tmp1date)
+
 if (class(ddata$zone) != "factor") ddata$zone <- as.factor(ddata$zone)
 if (class(ddata$site) != "factor") ddata$site <- as.factor(ddata$site)
 if (class(ddata$plot) != "factor") ddata$plot <- as.factor(ddata$plot)

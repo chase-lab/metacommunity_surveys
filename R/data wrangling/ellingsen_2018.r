@@ -5,14 +5,19 @@ ddata <- base::readRDS(paste("data/raw data", dataset_id, "ddata.rds", sep = "/"
 
 #Raw data ----
 ## melting species ----
-ddata <- data.table::melt(ddata,
-                          id.vars = c("year", "stat", "rep"),
-                          variable.name = "species",
-                          na.rm = TRUE
+for (col_i in setdiff(colnames(ddata), c("ScientificName", "year", "stat", "rep"))) {
+   data.table::set(x = ddata, j = col_i, value = as.numeric(ddata[[col_i]]))
+   data.table::set(x = ddata, i = which(ddata[[col_i]] == 0), col_i, NA_real_)
+}
+ddata <- data.table::melt(
+   data = ddata,
+   measure.vars = setdiff(x = colnames(ddata),
+                          y = c("ScientificName", "year", "stat", "rep")),
+   id.vars = c("year", "stat", "rep"),
+   variable.name = "species",
+   variable.factor = TRUE,
+   na.rm = TRUE
 )
-
-## exclude empty values and empty species names ----
-ddata <- ddata[!(species == "ScientificName" | value == 0)]
 
 ## community data ----
 ddata[, ":="(
@@ -65,15 +70,15 @@ data.table::fwrite(
 #standardised Data ----
 ## Pooling replicates together ----
 ddata <- ddata[, local := stat
-               ][, value := as.integer(value)
-                 ][, .(value = sum(value)), by = .(dataset_id, regional, local,
-                                                   year, species, metric, unit)]
+][, value := as.integer(value)
+][, .(value = sum(value)), keyby = .(dataset_id, regional, local,
+                                     year, species, metric, unit)]
 
 ##meta data ----
 meta[, local := stat]
 meta <- unique(meta[
    unique(ddata[, .(local, year)]),
-             on = .(local, year)])
+   on = .(local, year)])
 
 meta[,":="(
    effort = 5L,
@@ -90,7 +95,8 @@ meta[,":="(
    comment_standardisation = "In each station, each year, all 5 replicates were pooled together and abundances summed. IMPORTANT: To avoid taxonomical issues, the data set r1bio.new2.n was used ; see /data download/ellingsen_2018.r script or the authors helper MOD-DRYAD.R script for details on taxonomy cleaning.",
 
    stat = NULL
-)][, gamma_sum_grains := alpha_grain * data.table::uniqueN(local), by = year]
+)][, gamma_sum_grains := alpha_grain * data.table::uniqueN(local),
+   keyby = year]
 
 ##save data ----
 data.table::fwrite(

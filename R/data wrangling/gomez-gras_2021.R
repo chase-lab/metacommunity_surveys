@@ -7,12 +7,16 @@ ddata <- base::readRDS("data/raw data/gomez-gras_2021/ddata.rds")
 data.table::setnames(ddata, 1L, "local")
 
 ##melting species ----
-ddata <- data.table::melt(ddata,
-                          id.vars = "local",
-                          variable.name = "species")
-
-##deleting absences ----
-ddata <- ddata[value != 0]
+for (col_i in 2L:ncol(ddata)) {
+   data.table::set(x = ddata, j = col_i, value = as.numeric(ddata[[col_i]]))
+   data.table::set(x = ddata, i = which(ddata[[col_i]] == 0), col_i, NA_real_)
+}
+ddata <- data.table::melt(
+   data = ddata,
+   id.vars = "local",
+   variable.name = "species",
+   variable.factor = TRUE,
+   na.rm = TRUE)
 
 ##splitting year, local and plot
 ddata[, c("year", "local", "habitat", "plot") := data.table::tstrsplit(local, split = "_")]

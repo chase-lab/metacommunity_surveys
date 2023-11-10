@@ -11,11 +11,17 @@ data.table::setnames(ddata, 1L:4L, c("date", "regional", "exposure", "local"))
 
 # Raw data ----
 ## melting species ----
-for (i in 6L:ncol(ddata)) data.table::set(x = ddata, i = which(ddata[[i]] == 0L), i, NA_integer_)
-ddata <- data.table::melt(data = ddata,
-                          id.vars = 1:5L,
-                          variable.name = "species",
-                          na.rm = TRUE
+for (col_i in 6L:ncol(ddata)) {
+   data.table::set(x = ddata, j = col_i, value = as.numeric(ddata[[col_i]]))
+   data.table::set(x = ddata, i = which(ddata[[col_i]] == 0), col_i, NA_real_)
+}
+
+ddata <- data.table::melt(
+   data = ddata,
+   id.vars = 1L:5L,
+   variable.name = "species",
+   variable.factor = TRUE,
+   na.rm = TRUE
 )
 
 ## community data ----

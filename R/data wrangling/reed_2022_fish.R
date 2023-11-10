@@ -17,10 +17,13 @@ spatial[, ":="(
 )]
 
 # merge spatial to ddata
-ddata[spatial, on = "SITE", ':='(latitude = i.latitude, longitude = i.longitude)]
+ddata[i = spatial,
+      on = "SITE",
+      j = ':='(latitude = i.latitude, longitude = i.longitude)]
 
 ## converting date ----
-ddata[, DATE := data.table::as.IDate(DATE, format = "%Y-%m-%d")][, day := data.table::mday(DATE)]
+ddata[, DATE := data.table::as.IDate(DATE, format = "%Y-%m-%d")
+      ][, day := data.table::mday(DATE)]
 
 ##split dataset: ----
 ##group fish ----
@@ -54,7 +57,6 @@ ddata[, ":="(
    COMMON_NAME = NULL,
    SP_CODE = NULL,
    PERCENT_COVER = NULL,
-   DENSITY = NULL,
    WM_GM2 = NULL,
    DM_GM2 = NULL,
    SFDM = NULL,
@@ -120,7 +122,7 @@ meta[, ":="(
 )][, ":="(
    gamma_sum_grains = sum(alpha_grain),
    gamma_bounding_box = geosphere::areaPolygon(data.frame(longitude, latitude)[grDevices::chull(longitude, latitude), ]) / 10^6
-), by = year]
+), keyby = year]
 
 
 ##save data ----

@@ -16,7 +16,7 @@ spatial[, ":="(
       "120' 08.663' W", "119' 42.908' W", "119' 45.458' W"))
 )]
 ## merge spatial to ddata ----
-ddata <- ddata[spatial, on = "SITE"]
+ddata <- ddata[i = spatial, on = "SITE"]
 
 ## converting date ----
 ddata[, DATE := data.table::as.IDate(DATE, format = "%Y-%m-%d")][, day := data.table::mday(DATE)]
@@ -53,7 +53,6 @@ ddata[, ":="(
    COMMON_NAME = NULL,
    SP_CODE = NULL,
    PERCENT_COVER = NULL,
-   DENSITY = NULL,
    WM_GM2 = NULL,
    DM_GM2 = NULL,
    SFDM = NULL,
@@ -65,9 +64,9 @@ ddata[, ":="(
 )]
 
 ##meta data ----
-meta <- unique(ddata[, .(dataset_id, year, regional, local,
+meta <- unique(ddata[, .(dataset_id, regional, local,
                          latitude, longitude,
-                         month, day)])
+                         year, month, day)])
 meta[, ":="(
 
    realm = "Marine",
@@ -120,7 +119,7 @@ meta[,":="(
 )][, ":="(
    gamma_sum_grains = sum(alpha_grain),
    gamma_bounding_box = geosphere::areaPolygon(data.frame(longitude, latitude)[grDevices::chull(longitude, latitude), ]) / 10^6),
-   by = year]
+   keyby = year]
 
 ##save data ----
 data.table::fwrite(

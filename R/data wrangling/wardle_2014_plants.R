@@ -43,7 +43,8 @@ ddata[, ":="(
 
 ## Deleting samples with redundant observations ----
 data.table::setkey(ddata, regional, local, year, month)
-ddata <- ddata[!ddata[, .N, by = .(regional, local, year, month, species)][N != 1L]]
+ddata <- ddata[
+   i = !ddata[, .N, keyby = .(regional, local, year, month, species)][N != 1L]]
 
 ## meta ----
 meta <- unique(ddata[, .(dataset_id, regional, local, year, month)])
@@ -96,31 +97,31 @@ data.table::setkey(ddata, month_order)
 ddata <- ddata[!base::is.na(month_order)]
 
 ddata <- ddata[
-   unique(ddata[,
-                .(regional, local, year, month)])[, .SD[1L],
-                                                  by = .(regional, local, year)],
+   i = unique(ddata[,
+                    .(regional, local, year, month)])[, .SD[1L],
+                                                      keyby = .(regional, local, year)],
    on = .(regional, local, year, month)
 ][, month_order := NULL]
 
 ## Pooling all samples from a year together ----
-ddata <- ddata[, .(species = unique(species)), by = .(dataset_id, regional, local, year, metric, unit)]
+ddata <- ddata[, .(species = unique(species)),
+               keyby = .(dataset_id, regional, local, year, metric, unit)]
 
 ## Excluding sites that were not sampled at least twice 10 years apart ----
-ddata <- ddata[!ddata[, diff(range(year)) < 9L, by = .(regional, local)][(V1)],
-               on = .(regional, local)]
+ddata <- ddata[
+   i = !ddata[, diff(range(year)) < 9L, keyby = .(regional, local)][(V1)],
+   on = .(regional, local)]
 
 ddata[, ":="(
    value = 1L,
    metric = "pa",
-   unit = "pa",
-
-   month = NULL
+   unit = "pa"
 )]
 
 # update meta ----
 meta[, "month" := NULL]
 meta <- unique(meta)
-meta <- meta[unique(ddata[, .(local, year)]),
+meta <- meta[i = unique(ddata[, .(local, year)]),
              on = .(local, year)]
 
 meta[, ":="(
@@ -141,7 +142,7 @@ Exclude rows with NA values for percent coverage.
 Exclude percent coverage of dead plants.
 When a site is sampled several times a year, selecting the 1 most frequently sampled months from the 6 most sampled months.
 Sites that were not sampled at least twice 10 years apart were excluded."
-)][, gamma_sum_grains := sum(alpha_grain), by = .(regional, year)]
+)][, gamma_sum_grains := sum(alpha_grain), keyby = .(regional, year)]
 
 # save data -----
 data.table::fwrite(
