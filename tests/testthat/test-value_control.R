@@ -15,8 +15,8 @@ listfiles_community_raw <- list.files(
    full.names = TRUE, recursive = TRUE
 )
 #intersect listfiles_community_raw with modified listfiles
-listfiles_community_raw <- unique(grep(paste(listfiles, collapse = "|"),
-                                       listfiles_community_raw, value = TRUE))
+# listfiles_community_raw <- unique(grep(paste(listfiles, collapse = "|"),
+#                                        listfiles_community_raw, value = TRUE))
 
 listfiles_metadata_raw <- list.files(
    path = "data/wrangled data",
@@ -24,8 +24,8 @@ listfiles_metadata_raw <- list.files(
    full.names = TRUE, recursive = TRUE
 )
 #intersect listfiles_metadata_raw with modified listfiles
-listfiles_metadata_raw <- unique(grep(paste(listfiles, collapse = "|"),
-                                      listfiles_metadata_raw, value = TRUE))
+# listfiles_metadata_raw <- unique(grep(paste(listfiles, collapse = "|"),
+#                                       listfiles_metadata_raw, value = TRUE))
 
 ## standardised data ----
 listfiles_community_standardised <- list.files(
@@ -34,8 +34,9 @@ listfiles_community_standardised <- list.files(
    full.names = TRUE, recursive = TRUE
 )
 #intersect listfiles_community_standardsed with modified listfiles
-listfiles_community_standardised <- unique(grep(paste(listfiles, collapse = "|"),
-                                                listfiles_community_standardised, value = TRUE))
+# listfiles_community_standardised <- unique(grep(
+#    paste(listfiles, collapse = "|"),
+#    listfiles_community_standardised, value = TRUE))
 
 
 listfiles_metadata_standardised <- list.files(
@@ -45,8 +46,9 @@ listfiles_metadata_standardised <- list.files(
 )
 
 # intersect listfiles_metadata_standardised with modified listfiles
-listfiles_metadata_standardised <- unique(grep(paste(listfiles, collapse = "|"),
-                                               listfiles_metadata_standardised, value = TRUE))
+# listfiles_metadata_standardised <- unique(grep(
+#    paste(listfiles, collapse = "|"),
+#    listfiles_metadata_standardised, value = TRUE))
 
 
 # Tests ----
