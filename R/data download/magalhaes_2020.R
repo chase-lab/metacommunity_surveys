@@ -11,16 +11,23 @@ if (!file.exists("./data/raw data/magalhaes_2020/rdata.rds")) {
   }
 
   # extracting from pdf and saving the extraction
-  if (!file.exists("./data/raw data/magalhaes_2020/magalhaes_2020 10750_2020_4307_MOESM1_ESM-1.csv")) {
-    dir.create("./data/raw data/magalhaes_2020/", showWarnings = FALSE)
-    tabulizer::extract_tables(file = "./data/cache/magalhaes_2020 10750_2020_4307_MOESM1_ESM.pdf", pages = 2:3, method = "stream", output = "csv", outdir = "./data/raw data/magalhaes_2020/")
+  if (!file.exists("data/raw data/magalhaes_2020/magalhaes_2020 10750_2020_4307_MOESM1_ESM-1.csv")) {
+    dir.create("data/raw data/magalhaes_2020/", showWarnings = FALSE)
+    tabulizer::extract_tables(
+       file = "data/cache/magalhaes_2020 10750_2020_4307_MOESM1_ESM.pdf",
+       pages = 2:3,
+       method = "stream",
+       output = "csv",
+       outdir = "data/raw data/magalhaes_2020/",
+       encoding = "UTF-8")
   }
 
   # standardising and merging both pages
   rdata <- lapply(
-    list.files(path = "./data/raw data/magalhaes_2020/", pattern = "csv", full.names = TRUE),
+    list.files(path = "data/raw data/magalhaes_2020/", pattern = "csv", full.names = TRUE),
     data.table::fread
   )
+
   rdata[[1]][V1 == "", V1 := V2][, V2 := NULL]
   sites <- rdata[[1]][1][, -1]
   rdata[[1]] <- rdata[[1]][-(1:4)]
@@ -29,5 +36,5 @@ if (!file.exists("./data/raw data/magalhaes_2020/rdata.rds")) {
 
   rdata <- data.table::rbindlist(l = rdata, use.names = FALSE)
 
-  base::saveRDS(object = rdata, file = "./data/raw data/magalhaes_2020/rdata.rds")
+  base::saveRDS(object = rdata, file = "data/raw data/magalhaes_2020/rdata.rds")
 }

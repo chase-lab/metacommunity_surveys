@@ -4,10 +4,12 @@ ddata <- base::readRDS(file = "data/raw data/magalhaes_2020/rdata.rds")
 #Raw Data ----
 ##melting and splitting sites and years ----
 data.table::setnames(ddata, 1L, "species")
-ddata <- data.table::melt(ddata,
-                          id.vars = "species",
-                          variable.name = "local",
-                          na.rm = TRUE
+ddata <- data.table::melt(
+   data = ddata,
+   id.vars = "species",
+   variable.name = "local",
+   variable.factor = TRUE,
+   na.rm = TRUE
 )
 
 ddata[, c("local", "year") := data.table::tstrsplit(local, "_")]
@@ -17,14 +19,14 @@ ddata[, ":="(
    dataset_id = "magalhaes_2020",
    regional = "Muriae Ornamental Aquaculture Center",
    local = base::enc2utf8(tolower(local)),
-   year = as.integer(gsub("s", "", year)),
+   year = as.integer(sub("s", "", year)),
 
    metric = "abundance",
    unit = "count"
 )]
 
 ddata[year == 2010L, year := 2015L]
-ddata[year == 2000L, year := c(2003L, 2004L, 2005L, 2006L, 2006L)[match(local, c("boa vista", "pinheiros", "santo antônio", "chato", "gavião"))]]
+ddata[year == 2000L, year := c(2003L, 2004L, 2005L, 2006L, 2006L)[data.table::chmatch(local, c("boa vista", "pinheiros", "santo antônio", "chato", "gavião"))]]
 
 ##coordiantes ----
 coords <- data.table::as.data.table(
