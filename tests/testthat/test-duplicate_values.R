@@ -56,23 +56,25 @@ testthat::test_that(desc = "no duplicates - community data - raw data", code = {
    for (i in listfiles_community_raw) {
       col_names <- data.table::fread(file = i, sep = ",", dec = ".",
                                      header = FALSE, nrows = 1L)
-      testthat::expect_true(
-         if (all(c("month", "day") %in% col_names)) {
-            data.table::fread(
+      if (all(c("month", "day") %in% col_names)) {
+         testthat::expect_true(
+            object = data.table::fread(
                file = i, sep = ",", dec = ".", header = TRUE, stringsAsFactors = TRUE
-            )[, .N, by = .(regional, local, year, month, day, species)][, all(N == 1L)]
-
-         } else if ("month" %in% col_names) {
-            data.table::fread(
+            )[, .N, by = .(regional, local, year, month, day, species)][, all(N == 1L)],
+            info = i)
+      } else if ("month" %in% col_names) {
+         testthat::expect_true(
+            object = data.table::fread(
                file = i, sep = ",", dec = ".", header = TRUE, stringsAsFactors = TRUE
-            )[, .N, by = .(regional, local, year, month, species)][, all(N == 1L)]
-
-         } else { data.table::fread(
-            file = i, sep = ",", dec = ".", header = TRUE, stringsAsFactors = TRUE
-         )[, .N, by = .(regional, local, year, species)][, all(N == 1L)]
-         },
-         info = i
-      )
+            )[, .N, by = .(regional, local, year, month, species)][, all(N == 1L)],
+            info = i)
+      } else {
+         testthat::expect_true(
+            object = data.table::fread(
+               file = i, sep = ",", dec = ".", header = TRUE, stringsAsFactors = TRUE
+            )[, .N, by = .(regional, local, year, species)][, all(N == 1L)],
+            info = i)
+      }
    }
 })
 
@@ -92,23 +94,28 @@ testthat::test_that(desc = "no duplicates - metadata data - raw data", code = {
    for (i in listfiles_metadata_raw) {
       col_names <- data.table::fread(file = i, sep = ",", dec = ".",
                                      header = FALSE, nrows = 1L)
-      testthat::expect_true(
-         if (all(c("month", "day") %in% col_names)) {
-            data.table::fread(
-               file = i, sep = ",", dec = ".", header = TRUE, stringsAsFactors = TRUE
-            )[, .N, by = .(regional, local, year, month, day)][, all(N == 1L)]
 
-         } else if ("month" %in% col_names) {
-            data.table::fread(
+      if (all(c("month", "day") %in% col_names)) {
+         testthat::expect_true(
+            object = data.table::fread(
                file = i, sep = ",", dec = ".", header = TRUE, stringsAsFactors = TRUE
-            )[, .N, by = .(regional, local, year, month)][, all(N == 1L)]
+            )[, .N, by = .(regional, local, year, month, day)][, all(N == 1L)],
+            info = i)
 
-         } else { data.table::fread(
-            file = i, sep = ",", dec = ".", header = TRUE, stringsAsFactors = TRUE
-         )[, .N, by = .(regional, local, year)][, all(N == 1L)]
-         },
-         info = i
-      )
+      } else if ("month" %in% col_names) {
+         testthat::expect_true(
+            object = data.table::fread(
+               file = i, sep = ",", dec = ".", header = TRUE, stringsAsFactors = TRUE
+            )[, .N, by = .(regional, local, year, month)][, all(N == 1L)],
+            info = i)
+
+      } else {
+         testthat::expect_true(
+            object = data.table::fread(
+               file = i, sep = ",", dec = ".", header = TRUE, stringsAsFactors = TRUE
+            )[, .N, by = .(regional, local, year)][, all(N == 1L)],
+            info = i)
+      }
    }
 })
 
