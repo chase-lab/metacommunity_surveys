@@ -254,6 +254,7 @@ unique(meta_standardised[effort == "unknown" | is.na(effort), .(dataset_id, effo
 # all(meta[(checklist), effort] == 1)
 
 ### checking data_pooled_by_authors ----
+meta_standardised[, data_pooled_by_authors := as.logical(data_pooled_by_authors)]
 meta_standardised[is.na(data_pooled_by_authors), data_pooled_by_authors := FALSE]
 if (any(meta_standardised[(data_pooled_by_authors), is.na(sampling_years)])) warning(
    paste0("Missing sampling_years values in: ",

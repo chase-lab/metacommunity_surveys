@@ -70,6 +70,7 @@ data.table::fwrite(
 ## Standardisation ----
 ### Subsetting control and fully sampled samples
 ddata <- ddata[grepl("_control", local) &
+                  !is.na(species) &
                   effort == 49L &
                   sampled == 1L]
 

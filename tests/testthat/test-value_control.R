@@ -72,24 +72,23 @@ testthat::test_that(desc = "data quality check - community data - raw data", cod
             X[, all(is.na(value) | is.factor(value) | value >= 0)]
          ),
          info = paste("Positive values", i))
-      testthat::expect_length(
-         levels(X$dataset_id), 1L)
-      testthat::expect_length(
-         levels(X$metric), 1L)
-      testthat::expect_length(
-         levels(X$unit), 1L)
-      testthat::expect_true(
-         levels(X$metric) %in% c("abundance", "relative abundance", "density",
-                                 "cover", "Braun-Blanquet scale", "incidence",
-                                 "pa"),
-         info = paste("Metric is correct", i))
-      testthat::expect_true(
-         levels(X$unit) %in% c("count", "pa", "individuals per liter",
-                               "individuals per mL", "individuals per sqm",
-                               "individuals per 250m2",
-                               "individuals per transect",
-                               "cpue", "percent", "hits", "score", "unknown"),
-         info = paste("Unit is correct", i))
+      testthat::expect_equal(nlevels(X$dataset_id), 1L)
+      testthat::expect_equal(nlevels(X$metric), 1L)
+      testthat::expect_equal(nlevels(X$unit), 1L)
+      checkmate::expect_choice(
+         x = levels(X$metric),
+         choices = c("abundance", "relative abundance", "density",
+                     "cover", "Braun-Blanquet scale", "incidence",
+                     "pa"),
+         info = paste("metric is correct", i), null.ok = TRUE)
+      checkmate::expect_choice(
+         x = levels(X$unit),
+         choices = c("count", "pa", "individuals per liter",
+                     "individuals per mL", "individuals per sqm",
+                     "individuals per 250m2",
+                     "individuals per transect",
+                     "cpue", "percent", "hits", "score", "unknown"),
+         info = paste("unit is correct", i), null.ok = TRUE)
    }
 })
 
@@ -111,23 +110,21 @@ testthat::test_that(desc = "data quality check - community data - standardised d
             X[, all(is.na(value) | is.factor(value) | value >= 0)]
          ),
          info = paste("Positive values", i))
-      testthat::expect_length(
-         levels(X$dataset_id), 1L)
-      testthat::expect_length(
-         levels(X$metric), 1L)
-      testthat::expect_length(
-         levels(X$unit), 1L)
-      testthat::expect_true(
-         levels(X$metric) %in% c("abundance", "relative abundance", "density",
-                                 "cover", "pa"),
-         info = paste("Metric is correct", i))
-      testthat::expect_true(
-         levels(X$unit) %in% c("count", "pa", "individuals per liter",
-                               "individuals per mL", "individuals per transect",
-                               "individuals per 250m2", "individuals per sqm",
-                               "cpue", "percent","unknown"),
-         info = paste("Unit is correct", i))
-
+      testthat::expect_equal(nlevels(X$dataset_id), 1L)
+      testthat::expect_equal(nlevels(X$metric), 1L)
+      testthat::expect_equal(nlevels(X$unit), 1L)
+      checkmate::expect_choice(
+         x = levels(X$metric),
+         choices = c("abundance", "relative abundance", "density",
+                     "cover", "pa"),
+         info = paste("metric is correct", i), null.ok = TRUE)
+      checkmate::expect_choice(
+         x = levels(X$unit),
+         choices = c("count", "pa", "individuals per liter",
+                     "individuals per mL", "individuals per transect",
+                     "individuals per 250m2", "individuals per sqm",
+                     "cpue", "percent","unknown"),
+         info = paste("unit is correct", i), null.ok = TRUE)
    }
 })
 
@@ -141,21 +138,17 @@ testthat::test_that(desc = "data quality check - metadata data - raw data", code
       testthat::expect_true(
          all(data.table::between(X$year, 1500L, 2023L)),
          info = paste("Year range", i))
-      testthat::expect_length(
-         levels(X$dataset_id), 1L)
-      testthat::expect_length(
-         levels(X$study_type), 1L)
-      testthat::expect_length(
-         levels(X$taxon), 1L)
-      testthat::expect_length(
-         levels(X$realm), 1L)
+      testthat::expect_equal(nlevels(X$dataset_id), 1L)
+      testthat::expect_equal(nlevels(X$study_type), 1L)
+      testthat::expect_equal(nlevels(X$taxon), 1L)
+      testthat::expect_equal(nlevels(X$realm), 1L)
       testthat::expect_true(
-         length(levels(X$alpha_grain_unit)) == 1L ||
-            length(levels(X$alpha_grain_unit)) == 0L,
+         nlevels(X$alpha_grain_unit) == 1L ||
+            nlevels(X$alpha_grain_unit) == 0L,
          info = paste("alpha_grain_unit is unique", i))
       testthat::expect_true(
-         length(levels(X$alpha_grain_type)) == 1L ||
-            length(levels(X$alpha_grain_type)) == 0L,
+         nlevels(X$alpha_grain_type) == 1L ||
+            nlevels(X$alpha_grain_type) == 0L,
          info = paste("alpha_grain_type is unique", i))
 
       checkmate::expect_choice(
@@ -193,27 +186,25 @@ testthat::test_that(desc = "data quality check - metadata data - standardised da
       testthat::expect_true(
          all(data.table::between(X$year, 1500L, 2023L)),
          info = paste("Year range", i))
-      testthat::expect_length(
-         levels(X$dataset_id), 1L)
-      testthat::expect_length(
-         levels(X$study_type), 1L)
-      testthat::expect_length(
-         levels(X$taxon), 1L)
-      testthat::expect_length(
-         levels(X$realm), 1L)
+      testthat::expect_equal(nlevels(X$dataset_id), 1L)
+      testthat::expect_equal(nlevels(X$study_type), 1L)
+      testthat::expect_equal(nlevels(X$taxon), 1L)
+      testthat::expect_equal(nlevels(X$realm), 1L)
       testthat::expect_true(
-         length(levels(X$alpha_grain_unit)) == 1L ||
-            length(levels(X$alpha_grain_unit)) == 0L,
+         nlevels(X$alpha_grain_unit) == 1L ||
+            nlevels(X$alpha_grain_unit) == 0L,
          info = paste("alpha_grain_unit is unique", i))
       testthat::expect_true(
-         length(levels(X$alpha_grain_type)) == 1L ||
-            length(levels(X$alpha_grain_type)) == 0L,
+         nlevels(X$alpha_grain_type) == 1L ||
+            nlevels(X$alpha_grain_type) == 0L,
          info = paste("alpha_grain_type is unique", i))
       testthat::expect_true(
-         length(levels(X$gamma_bounding_box_type)) == 1L || length(levels(X$gamma_bounding_box_type)) == 0L,
+         nlevels(X$gamma_bounding_box_type) == 1L ||
+            nlevels(X$gamma_bounding_box_type) == 0L,
          info = paste("gamma_bounding_box_type is unique", i))
       testthat::expect_true(
-         length(levels(X$gamma_sum_grains_type)) == 1L || length(levels(X$gamma_sum_grains_type)) == 0L,
+         nlevels(X$gamma_sum_grains_type) == 1L ||
+            nlevels(X$gamma_sum_grains_type) == 0L,
          info = paste("gamma_sum_grains_type is unique", i))
 
       checkmate::expect_choice(

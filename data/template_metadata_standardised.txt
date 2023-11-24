@@ -17,11 +17,11 @@ alpha_grain_comment	FALSE
 gamma_bounding_box	TRUE
 gamma_bounding_box_unit	TRUE
 gamma_bounding_box_type	TRUE
-gamma_bounding_box_comment	TRUE
+gamma_bounding_box_comment	FALSE
 gamma_sum_grains	TRUE
 gamma_sum_grains_unit	TRUE
 gamma_sum_grains_type	TRUE
-gamma_sum_grains_comment	TRUE
+gamma_sum_grains_comment	FALSE
 realm	TRUE
 taxon	TRUE
 comment	TRUE

@@ -5,7 +5,7 @@ month	FALSE
 day	FALSE
 regional	TRUE
 local	TRUE
-species	TRUE
+species	FALSE
 metric	TRUE
-value	TRUE
+value	FALSE
 unit	TRUE

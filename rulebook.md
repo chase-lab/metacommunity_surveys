@@ -1,5 +1,9 @@
 The Rulebook
 =================
+# Wrangling
+## Standardised data
+- is alpha_grain the grain of the sample or the grain * number of samples pooled in a year?
+
 
 # Splitting
 - Do we keep absences when they are given? No

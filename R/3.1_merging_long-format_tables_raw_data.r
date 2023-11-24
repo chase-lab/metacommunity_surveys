@@ -12,8 +12,9 @@ listfiles_metadata_raw <- list.files(
 )
 
 
-template_community_raw <- utils::read.csv(file = "data/template_communities_raw.txt",
-                                          header = TRUE, sep = "\t")
+template_community_raw <- utils::read.csv(
+   file = "data/template_communities_raw.txt",
+   header = TRUE, sep = "\t")
 column_names_template_community_raw <- template_community_raw[, 1]
 
 lst_community_raw <- lapply(listfiles_community_raw,
@@ -22,8 +23,9 @@ lst_community_raw <- lapply(listfiles_community_raw,
                             stringsAsFactors = TRUE)
 dt_raw <- data.table::rbindlist(lst_community_raw, fill = TRUE)
 
-template_metadata_raw <- utils::read.csv(file = "data/template_metadata_raw.txt",
-                                         header = TRUE, sep = "\t")
+template_metadata_raw <- utils::read.csv(
+   file = "data/template_metadata_raw.txt",
+   header = TRUE, sep = "\t")
 column_names_template_metadata_raw <- template_metadata_raw[, 1L]
 
 lst_metadata_raw <- lapply(listfiles_metadata_raw,
@@ -106,9 +108,9 @@ if (anyDuplicated(dt_raw)) warning(
 )
 
 if (any(dt_raw[, .N, keyby = .(dataset_id, regional, local, year, month, day, species)]$N != 1L)) warning(paste(
-      'Duplicated species in:',
-      paste(collapse = ', ',
-            dt_raw[, .N, keyby = .(dataset_id, regional, local, year, month, day, species)][N != 1L, unique(dataset_id)])))
+   'Duplicated species in:',
+   paste(collapse = ', ',
+         dt_raw[, .N, keyby = .(dataset_id, regional, local, year, month, day, species)][N != 1L, unique(dataset_id)])))
 
 
 ### checking metrics and units ----
@@ -219,11 +221,11 @@ if (any(meta_raw[, data.table::uniqueN(paste(range(year), collapse = "-")),
 
 ### checking study_type ----
 if (any(!meta_raw$study_type %in% c("ecological_sampling", "resurvey"))) warning(
-      paste(
-         "study_type has to be either 'ecological_sampling' or 'resurvey', see: ",
-         paste(meta_raw[!study_type  %in% c("ecological_sampling","resurvey"), unique(dataset_id)], collapse = ",")
-      )
+   paste(
+      "study_type has to be either 'ecological_sampling' or 'resurvey', see: ",
+      paste(meta_raw[!study_type  %in% c("ecological_sampling","resurvey"), unique(dataset_id)], collapse = ",")
    )
+)
 
 ### checking data_pooled_by_authors ----
 meta_raw[is.na(data_pooled_by_authors), data_pooled_by_authors := FALSE]
