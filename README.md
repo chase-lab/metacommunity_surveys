@@ -7,7 +7,7 @@
 
 This research compendium regroups scripts used to download, re-structure and aggregate data sets to constitute a large meta-analysis of communities sampled at least twice, 10 years apart or more.  
 
-As of 2.3, data are provided in a raw and standardised states. Raw data were restructured to fit a common template and few modifications were made, see `rulebook.md`. Standardised data were restructured to fit a common template and the effort was standardised to be consistent between localities and years of the same region.  
+As of 2.4, data are provided in a raw and standardised states. Raw data were restructured to fit a common template and few modifications were made, see `rulebook.md`. Standardised data were restructured to fit a common template and the effort was standardised to be consistent between localities and years of the same region.  
 
 Variable definitions are in files:
 ```
@@ -17,9 +17,9 @@ Variable definitions are in files:
 ```
 
 ## Availability
-### Release v2.3-Blowes_etal_Science_Advances 
+### Release v2.5-Blowes_etal_Science_Advances 
 
- - Code archived on Zenodo: https://doi.org/10.5281/zenodo.7785287
+ - Code archived on Zenodo: https://zenodo.org/doi/10.5281/zenodo.7785286
  - Data are also available in this repository in the following files:
  
  ```
@@ -28,11 +28,11 @@ Variable definitions are in files:
     ./data/communities_standardised.rds
     ./data/metadata_standardised.rds
  ```
- - Used by Dr Shane Blowes in the manuscript 'Local changes dominate variation in biotic homogenization and differentiation' submitted to Science Advances.
+ - Used by Dr Shane Blowes in the manuscript 'Synthesis reveals approximately balanced biotic differentiation and homogenization' published in Science Advances.
 
 ### Release v1.0.0
 
- - Code archived on Zenodo: https://doi.org/10.5281/zenodo.7785287
+ - Code archived on Zenodo: [https://doi.org/10.5281/zenodo.7785287](https://zenodo.org/doi/10.5281/zenodo.7785286)
  - Used by Dr Wubing Xu in his manuscript 'Regional occupancy increases for widespread species but decreases for narrowly distributed species in metacommunity time series' published in Nature Communication in March 2023: https://doi.org/10.1038/s41467-023-37127-2
  - Data archived on iDiv Data Portal: https://doi.org/10.25829/idiv.3503-jevu6s
 
