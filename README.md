@@ -17,7 +17,7 @@ Variable definitions are in files:
 ```
 
 ## Availability
-### Release v2.5-Blowes_etal_Science_Advances 
+### Release v2.6-Blowes_etal_Science_Advances 
 
  - Code archived on Zenodo: https://zenodo.org/doi/10.5281/zenodo.7785286
  - Data are also available in this repository in the following files:
