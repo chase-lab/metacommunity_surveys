@@ -46,13 +46,10 @@ ddata[, ":="(
 ddata <- unique(ddata) # some rows are duplicated, only record_num differs.
 
 ## meta data ----
-meta <- unique(ddata[, .(dataset_id, regional, local, year, month, day)])
+meta <- unique(ddata[, .(dataset_id, regional, local, year, month, day, latitude, longitude)])
 meta[, ":="(
    realm = "Freshwater",
    taxon = "Plants",
-
-   latitude = 40L,
-   longitude = -89L,
 
    study_type = "ecological_sampling",
 
@@ -67,6 +64,8 @@ meta[, ":="(
    comment_standardisation = "A few duplicated rows were excluded",
    doi = 'https://doi.org/10.5061/dryad.15dv41nt2 | https://doi.org/10.1111/geb.13053'
 )]
+
+ddata[j = c("latitude","longitude") := NULL]
 
 ## save raw data ----
 dir.create(paste0("data/wrangled data/", dataset_id), showWarnings = FALSE)
