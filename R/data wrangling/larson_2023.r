@@ -8,7 +8,7 @@ data.table::setnames(
    x = ddata,
    old = c('fldnum', 'pool', 'visual1', 'east_15', 'north_15', 'sppcd'),
    new = c('regional', 'local', 'value', 'longitude', 'latitude', 'species'))
-ddata[, date := data.table::as.IDate(base::strptime(date, "%m/%d/%Y"))]
+ddata[, date := data.table::as.IDate(date, "%m/%d/%Y")]
 
 # Raw data ----
 ## Communities ----

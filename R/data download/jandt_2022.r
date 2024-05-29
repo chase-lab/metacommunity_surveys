@@ -1,5 +1,4 @@
 # jandt_2022
-if (!base::file.exists("data/raw data/jandt_2022/rdata.rds")) {
    if (!base::file.exists("data/cache/jandt_2022.zip")) {
       curl::curl_download(
          url = "https://idata.idiv.de/ddm/Data/DownloadZip/3514?version=5513",
@@ -26,10 +25,10 @@ if (!base::file.exists("data/raw data/jandt_2022/rdata.rds")) {
       file = "data/cache/jandt_2022/Header_ReSurveyGermany.csv",
       sep = ",", header = TRUE, stringsAsFactors = TRUE,
       select = c("PROJECT_ID", "RELEVE_NR", "RS_SITE", "RS_PLOT", "MANIPULATE",
-      "YEAR", "DATE", "SURF_AREA", "LONGITUDE", "LATITUDE"),
+      "LOCALITY", "LOC_METHOD", "LOC_METH_COMMENT",
+      "YEAR", "DATE", "SURF_AREA", "LONGITUDE", "LATITUDE","PRECISION"),
       encoding = "UTF-8")
 
    base::dir.create(path = "data/raw data/jandt_2022/", showWarnings = FALSE)
    base::saveRDS(object = rdata[env, on = .(PROJECT_ID, RELEVE_NR)],
                  file = "data/raw data/jandt_2022/rdata.rds")
-}
