@@ -17,6 +17,10 @@ Variable definitions are in files:
 ```
 
 ## Availability
+### Latest version
+The latest version can always be found on the dev branch but scripts there did
+not yet receive all the curation that the script getting to the main branch received.
+
 ### Release v2.5-Blowes_etal_Science_Advances 
 
  - Code archived on Zenodo: https://zenodo.org/doi/10.5281/zenodo.7785286

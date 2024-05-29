@@ -2,10 +2,8 @@
 #'
 #' @param dataset_id a vector of dataset_ids. Can be `factor` or `character`.
 #' @returns A character vector of the same length as dataset_id containing unique IDs
-#' @details If a data set already has an ID like `sagouis_2023` and is then split
+#' @details If a data set like `sagouis_2023` already has an ID and is then split
 #' into `sagouis_2023a` and `sagouis_2023b`, these data sets will receive entirely new IDs.
-#' @importFrom data.table data.table
-
 
 assign_id <- function(dataset_id) {
    ids <- base::unique(dataset_id)

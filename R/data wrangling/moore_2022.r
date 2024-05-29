@@ -5,7 +5,8 @@ coords <- base::readRDS("data/raw data/moore_2022/coords.rds")
 
 #Raw Data ----
 ##counting individuals ----
-ddata <- ddata[, .(value = .N), by = .(year = Year, regional = Site, local = Quadrat, species)]
+ddata <- ddata[j = .(value = .N),
+               keyby = .(year = Year, regional = Site, local = Quadrat, species)]
 
 ##community data ----
 ddata[, ":="(
@@ -57,11 +58,12 @@ data.table::fwrite(
 #standardised data ----
 ## Community data ----
 ## Excluding sites that were not sampled at least twice 10 years apart ----
-ddata <- ddata[!ddata[, diff(range(year)) < 9L, by = .(regional, local)][(V1)],
+ddata <- ddata[i = !ddata[j = diff(range(year)) < 9L,
+                          by = .(regional, local)][(V1)],
                on = .(regional, local)]
 
 ## Metadata ----
-meta <- meta[unique(ddata[, .(regional, local, year)]),
+meta <- meta[i = unique(ddata[, .(regional, local, year)]),
              on = .(regional, local, year)]
 meta[,":="(
    effort = 1L,
