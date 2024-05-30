@@ -58,7 +58,7 @@ data.table::setkey(ddata, dataset_id, regional, local,
 # remove two samples with duplicated observations of Brachypodium pinnatum agg.
 ddata <- ddata[
    i  = !ddata[j = .N,
-               keyby = .(dataset_id, regional, local,
+               keyby = .(dataset_id, regional, local, layer,
                          year, month, day, species)][N != 1],
    on = .(dataset_id, regional, local, year, month, day)]
 
@@ -125,7 +125,8 @@ ddata <- ddata[i = base::grepl(pattern = "!N!", x = local, fixed = TRUE)][
                                           x = local, fixed = TRUE))]
 
 # Keeping sites with loc_method = 1 and precision < 1000 ----
-ddata <- ddata[i = is.element(loc_method, c(1L, 4L:6L)) & precision <= 1000]
+ddata <- ddata[i = (is.na(precision) | precision <= 1000) &
+                  is.element(loc_method, c(1L, 4L:6L))]
 
 ## Community data ----
 ### Pooling layers ----
