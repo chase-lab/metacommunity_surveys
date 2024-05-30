@@ -239,14 +239,14 @@ for (dataset_id_i in dataset_ids) {
    dir.create(paste0("/Users/as80fywe/iDiv Dropbox/Alban Sagouis/BioTimeX/Local-Regional Homogenization/_discuss papers/German_resurvey/", dataset_id_i), showWarnings = FALSE)
    data.table::fwrite(
       x = ddata[dataset_id_i],
-      # file = paste0("data/wrangled data/", dataset_id_i, "/", dataset_id_i, "_standardised.csv"),
-      file = paste0("/Users/as80fywe/iDiv Dropbox/Alban Sagouis/BioTimeX/Local-Regional Homogenization/_discuss papers/German_resurvey/", dataset_id_i, "/", dataset_id_i, "_standardised.csv"),
+      file = paste0("data/wrangled data/", dataset_id_i, "/", dataset_id_i, "_standardised.csv"),
+      # file = paste0("/Users/as80fywe/iDiv Dropbox/Alban Sagouis/BioTimeX/Local-Regional Homogenization/_discuss papers/German_resurvey/", dataset_id_i, "/", dataset_id_i, "_standardised.csv"),
       row.names = FALSE, sep = ","
    )
    data.table::fwrite(
       x = meta[dataset_id_i],
-      # file = paste0("data/wrangled data/", dataset_id_i, "/", dataset_id_i, "_standardised_metadata.csv"),
-      file = paste0("/Users/as80fywe/iDiv Dropbox/Alban Sagouis/BioTimeX/Local-Regional Homogenization/_discuss papers/German_resurvey/", dataset_id_i, "/", dataset_id_i, "_standardised_metadata.csv"),
+      file = paste0("data/wrangled data/", dataset_id_i, "/", dataset_id_i, "_standardised_metadata.csv"),
+      # file = paste0("/Users/as80fywe/iDiv Dropbox/Alban Sagouis/BioTimeX/Local-Regional Homogenization/_discuss papers/German_resurvey/", dataset_id_i, "/", dataset_id_i, "_standardised_metadata.csv"),
       row.names = FALSE, sep = ",", bom = TRUE
    )
 }
