@@ -256,12 +256,14 @@ if (any(!unique(meta_raw$alpha_grain_type) %in% c("island", "plot", "sample", "l
 
 # Adding a unique ID ----
 source(file = "R/functions/assign_id.R")
-meta_raw[, ID := assign_id(dataset_id)]
-dt_raw[, ID := assign_id(dataset_id)]
+meta_raw[, ID := assign_id(dataset_id, regional)]
+dt_raw[, ID := assign_id(dataset_id, regional)]
 
 # Ordering metadata ----
 data.table::setorder(meta_raw, ID, regional, local, year, month, day)
-data.table::setcolorder(meta_raw, c("ID", base::intersect(column_names_template_metadata_raw, colnames(meta_raw))))
+data.table::setcolorder(meta_raw, c("ID", base::intersect(
+   column_names_template_metadata_raw,
+   colnames(meta_raw))))
 
 # Checking that all data sets have both community and metadata data ----
 if (length(base::setdiff(unique(dt_raw$dataset_id), unique(meta_raw$dataset_id))) > 0L) warning("Incomplete community or metadata tables")
