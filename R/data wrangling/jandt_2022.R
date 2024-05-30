@@ -10,7 +10,7 @@ data.table::setnames(
 
 ## Excluding sites where surf_area/alpha_grain is missing as it is needed to assess effort
 ## Excluding sites that were not precisely resurveyed thanks to stakes or GPS
-ddata <- ddata[!is.na(alpha_grain) & is.element(loc_method, 1:2)]
+ddata <- ddata[!is.na(alpha_grain)]
 
 ddata[, ":="(month = as.integer(base::substr(date, 5L, 6L)),
              day = as.integer(base::substr(date, 7L, 8L)))]
@@ -29,17 +29,15 @@ ddata[is.na(manipulate), manipulate := factor("N")]
 ddata[j = local := factor(paste0(local, "!", manipulate, "!"))]
 
 # Adding the releve number to local for localities that had several releve number per DATE and RS_OBSERVER. Some of these releves had distinct coordinates from one another.
-ddata[i  = ddata[, data.table::uniqueN(releve_nr),
-                 keyby = .(regional, local, year, date)][V1 != 1L],
-      on = .(regional, local, year, date),
-      j  = local := factor(paste0(local, "_", releve_nr))]
+ddata[j  = local := factor(paste0(local, "_", releve_nr))]
 
 # ddata_standardised <- data.table::copy(ddata)
 
 # Raw data ----
 ## Community data ----
 ddata[, ":="(
-   dataset_id = factor(paste0(dataset_id, "_", alpha_grain, "sqm_", "layer", layer)),
+   # dataset_id = factor(paste0(dataset_id, "_", alpha_grain, "sqm_", "layer", layer)),
+   dataset_id = factor(paste0(dataset_id, "_", alpha_grain, "sqm")),
 
    # local = factor(paste0(local, "#", layer, "#")),
 
@@ -49,7 +47,7 @@ ddata[, ":="(
    rs_site = NULL,
    # project_id = NULL,
    # releve_nr = NULL,
-   layer = NULL,
+   # layer = NULL,
    manipulate = NULL,
    date = NULL
 )]
@@ -99,12 +97,12 @@ dataset_ids <- unique(meta$dataset_id)
 # for (dataset_id_i in dataset_ids) {
 #    dir.create(paste0("data/wrangled data/", dataset_id_i), showWarnings = FALSE)
 #    data.table::fwrite(
-#       x = ddata[dataset_id_i, !"releve_nr"],
+#       x = ddata[dataset_id_i, !"releve_nr"], !"layer"
 #       file = paste0("data/wrangled data/", dataset_id_i, "/", dataset_id_i, "_raw.csv"),
 #       row.names = FALSE, sep = ","
 #    )
 #    data.table::fwrite(
-#       x = meta[dataset_id_i, !"releve_nr"],
+#       x = meta[dataset_id_i, !"releve_nr"], !"layer"
 #       file = paste0("data/wrangled data/", dataset_id_i, "/", dataset_id_i, "_raw_metadata.csv"),
 #       row.names = FALSE, sep = ","
 #    )
@@ -112,10 +110,22 @@ dataset_ids <- unique(meta$dataset_id)
 
 # Standardised data ----
 ## data standardisation ----
+### Keeping only plots where only one relevé was made ----
+# Wubing stresses that several relevés were made when the original could not be
+# accurately relocated.
+# Removing the releve_nr from local and excluding
+ddata[j = local := stringi::stri_replace_first_regex(local, "_[0-9]{1,3}$", "")]
+ddata <- ddata[i = !ddata[j = data.table::uniqueN(releve_nr),
+                          keyby = .(regional, local, year)][V1 > 1L],
+               on = .(regional, local)] # no year here.
+
 ### Keeping only sites that were not treated ----
 ddata <- ddata[i = base::grepl(pattern = "!N!", x = local, fixed = TRUE)][
    j = local := base::as.factor(base::sub(pattern = "!N!", replacement = "",
                                           x = local, fixed = TRUE))]
+
+# Keeping sites with loc_method = 1 and precision < 1000 ----
+ddata <- ddata[i = is.element(loc_method, c(1L, 4L:6L)) & precision <= 1000]
 
 ## Community data ----
 ### Pooling layers ----
@@ -152,13 +162,13 @@ ddata[, ":="(
 
 data.table::setkey(ddata, dataset_id, regional, local,
                    year, month, day, releve_nr)
-ddata <- ddata[
-   i = ddata[, j = .(releve_nr = releve_nr[1L]),
-             keyby = .(dataset_id, regional, local, year)],
-   on = .(dataset_id, regional, local, year, releve_nr)]
+# ddata <- ddata[
+#    i = ddata[, j = .(releve_nr = releve_nr[1L]),
+#              keyby = .(dataset_id, regional, local, year)],
+#    on = .(dataset_id, regional, local, year, releve_nr)]
 # ddata[, data.table::uniqueN(releve_nr), keyby = .(dataset_id,regional, local, year, month, day)]
-# ddata[, data.table::uniqueN(day), keyby = .(dataset_id, regional, local, year, month)][, table(V1)]
-# ddata[, data.table::uniqueN(month), keyby = .(dataset_id, regional, local, year)][, table(V1)]
+ddata[, data.table::uniqueN(day), keyby = .(dataset_id, regional, local, year, month)][, table(V1)]
+ddata[, data.table::uniqueN(month), keyby = .(dataset_id, regional, local, year)][, table(V1)]
 ddata[, c("month", "day") := NULL]
 
 while (ddata[j = diff(range(year)) < 9L,
@@ -208,10 +218,10 @@ When available, the authors note whether the plot had a treatment (Y) or not (N)
 In localities that had several relevés a day, a month or a year, we selected the first relevé per year.
 Finally, regions/years with less than 4 localities were excluded and localities that were not sampled at least 10 years apart were excluded.
 Regional is rs_site
-Local is rs_plot_releve_nr")
+Local is rs_plot_releve_nr"),
 
    # layer = NULL,
-   # releve_nr = NULL
+   releve_nr = NULL
 )][, ":="(
    gamma_bounding_box = geosphere::areaPolygon(data.frame(na.omit(longitude), na.omit(latitude))[grDevices::chull(na.omit(longitude), na.omit(latitude)), ]) / 10^6,
    gamma_sum_grains = sum(alpha_grain)),
@@ -226,7 +236,7 @@ dataset_ids <- unique(meta$dataset_id)
 
 for (dataset_id_i in dataset_ids) {
    dir.create(paste0("/Users/as80fywe/iDiv Dropbox/Alban Sagouis/BioTimeX/Local-Regional Homogenization/_discuss papers/German_resurvey/", dataset_id_i), showWarnings = FALSE)
-      data.table::fwrite(
+   data.table::fwrite(
       x = ddata[dataset_id_i],
       # file = paste0("data/wrangled data/", dataset_id_i, "/", dataset_id_i, "_standardised.csv"),
       file = paste0("/Users/as80fywe/iDiv Dropbox/Alban Sagouis/BioTimeX/Local-Regional Homogenization/_discuss papers/German_resurvey/", dataset_id_i, "/", dataset_id_i, "_standardised.csv"),
