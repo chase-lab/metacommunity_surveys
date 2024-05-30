@@ -291,8 +291,8 @@ meta_standardised[gamma_bounding_box_km2 == 0, gamma_bounding_box_km2 := NA_real
 
 # Adding a unique ID ----
 source(file = "R/functions/assign_id.R")
-meta_standardised[, ID := assign_id(dataset_id)]
-dt_standardised[, ID := assign_id(dataset_id)]
+meta_standardised[, ID := assign_id(dataset_id, regional)]
+dt_standardised[, ID := assign_id(dataset_id, regional)]
 
 # Ordering metadata ----
 data.table::setorder(meta_standardised, ID, regional, local, year)
