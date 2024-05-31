@@ -195,8 +195,9 @@ while (ddata[j = diff(range(year)) < 9L,
 #    str = local,
 #    pattern = "_[0-9]{1,6}_(?=#)",
 #    replacement = "")] # regex checked
-meta[j = local := base::as.factor(base::sub(pattern = "!N!", replacement = "",
-                                            x = local, fixed = TRUE))]
+meta[j = local := stringi::stri_replace_first_regex(local, "_[0-9]{1,3}$", "") |>
+        base::sub(pattern = "!N!", replacement = "", fixed = TRUE) |>
+        base::as.factor()]
 meta <- unique(meta[, c("month", "day") := NULL])
 meta <- meta[
    i = unique(ddata[, .(dataset_id, regional, local, releve_nr, year)]),
@@ -257,3 +258,4 @@ meta[, length(unique(regional)), keyby = .(dataset_id)][, sum(V1)]
 meta[, length(unique(local)), keyby = .(dataset_id, regional)][, sum(V1)]
 meta[, .N, keyby = .(dataset_id, regional, local, year)][, sum(N)]
 ddata[, .N, keyby = .(dataset_id, regional, local, year)][, summary(N)]
+
