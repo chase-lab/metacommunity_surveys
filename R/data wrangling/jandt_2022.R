@@ -236,7 +236,8 @@ data.table::setkey(meta, dataset_id)
 dataset_ids <- unique(meta$dataset_id)
 
 for (dataset_id_i in dataset_ids) {
-   dir.create(paste0("/Users/as80fywe/iDiv Dropbox/Alban Sagouis/BioTimeX/Local-Regional Homogenization/_discuss papers/German_resurvey/", dataset_id_i), showWarnings = FALSE)
+   # dir.create(paste0("/Users/as80fywe/iDiv Dropbox/Alban Sagouis/BioTimeX/Local-Regional Homogenization/_discuss papers/German_resurvey/", dataset_id_i), showWarnings = FALSE)
+   dir.create(paste0("data/wrangled data/", dataset_id_i), showWarnings = FALSE)
    data.table::fwrite(
       x = ddata[dataset_id_i],
       file = paste0("data/wrangled data/", dataset_id_i, "/", dataset_id_i, "_standardised.csv"),
