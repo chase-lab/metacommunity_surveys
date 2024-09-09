@@ -1,4 +1,6 @@
 # RAW DATA ----
+library(dplyr)
+
 ## Merging ----
 listfiles_community_raw <- list.files(
    path = "data/wrangled data",
@@ -51,8 +53,12 @@ if (dt_raw[, any(is.na(metric) | metric == "")]) warning(paste("missing _metric_
 if (dt_raw[, any(is.na(unit) | unit == "")]) warning(paste("missing _unit_ value in ", paste(unique(dt_raw[is.na(unit) | unit == "", dataset_id]), collapse = ", ")))
 
 ### Counting the study cases ----
-dt_raw[, .(nsites = data.table::uniqueN(.SD)), .SDcols = c('regional', 'local'),
-       keyby = .(dataset_id)][order(nsites, decreasing = TRUE)]
+dt_raw |>
+   dtplyr::lazy_dt() |>
+   group_by(dataset_id) |>
+   summarise(nsites = n_distinct(regional, local)) |>
+   arrange(-nsites)
+
 
 ## Ordering ----
 # data.table::setcolorder(dt, intersect(column_names_template, colnames(dt)))
@@ -70,34 +76,39 @@ data.table::setkey(dt_raw, dataset_id, regional, local,
 # if (dt_raw[unit == "count", any(!is.integer(value))]) warning(paste("Non integer values in", paste(dt_raw[unit == "count" & !is.integer(value), unique(dataset_id)], collapse = ", ")))
 
 ### checking species names ----
-for (i in seq_along(lst_community_raw)) if (is.character(lst_community_raw[[i]]$species)) if (any(!unique(Encoding(lst_community_raw[[i]]$species)) %in% c("UTF-8", "unknown"))) warning(paste0("Encoding issue in ", listfiles_community_raw[i]))
+for (i in seq_along(lst_community_raw)) if (is.character(lst_community_raw[[i]]$species)) if (any(!unique(Encoding(lst_community_raw[[i]]$species)) %in% c("UTF-8", "unknown"))) warning(paste0("Encoding issue in ", lst_community_raw[i]))
 
 ### adding GBIF matched names by Dr. Wubing Xu ----
 corrected_species_names <- data.table::fread(
    file = "data/requests to taxonomy databases/manual_community_species_filled_20230922.csv",
-   select = c("dataset_id","species_original","species.new")
+   colClasses = c(dataset_id = "factor",
+                  species_original = "character",
+                  species.new = "character",
+                  species = "NULL",
+                  comment = "NULL",
+                  corrected = "NULL",
+                  checked = "NULL")
 )
 
 #### removing new names assigned to several original names ----
-corrected_species_names <- corrected_species_names[
-   i = !corrected_species_names[, .N, keyby = .(dataset_id, species.new)][N != 1L],
-   on = .(dataset_id, species.new)]
+corrected_species_names <- anti_join(
+   x = corrected_species_names,
+   y = corrected_species_names |>
+      group_by(dataset_id, species.new) |>
+      filter(n() != 1L))
 
 #### data.table join with update by reference ----
-data.table::setnames(corrected_species_names, "species_original", "species")
-dt_raw[
-   i = corrected_species_names,
-   on = .(dataset_id, species),
-   j = species.new := i.species.new]
-
-data.table::setnames(dt_raw,
-                     old = c("species", "species.new"),
-                     new = c("species_original", "species"))
-
-dt_raw[is.na(species), species := species_original]
-# unique(dt[grepl("[^a-zA-Z\\._ ]", species) & nchar(species) < 10L, .(dataset_id)])
-# unique(dt[grepl("[^a-zA-Z\\._ \\(\\)0-9\\-\\&]", species), .(dataset_id, species)])[sample(1:1299, 50)]
-# unique(dt[grepl("Â", species), .(dataset_id, species)])
+dt_raw <- dt_raw |>
+   dtplyr::lazy_dt(immutable = FALSE) |>
+   left_join(corrected_species_names |>
+                select(dataset_id, species = species_original, species.new),
+             join_by(dataset_id, species)) |>
+   rename(species_original = species,
+          species = species.new) |>
+   mutate(species = if_else(is.na(species),
+                            true = species_original,
+                            false = species)) |>
+   data.table::as.data.table()
 
 ### checking duplicated rows ----
 if (anyDuplicated(dt_raw)) warning(
@@ -119,10 +130,13 @@ if (any(dt_raw[, data.table::uniqueN(unit), keyby = dataset_id]$V1 != 1L)) warni
 
 
 ## Metadata ----
-meta_raw <- meta_raw[
-   unique(dt_raw[, .(dataset_id, regional, local, year, month, day)]),
-   on = .(dataset_id, regional, local, year, month, day)
-]
+# Insuring perfect match between dt and meta
+meta_raw <- inner_join(
+   x = meta_raw,
+   y = dt_raw |>
+      select(dataset_id, regional, local, year, month, day) |>
+      distinct(),
+   join_by(dataset_id, regional, local, year, month, day))
 
 # Checking metadata
 if (any(!unique(meta_raw$taxon) %in% c("Invertebrates", "Plants", "Mammals", "Fish", "Marine plants", "Birds", "Herpetofauna"))) warning(
@@ -145,45 +159,41 @@ if (any(!unique(meta_raw$realm) %in% c("Terrestrial", "Marine", "Freshwater" )))
 ### checking units ----
 if (any(!na.omit(unique(meta_raw$alpha_grain_unit)) %in% c("acres", "ha", "km2", "m2", "cm2"))) warning("Non standard unit in alpha")
 ### converting areas ----
-meta_raw[, alpha_grain := as.numeric(alpha_grain)][,
-                                                   alpha_grain := data.table::fcase(
-                                                      alpha_grain_unit == "m2", alpha_grain,
-                                                      alpha_grain_unit == "cm2", alpha_grain / 10^4,
-                                                      alpha_grain_unit == "ha", alpha_grain * 10^4,
-                                                      alpha_grain_unit == "km2", alpha_grain * 10^6,
-                                                      alpha_grain_unit == "acres", alpha_grain * 4046.856422
-                                                   )
-][, alpha_grain_unit := NULL]
-
-data.table::setnames(meta_raw, "alpha_grain", "alpha_grain_m2")
+meta_raw <- meta_raw |>
+   dtplyr::lazy_dt(immutable = FALSE) |>
+   mutate(alpha_grain_unit = as.character(alpha_grain_unit)) |>
+   mutate(alpha_grain = case_match(alpha_grain_unit,
+                               "m2" ~ alpha_grain,
+                               "cm2" ~ alpha_grain / 10^4,
+                               "ha" ~ alpha_grain * 10^4,
+                               "km2" ~ alpha_grain * 10,
+                               "acres" ~ alpha_grain * 4046.856422),
+      alpha_grain_unit = NULL) |>
+   rename(alpha_grain_m2 = alpha_grain) |>
+   data.table::as.data.table()
 
 meta_raw[is.na(alpha_grain_m2), unique(dataset_id)]
 
 ## Converting coordinates into a common format with parzer ----
-meta_raw[, ":="(
-   latitude = as.character(latitude),
-   longitude = as.character(longitude)
-)]
-unique_coordinates_raw <- unique(meta_raw[, .(latitude, longitude)])
-unique_coordinates_raw[, ":="(
-   lat = parzer::parse_lat(latitude),
-   lon = parzer::parse_lon(longitude)
-)]
-unique_coordinates_raw[is.na(lat) | is.na(lon)]
-# data.table join with update by reference
-meta_raw[
-   unique_coordinates_raw,
-   on = .(latitude, longitude),
-   ":="(latitude = i.lat, longitude = i.lon)]
-# meta_raw <- merge(meta_raw, unique_coordinates_raw, keyby = c("latitude", "longitude"))
-# meta_raw[, c("latitude", "longitude") := NULL]
-# data.table::setnames(meta_raw, c("lat", "lon"), c("latitude", "longitude"))
+meta_raw <- left_join(
+   x = meta_raw,
+   y = unique(meta_raw[, .(latitude, longitude)]) |>
+      mutate(latitude = as.character(latitude),
+             longitude = as.character(longitude)) |>
+      mutate(lat = parzer::parse_lat(latitude),
+             lon = parzer::parse_lon(longitude)),
+   join_by(latitude, longitude)) |>
+   mutate(latitude = NULL,
+          longitude = NULL) |>
+   rename(latitude = lat, longitude = lon)
 
-## Coordinate scale ----
-meta_raw[, is_coordinate_local_scale := data.table::uniqueN(latitude) != 1L
-         && data.table::uniqueN(longitude) != 1L,
-         keyby = .(dataset_id, regional)]
-
+# Coordinate scale ----
+meta_raw <- meta_raw |>
+   dtplyr::lazy_dt(immutable = FALSE) |>
+   group_by(dataset_id, regional) |>
+   mutate(is_coordinate_local_scale = n_distinct(latitude) != 1L &&
+             n_distinct(longitude) != 1L) |>
+   data.table::as.data.table()
 
 ## Checks ----
 ### checking duplicated rows ----
@@ -228,7 +238,12 @@ if (any(!meta_raw$study_type %in% c("ecological_sampling", "resurvey"))) warning
 )
 
 ### checking data_pooled_by_authors ----
-meta_raw[is.na(data_pooled_by_authors), data_pooled_by_authors := FALSE]
+meta_raw <- meta_raw |>
+   mutate(data_pooled_by_authors = as.logical(data_pooled_by_authors)) |>
+   mutate(data_pooled_by_authors = if_else(
+      condition = is.na(data_pooled_by_authors),
+      true = FALSE,
+      false = data_pooled_by_authors))
 if (any(meta_raw[(data_pooled_by_authors), is.na(sampling_years)])) warning(
    paste0("Missing sampling_years values in: ",
           paste(meta_raw[(data_pooled_by_authors) & is.na(sampling_years), unique(dataset_id)], collapse = ", "))
@@ -256,14 +271,20 @@ if (any(!unique(meta_raw$alpha_grain_type) %in% c("island", "plot", "sample", "l
 
 # Adding a unique ID ----
 source(file = "R/functions/assign_id.R")
-meta_raw[, ID := assign_id(dataset_id, regional)]
-dt_raw[, ID := assign_id(dataset_id, regional)]
+meta_raw <- meta_raw |>
+   mutate(ID := assign_id(dataset_id, regional))
+dt_raw <- dt_raw |>
+   mutate(ID := assign_id(dataset_id, regional))
 
 # Ordering metadata ----
 data.table::setorder(meta_raw, ID, regional, local, year, month, day)
 data.table::setcolorder(meta_raw, c("ID", base::intersect(
    column_names_template_metadata_raw,
    colnames(meta_raw))))
+data.table::setcolorder(meta_raw, "alpha_grain_m2",
+                        before = "alpha_grain_type")
+data.table::setcolorder(meta_raw, "is_coordinate_local_scale",
+                        before = "alpha_grain_m2")
 
 # Checking that all data sets have both community and metadata data ----
 if (length(base::setdiff(unique(dt_raw$dataset_id), unique(meta_raw$dataset_id))) > 0L) warning("Incomplete community or metadata tables")
@@ -283,8 +304,10 @@ if (nrow(meta_raw) != nrow(unique(dt_raw[, .(ID, regional, local, year, month, d
 # }
 
 ## Removing not shareable data sets before publication ----
-dt_raw <- dt_raw[!grepl(pattern = "myers-smith|edgar", x = dataset_id)]
-meta_raw <- meta_raw[!grepl(pattern = "myers-smith|edgar", x = dataset_id)]
+dt_raw <- dt_raw |>
+   filter(!grepl(pattern = "myers-smith|edgar", x = dataset_id))
+meta_raw <- meta_raw |>
+   filter(!grepl(pattern = "myers-smith|edgar", x = dataset_id))
 
 # Saving public dt ----
 data.table::setcolorder(dt_raw, c("ID", "dataset_id", "regional", "local", "year", "species", "species_original", "value", "metric", "unit"))

@@ -1,4 +1,6 @@
 # STANDARDISED DATA ----
+library(dplyr)
+
 ## Merging ----
 listfiles_community_standardised <- list.files(
    path = "data/wrangled data",
@@ -47,7 +49,11 @@ if (dt_standardised[, any(is.na(metric) | metric == "")]) warning(paste("missing
 if (dt_standardised[, any(is.na(unit) | unit == "")]) warning(paste("missing _unit_ value in ", unique(dt_standardised[is.na(unit) | unit == "", dataset_id]), collapse = ", "))
 
 ### Counting the study cases ----
-dt_standardised[, .(nsites = data.table::uniqueN(.SD)), .SDcols = c('regional', 'local'), keyby = .(dataset_id)][order(nsites, decreasing = TRUE)]
+dt_standardised |>
+   dtplyr::lazy_dt() |>
+   group_by(dataset_id) |>
+   summarise(nsites = n_distinct(regional, local)) |>
+   arrange(-nsites)
 
 ## Ordering ----
 # data.table::setcolorder(dt, intersect(column_names_template, colnames(dt)))
@@ -60,36 +66,40 @@ data.table::setkey(dt_standardised, dataset_id, regional, local,
 # )]
 
 ## Checks ----
-
-### checking values ----
-if (dt_standardised[unit == "count", any(!is.integer(value))]) warning(paste("Non integer values in", paste(dt_standardised[unit == "count" & !is.integer(value), unique(dataset_id)], collapse = ", ")))
-
 ### checking species names ----
 for (i in seq_along(lst_community_standardised)) if (is.character(lst_community_standardised[[i]]$species)) if (any(!unique(Encoding(lst_community_standardised[[i]]$species)) %in% c("UTF-8", "unknown"))) warning(paste0("Encoding issue in ", listfiles_community_standardised[i]))
 
 ### adding GBIF matched names by Dr. Wubing Xu ----
 corrected_species_names <- data.table::fread(
    file = "data/requests to taxonomy databases/manual_community_species_filled_20230922.csv",
-   select = c("dataset_id", "species_original", "species.new")
+   colClasses = c(dataset_id = "factor",
+                  species_original = "character",
+                  species.new = "character",
+                  species = "NULL",
+                  comment = "NULL",
+                  corrected = "NULL",
+                  checked = "NULL")
 )
 
 #### removing new names assigned to several original names ----
-corrected_species_names <- corrected_species_names[
-   i = !corrected_species_names[, .N, keyby = .(dataset_id, species.new)][N != 1L],
-   on = .(dataset_id, species.new)]
+corrected_species_names <- anti_join(
+   x = corrected_species_names,
+   y = corrected_species_names |>
+      group_by(dataset_id, species.new) |>
+      filter(n() != 1L))
 
 #### data.table join with update by reference ----
-data.table::setnames(corrected_species_names, "species_original", "species")
-dt_standardised[
-   i = corrected_species_names,
-   on = .(dataset_id, species),
-   j = species.new := i.species.new]
-
-data.table::setnames(dt_standardised, c("species", "species.new"), c("species_original", "species"))
-dt_standardised[is.na(species), species := species_original]
-# unique(dt[grepl("[^a-zA-Z\\._ ]", species) & nchar(species) < 10L, .(dataset_id)])
-# unique(dt[grepl("[^a-zA-Z\\._ \\(\\)0-9\\-\\&]", species), .(dataset_id, species)])[sample(1:1299, 50)]
-# unique(dt[grepl("Â", species), .(dataset_id, species)])
+dt_standardised <- dt_standardised |>
+   dtplyr::lazy_dt(immutable = FALSE) |>
+   left_join(corrected_species_names |>
+                select(dataset_id, species = species_original, species.new),
+             join_by(dataset_id, species)) |>
+   rename(species_original = species,
+          species = species.new) |>
+   mutate(species = if_else(is.na(species),
+                            true = species_original,
+                            false = species)) |>
+   data.table::as.data.table()
 
 ### checking duplicated rows ----
 if (anyDuplicated(dt_standardised)) warning(
@@ -149,70 +159,62 @@ if (any(!na.omit(unique(meta_standardised$gamma_sum_grains_unit)) %in% c("acres"
 if (any(!na.omit(unique(meta_standardised$gamma_bounding_box_unit)) %in% c("acres", "ha", "km2", "m2", "mile2"))) warning("Non standard unit in gamma_bounding_box")
 
 ### converting areas ----
-meta_standardised[, alpha_grain := as.numeric(alpha_grain)
-][,
-  alpha_grain := data.table::fcase(
-     alpha_grain_unit == "m2", alpha_grain,
-     alpha_grain_unit == "cm2", alpha_grain / 10^4,
-     alpha_grain_unit == "ha", alpha_grain * 10^4,
-     alpha_grain_unit == "km2", alpha_grain * 10,
-     alpha_grain_unit == "acres", alpha_grain * 4046.856422
-  )
-][, alpha_grain_unit := NULL]
-
-meta_standardised[, gamma_sum_grains := as.numeric(gamma_sum_grains)
-][,
-  gamma_sum_grains := data.table::fcase(
-     gamma_sum_grains_unit == "km2", gamma_sum_grains,
-     gamma_sum_grains_unit == "m2", gamma_sum_grains / 10^6,
-     gamma_sum_grains_unit == "ha", gamma_sum_grains / 100,
-     gamma_sum_grains_unit == "cm2", gamma_sum_grains / 10^10,
-     gamma_sum_grains_unit == "acres", gamma_sum_grains * 0.004046856422
-  )
-][, gamma_sum_grains_unit := NULL]
-
-meta_standardised[, gamma_bounding_box := as.numeric(gamma_bounding_box)
-][,
-  gamma_bounding_box := data.table::fcase(
-     gamma_bounding_box_unit == "km2", gamma_bounding_box,
-     gamma_bounding_box_unit == "m2", gamma_bounding_box / 1000000,
-     gamma_bounding_box_unit == "ha", gamma_bounding_box / 100,
-     gamma_bounding_box_unit == "acres", gamma_bounding_box * 0.004046856422,
-     gamma_bounding_box_unit == "mile2", gamma_bounding_box * 2.589988
-  )
-][, gamma_bounding_box_unit := NULL]
-
-data.table::setnames(
-   x = meta_standardised,
-   old = c("alpha_grain", "gamma_bounding_box", "gamma_sum_grains"),
-   new = c("alpha_grain_m2", "gamma_bounding_box_km2", "gamma_sum_grains_km2"))
+meta_standardised <- meta_standardised |>
+   dtplyr::lazy_dt(immutable = FALSE) |>
+   mutate(
+      alpha_grain_unit = as.character(alpha_grain_unit),
+      gamma_sum_grains_unit = as.character(gamma_sum_grains_unit),
+      gamma_bounding_box_unit = as.character(gamma_bounding_box_unit)) |>
+   mutate(
+      alpha_grain = case_match(alpha_grain_unit,
+                               "m2" ~ alpha_grain,
+                               "cm2" ~ alpha_grain / 10^4,
+                               "ha" ~ alpha_grain * 10^4,
+                               "km2" ~ alpha_grain * 10,
+                               "acres" ~ alpha_grain * 4046.856422),
+      alpha_grain_unit = NULL,
+      gamma_sum_grains = case_match(gamma_sum_grains_unit,
+                                    "km2"~ gamma_sum_grains,
+                                    "m2" ~ gamma_sum_grains / 10^6,
+                                    "ha" ~ gamma_sum_grains / 100,
+                                    "cm2" ~ gamma_sum_grains / 10^10,
+                                    "acres" ~ gamma_sum_grains * 0.004046856422),
+      gamma_sum_grains_unit = NULL,
+      gamma_bounding_box = case_match(gamma_bounding_box_unit,
+                                      "km2" ~ gamma_bounding_box,
+                                      "m2" ~ gamma_bounding_box / 1000000,
+                                      "ha" ~ gamma_bounding_box / 100,
+                                      "acres" ~ gamma_bounding_box * 0.004046856422,
+                                      "mile2" ~ gamma_bounding_box * 2.589988),
+      gamma_bounding_box_unit = NULL) |>
+   rename(alpha_grain_m2 = alpha_grain,
+          gamma_bounding_box_km2 = gamma_bounding_box,
+          gamma_sum_grains_km2 = gamma_sum_grains) |>
+   data.table::as.data.table()
 
 meta_standardised[is.na(alpha_grain_m2), unique(dataset_id)]
 meta_standardised[is.na(gamma_sum_grains_km2) & is.na(gamma_bounding_box_km2), unique(dataset_id)]
 
-## Converting coordinates into a common format with parzer ----
-meta_standardised[, ":="(
-   latitude = as.character(latitude),
-   longitude = as.character(longitude)
-)]
-unique_coordinates_standardised <- unique(meta_standardised[, .(latitude, longitude)])
-unique_coordinates_standardised[, ":="(
-   lat = parzer::parse_lat(latitude),
-   lon = parzer::parse_lon(longitude)
-)]
-unique_coordinates_standardised[is.na(lat) | is.na(lon)]
-# data.table join with update by reference
-meta_standardised[
-   unique_coordinates_standardised,
-   on = .(latitude, longitude),
-   ":="(latitude = i.lat, longitude = i.lon)]
-# meta_standardised <- merge(meta_standardised, unique_coordinates_standardised, keyby = c("latitude", "longitude"))
-# meta_standardised[, c("latitude", "longitude") := NULL]
-# data.table::setnames(meta_standardised, c("lat", "lon"), c("latitude", "longitude"))
+# Converting coordinates into a common format with parzer ----
+meta_standardised <- left_join(
+   x = meta_standardised,
+   y = unique(meta_standardised[, .(latitude, longitude)]) |>
+      mutate(latitude = as.character(latitude),
+             longitude = as.character(longitude)) |>
+      mutate(lat = parzer::parse_lat(latitude),
+             lon = parzer::parse_lon(longitude)),
+   join_by(latitude, longitude)) |>
+   mutate(latitude = NULL,
+          longitude = NULL) |>
+   rename(latitude = lat, longitude = lon)
 
-## Coordinate scale ----
-meta_standardised[, is_coordinate_local_scale := data.table::uniqueN(latitude) != 1L && data.table::uniqueN(longitude) != 1L,
-                  keyby = .(dataset_id, regional)]
+# Coordinate scale ----
+meta_standardised <- meta_standardised |>
+   dtplyr::lazy_dt(immutable = FALSE) |>
+   group_by(dataset_id, regional) |>
+   mutate(is_coordinate_local_scale = n_distinct(latitude) != 1L &&
+             n_distinct(longitude) != 1L) |>
+   data.table::as.data.table()
 
 
 ## Checks ----
@@ -254,12 +256,17 @@ unique(meta_standardised[effort == "unknown" | is.na(effort), .(dataset_id, effo
 # all(meta[(checklist), effort] == 1)
 
 ### checking data_pooled_by_authors ----
-meta_standardised[, data_pooled_by_authors := as.logical(data_pooled_by_authors)]
-meta_standardised[is.na(data_pooled_by_authors), data_pooled_by_authors := FALSE]
+meta_standardised <- meta_standardised |>
+   mutate(data_pooled_by_authors = as.logical(data_pooled_by_authors)) |>
+   mutate(data_pooled_by_authors = if_else(
+      condition = is.na(data_pooled_by_authors),
+      true = FALSE,
+      false = data_pooled_by_authors))
+
 if (any(meta_standardised[(data_pooled_by_authors), is.na(sampling_years)])) warning(
    paste0("Missing sampling_years values in: ",
-          paste(meta_standardised[(data_pooled_by_authors) & is.na(sampling_years), unique(dataset_id)], collapse = ", "))
-)
+          paste(meta_standardised[(data_pooled_by_authors) & is.na(sampling_years), unique(dataset_id)], collapse = ", ")))
+
 if (any(meta_standardised[(data_pooled_by_authors), is.na(data_pooled_by_authors_comment)])) warning(paste("Missing data_pooled_by_authors_comment values in", meta_standardised[(data_pooled_by_authors) & is.na(data_pooled_by_authors_comment), paste(unique(dataset_id), collapse = ", ")]))
 
 ## checking comment ----
@@ -287,16 +294,34 @@ if (any(!na.omit(unique(meta_standardised$gamma_sum_grains_type)) %in% c("archip
 if (any(!na.omit(unique(meta_standardised$gamma_bounding_box_type)) %in% c("administrative", "island", "functional", "convex-hull", "watershed", "box", "buffer", "ecosystem", "shore", "lake_pond"))) warning(paste("Invalid gamma_bounding_box_type value in", paste(unique(meta_standardised[!is.na(gamma_bounding_box_type) & !gamma_bounding_box_type %in% c("administrative", "island", "functional", "convex-hull", "watershed", "box", "buffer", "ecosystem", "shore", "lake_pond"), dataset_id]), collapse = ", ")))
 
 ### checking gamma_bouding_box ----
-meta_standardised[gamma_bounding_box_km2 == 0, gamma_bounding_box_km2 := NA_real_]
+meta_standardised <- meta_standardised |>
+mutate(gamma_bounding_box_km2 = if_else(
+   condition = gamma_bounding_box_km2 == 0,
+   true = NA_real_,
+   false = gamma_bounding_box_km2))
 
 # Adding a unique ID ----
 source(file = "R/functions/assign_id.R")
-meta_standardised[, ID := assign_id(dataset_id, regional)]
-dt_standardised[, ID := assign_id(dataset_id, regional)]
+meta_standardised <- meta_standardised |>
+   mutate(ID = assign_id(dataset_id, regional))
+dt_standardised <- dt_standardised |>
+   mutate(ID = assign_id(dataset_id, regional))
 
 # Ordering metadata ----
 data.table::setorder(meta_standardised, ID, regional, local, year)
-data.table::setcolorder(meta_standardised, c("ID", base::intersect(column_names_template_metadata_standardised, colnames(meta_standardised))))
+data.table::setcolorder(
+   x = meta_standardised,
+   neworder = c("ID",
+                base::intersect(column_names_template_metadata_standardised,
+                                colnames(meta_standardised))))
+data.table::setcolorder(meta_standardised, "alpha_grain_m2",
+                        before = "alpha_grain_type")
+data.table::setcolorder(meta_standardised, "gamma_sum_grains_km2",
+                        before = "gamma_sum_grains_type")
+data.table::setcolorder(meta_standardised, "gamma_bounding_box_km2",
+                        before = "gamma_bounding_box_type")
+data.table::setcolorder(meta_standardised, "is_coordinate_local_scale",
+                        before = "alpha_grain_m2")
 
 # Checking that all data sets have both community and metadata data ----
 if (length(base::setdiff(unique(dt_standardised$dataset_id), unique(meta_standardised$dataset_id))) > 0L) warning("Incomplete community or metadata tables")
@@ -321,8 +346,10 @@ if (nrow(meta_standardised) != nrow(unique(dt_standardised[, .(ID, regional, loc
 # }
 
 ## Removing not shareable data sets before publication ----
-dt_standardised <- dt_standardised[!grepl(pattern = "myers-smith|edgar", x = dataset_id)]
-meta_standardised <- meta_standardised[!grepl(pattern = "myers-smith|edgar", x = dataset_id)]
+dt_standardised <- dt_standardised |>
+   filter(!grepl(pattern = "myers-smith|edgar", x = dataset_id))
+meta_standardised <- meta_standardised |>
+   filter(!grepl(pattern = "myers-smith|edgar", x = dataset_id))
 
 # Saving public dt ----
 data.table::setcolorder(x = dt_standardised,
@@ -330,10 +357,13 @@ data.table::setcolorder(x = dt_standardised,
                                      "year", "species", "species_original",
                                      "value", "metric", "unit"))
 base::saveRDS(dt_standardised, file = "data/communities_standardised.rds")
-# data.table::fwrite(dt_standardised, "data/communities_standardised.csv", sep = ",", row.names = FALSE) # for iDiv data portal: add , na = "NA"
+# data.table::fwrite(dt_standardised, "data/communities_standardised.csv",
+#                    sep = ",",
+#                    row.names = FALSE) # for iDiv data portal: add , na = "NA"
 
 
 # Saving public meta ----
 base::saveRDS(meta_standardised, file = "data/metadata_standardised.rds")
-# data.table::fwrite(meta_standardised, "data/metadata_standardised.csv", sep = ",", row.names = FALSE) # for iDiv data portal: add , na = "NA"
-
+# data.table::fwrite(meta_standardised, "data/metadata_standardised.csv",
+#                    sep = ",",
+#                    row.names = FALSE) # for iDiv data portal: add , na = "NA"
