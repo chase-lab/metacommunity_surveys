@@ -68,6 +68,7 @@ meta[, ":="(
 
    comment = "Extracted from Burlakova et al 2024 Dryad repository Density data for Lake Erie benthic invertebrate assemblages from 1930 to 2019. The authors aggregated data from various benthic invertebrate sampling campains in Lake Erie. Sampling gear, methodology (e. g. number of replicates) and frequency varies between campains. Burlakova et al averaged abundances of collected species in a station in a year. Species: spaces were added between Genus and Species names, delete spaces if you want to match with the original names.
    Refer to the Dryad repository for complete and extensive documentation on each campaign: https://doi.org/10.5061/dryad.47d7wm3m0",
+   comment_standardisation = "none needed",
 
    doi = "https://doi.org/10.5061/dryad.47d7wm3m0 | https://doi.org/10.1016/j.jglr.2022.09.006"
 )]

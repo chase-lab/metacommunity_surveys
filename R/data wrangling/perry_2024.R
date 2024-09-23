@@ -1,10 +1,10 @@
-# perry_2023
-dataset_id <- 'perry_2023'
+# perry_2024
+dataset_id <- 'perry_2024'
 
-ddata <- unique(base::readRDS('data/raw data/perry_2023/rdata.rds'))
+ddata <- unique(base::readRDS('data/raw data/perry_2024/rdata.rds'))
 data.table::setnames(ddata, tolower(colnames(ddata)))
 data.table::setnames(ddata,
-                     old = c("lab", "stationcode", "organisms_per_ml", "name"),
+                     old = c("lab", "station", "units_per_ml", "taxon"),
                      new = c("regional", "local", "value", "species"))
 
 # raw data ----
@@ -14,9 +14,9 @@ ddata[, ":="(
 
    regional = factor("Sacramento-San Joaquin Bay-Delta"),
 
-   year = data.table::year(sampledate),
-   month = data.table::month(sampledate),
-   day = data.table::mday(sampledate),
+   year = data.table::year(date),
+   month = data.table::month(date),
+   day = data.table::mday(date),
 
    metric = "density",
    unit = "individuals per mL"
@@ -38,6 +38,9 @@ meta[, ":="(
    study_type = "ecological_sampling",
 
    data_pooled_by_authors = FALSE,
+
+   alpha_grain = NA,
+   alpha_grain_comment = "unknown but constant per region",
 
    comment = "Extracted from Perry, S.E., T. Brown, and V. Klotz. 2023. Interagency Ecological Program: Phytoplankton monitoring in the Sacramento-San Joaquin Bay-Delta, collected by the Environmental Monitoring Program, 2008-2021 ver 1. Environmental Data Initiative. https://doi.org/10.6073/pasta/389ea091f8af4597e365d8b8a4ff2a5a (Accessed 2023-02-23). METHODS: 'Phytoplankton samples are collected with a submersible pump or a Van Dorn sampler from a water depth of one meter (approximately three feet) below the water surface.' density vlues were retrieved from column 'organisms_per_mL' LOCAL is a stationcode and REGIONAL is the whole Sacramento-San Joaquin Bay-Delta with a split depending on the lab in charge of identifying algae organisms.",
    comment_standardisation = "In some samples, one species was observed and considered 'Good' quality observations and it was also observed in a 'Fragmented' state. When this happened, we pooled densities together.",
@@ -67,9 +70,9 @@ data.table::fwrite(
 ddata <- ddata_standardised[
    i = ddata_standardised[
       i = qualitycheck == 'Good',
-      j = .(sampledate = sampledate[1L]),
+      j = .(date = date[1L]),
       by = .(regional, year, month, local)],
-   on = .(regional, year, month, local, sampledate)
+   on = .(regional, year, month, local, date)
 ]
 
 ### selecting 10 samples in sites/years with 11 or 12 samples ----
@@ -80,7 +83,7 @@ ddata <- ddata[
    on = .(regional, local, year, month)
 ] # (data.table style join)
 
-month_order <- ddata[, data.table::uniqueN(sampledate), by = .(regional, year, month)][, sum(V1), by = month][order(-V1)][1L:12L, month]
+month_order <- ddata[, data.table::uniqueN(date), by = .(regional, year, month)][, sum(V1), by = month][order(-V1)][1L:12L, month]
 ddata[, month_order := (1L:12L)[match(month, month_order, nomatch = NULL)]]
 data.table::setkey(ddata, month_order)
 
